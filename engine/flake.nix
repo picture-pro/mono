@@ -44,7 +44,7 @@
         devShell = pkgs.mkShell {
           nativeBuildInputs = [
             toolchain
-            # pkgs.surrealdb
+            pkgs.surrealdb
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             pkgs.darwin.Security
           ];
