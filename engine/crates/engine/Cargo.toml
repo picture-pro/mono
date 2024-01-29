@@ -9,3 +9,5 @@ edition = "2021"
 tokio.workspace = true
 color-eyre.workspace = true
 axum.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
