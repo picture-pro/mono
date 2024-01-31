@@ -219,6 +219,7 @@ dependencies = [
  "axum-login",
  "clients",
  "color-eyre",
+ "redact",
  "serde",
  "surrealdb",
  "thiserror",
@@ -2263,6 +2264,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "redact"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbcc931183921ce8ec7abb78e335d8e0dbdd86ee237bd991bc022f7b79251168"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

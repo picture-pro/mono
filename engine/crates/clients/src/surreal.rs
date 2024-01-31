@@ -24,7 +24,17 @@ impl SurrealRootClient {
     )
     .await
     .wrap_err("Could not connect to SurrealDB endpoint")?;
-    client
+
+    let client = Self { client };
+    client.sign_in_as_root().await?;
+
+    Ok(client)
+  }
+
+  /// Signs in as root.
+  pub async fn sign_in_as_root(&self) -> Result<()> {
+    self
+      .client
       .signin(Root {
         username: &std::env::var("SURREALDB_ROOT_USER")
           .wrap_err("Could not find env var \"SURREALDB_ROOT_USER\"")?,
@@ -32,8 +42,8 @@ impl SurrealRootClient {
           .wrap_err("Could not find env var \"SURREALDB_ROOT_PASS\"")?,
       })
       .await
-      .wrap_err("Could not sign in to SurrealDB as root")?;
-    Ok(Self { client })
+      .wrap_err("Could not sign in to SurrealDB as root")
+      .map(|_| ())
   }
 }
 

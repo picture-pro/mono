@@ -6,4 +6,4 @@ surreal:
 wipe-surreal:
 	rm -rf /tmp/surreal_data
 apply-surreal:
-	cd engine/migrations && surrealdb-migrations apply --username $SURREALDB_ROOT_USER --password $SURREALDB_ROOT_PASS
+	cd engine/migrations && surrealdb-migrations apply --username $SURREALDB_ROOT_USER --password $SURREALDB_ROOT_PASS --ns main --db main
