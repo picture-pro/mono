@@ -8,4 +8,9 @@ edition = "2021"
 [dependencies]
 axum-login = "0.13.1"
 serde.workspace = true
+color-eyre.workspace = true
+thiserror.workspace = true
 surrealdb.workspace = true
+
+clients = { path = "../clients" }
+async-trait = "0.1.77"

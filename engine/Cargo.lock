@@ -215,9 +215,13 @@ dependencies = [
 name = "auth"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "axum-login",
+ "clients",
+ "color-eyre",
  "serde",
  "surrealdb",
+ "thiserror",
 ]
 
 [[package]]

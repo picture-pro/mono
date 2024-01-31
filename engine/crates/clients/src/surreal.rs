@@ -10,6 +10,7 @@ use surrealdb::{
 };
 
 /// A root-level client for the SurrealDB database.
+#[derive(Clone, Debug)]
 pub struct SurrealRootClient {
   client: surrealdb::Surreal<Client>,
 }
