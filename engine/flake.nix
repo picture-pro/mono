@@ -39,7 +39,7 @@
           cargoArtifacts = engine_deps;
         });
 
-        surreal_deps = [ pkgs.surrealdb ];
+        surreal_deps = with pkgs; [ surrealdb surrealdb-migrations ];
         rust_dev_deps = [ pkgs.bacon ];
       in {
         defaultPackage = engine;
