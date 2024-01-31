@@ -38,14 +38,17 @@
         engine = craneLib.buildPackage (common_args // {
           cargoArtifacts = engine_deps;
         });
+
+        surreal_deps = [ pkgs.surrealdb ];
+        rust_dev_deps = [ pkgs.bacon ];
       in {
         defaultPackage = engine;
 
         devShell = pkgs.mkShell {
           nativeBuildInputs = [
             toolchain
-            pkgs.surrealdb
-          ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+          ] ++ surreal_deps ++ rust_dev_deps
+          ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             pkgs.darwin.Security
           ];
         };
