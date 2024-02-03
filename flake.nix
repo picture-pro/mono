@@ -83,7 +83,7 @@
           buildPhaseCargoCommand = "cargo leptos build --release -vvv";
           installPhaseCommand = ''
             mkdir -p $out/bin
-            cp target/release/server $out/bin/blog
+            cp target/release/site-server $out/bin/site-server
             cp -r target/site $out/bin/
           '';
           # Prevent cargo test and nextest from duplicating tests

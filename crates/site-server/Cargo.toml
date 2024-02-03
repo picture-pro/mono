@@ -7,6 +7,8 @@ edition = "2021"
 
 [dependencies]
 site-app = { path = "../site-app", default-features = false, features = ["ssr"] }
+auth = { path = "../auth" }
+
 leptos = { workspace = true, features = [ "ssr" ]}
 leptos_axum.workspace = true
 

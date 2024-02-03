@@ -1,6 +1,6 @@
 module.exports = {
   content: {
-    files: ["*.html", "crates/**/*.rs"],
+    files: ["crates/site-app/src/**/*.rs"],
   },
 };
 

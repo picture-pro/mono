@@ -3873,6 +3873,7 @@ dependencies = [
 name = "site-server"
 version = "0.1.0"
 dependencies = [
+ "auth",
  "axum",
  "leptos",
  "leptos_axum",
