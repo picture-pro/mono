@@ -42,13 +42,7 @@ async fn get_static_file(
   // `ServeDir` implements `tower::Service` so we can call it with
   // `tower::ServiceExt::oneshot` This path is relative to the cargo root
   match ServeDir::new(root).oneshot(req).await {
-    Ok(res) => {
-      let mut res = res;
-      res
-        .headers_mut()
-        .insert("Cache-Control", "public, max-age=86400".parse().unwrap());
-      Ok(res.into_response())
-    }
+    Ok(res) => Ok(res.into_response()),
     Err(err) => Err((
       StatusCode::INTERNAL_SERVER_ERROR,
       format!("Something went wrong: {err}"),

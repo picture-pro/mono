@@ -12,7 +12,7 @@ pub fn App() -> impl IntoView {
   provide_meta_context();
 
   view! {
-    <Stylesheet id="leptos" href="/pkg/start-axum-workspace.css"/>
+    <Stylesheet id="leptos" href="/pkg/site.css"/>
 
     // sets the document title
     <Title text="Welcome to Leptos"/>
@@ -40,7 +40,7 @@ fn HomePage() -> impl IntoView {
   let on_click = move |_| set_count.update(|count| *count += 1);
 
   view! {
-    <h1>"Welcome to Leptos!"</h1>
+    <p class="text-lg">"Welcome to Leptos!"</p>
     <button on:click=on_click>"Click Me: " {count}</button>
   }
 }

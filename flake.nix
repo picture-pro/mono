@@ -3,9 +3,10 @@
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.555002.tar.gz";
     rust-overlay.url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1271.tar.gz";
     crane.url = "https://flakehub.com/f/ipetkov/crane/0.16.1.tar.gz";
+    cargo-leptos-src = { url = "github:benwis/cargo-leptos"; flake = false; };
   };
 
-  outputs = { self, flake-utils, crane, nixpkgs, rust-overlay }:
+  outputs = { self, nixpkgs, rust-overlay, crane, cargo-leptos-src, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
@@ -16,41 +17,102 @@
         
         toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
           extensions = [ "rust-src" "rust-analyzer" ];
+          targets = [ "wasm32-unknown-unknown" ];
         });
         
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
-        common_args = {
-          src = craneLib.cleanCargoSource (craneLib.path ./.);
-          doCheck = false;
-          pname = "engine";
-          version = "0.1.0";
+        filterGenerator = pattern: path: _type: builtins.match pattern path != null;
+        protoOrCargo = path: type:
+          (craneLib.filterCargoSources path type)
+            || (filterGenerator ".*css$" path type)
+            || (filterGenerator ".*js$" path type)
+            || (filterGenerator ".*ttf$" path type)
+            || (filterGenerator ".*woff2$" path type)
+            || (filterGenerator ".*webp$" path type)
+            || (filterGenerator ".*jpeg$" path type)
+            || (filterGenerator ".*png$" path type)
+            || (filterGenerator ".*ico$" path type);
 
-          nativeBuildInputs = [ ];
-          buildInputs = with pkgs; [
-            pkg-config
-            openssl
-          ];
+        # Include more types of files in our bundle
+        src = pkgs.lib.cleanSourceWith {
+          src = ./.; # The original, unfiltered source
+          filter = protoOrCargo;
         };
 
-        engine_deps = craneLib.buildDepsOnly (common_args // {
-        });
-        engine = craneLib.buildPackage (common_args // {
-          cargoArtifacts = engine_deps;
-        });
+        cargo-leptos = (import ./nix/cargo-leptos.nix) {
+          inherit pkgs;
+          cargo-leptos = cargo-leptos-src;
+        };
 
-        surreal_deps = with pkgs; [ surrealdb surrealdb-migrations ];
-        rust_dev_deps = [ pkgs.bacon ];
-      in {
-        defaultPackage = engine;
+        common_args = {
+          inherit src;
 
-        devShell = pkgs.mkShell {
+          pname = "site-server";
+          version = "0.1.0";
+
           nativeBuildInputs = [
-            toolchain
-          ] ++ surreal_deps ++ rust_dev_deps
-          ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-            pkgs.darwin.Security
+            # Add additional build inputs here
+            cargo-leptos
+            pkgs.cargo-generate
+            pkgs.binaryen
+            pkgs.dart-sass
+            pkgs.tailwindcss
+            pkgs.clang
+          ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+            # Additional darwin specific inputs can be set here
+            pkgs.libiconv
           ];
+
+          buildInputs = [
+            pkgs.pkg-config
+            pkgs.openssl
+          ];
+
+        };
+
+        # Build *just* the cargo dependencies, so we can reuse
+        # all of that work (e.g. via cachix) when running in CI
+        site-server-deps = craneLib.buildDepsOnly (common_args // {
+          doCheck = false;
+        });
+
+        # Build the actual crate itself, reusing the dependency
+        # artifacts from above.
+        site-server = craneLib.buildPackage (common_args // {
+          buildPhaseCargoCommand = "cargo leptos build --release -vvv";
+          installPhaseCommand = ''
+            mkdir -p $out/bin
+            cp target/release/server $out/bin/blog
+            cp -r target/site $out/bin/
+          '';
+          # Prevent cargo test and nextest from duplicating tests
+          doCheck = false;
+          cargoArtifacts = site-server-deps;
+
+          SQLX_OFFLINE = "true";
+          LEPTOS_BIN_PROFILE_RELEASE = "release";
+          LEPTOS_LIB_PROFILE_RELEASE = "release-wasm-size";
+          APP_ENVIRONMENT = "production";
+        });
+      in {
+        defaultPackage = site-server;
+        devShell = pkgs.mkShell {
+          nativeBuildInputs = (with pkgs; [
+            toolchain # cargo and such
+            dive # docker images
+            cargo-leptos
+            flyctl # fly.io
+            bacon # cargo check w/ hot reload
+
+            # surreal stuff
+            surrealdb surrealdb-migrations
+          ])
+            ++ common_args.buildInputs
+            ++ common_args.nativeBuildInputs
+            ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+              pkgs.darwin.Security
+            ];
         };
       }
     );
