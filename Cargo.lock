@@ -288,6 +288,8 @@ dependencies = [
  "serde",
  "surrealdb",
  "thiserror",
+ "tower-sessions",
+ "tower-sessions-surrealdb-store",
 ]
 
 [[package]]
@@ -3334,6 +3336,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "rmp"
+version = "0.8.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f9860a6cc38ed1da53456442089b4dfa35e7cedaa326df63017af88385e6b20"
+dependencies = [
+ "byteorder",
+ "num-traits",
+ "paste",
+]
+
+[[package]]
+name = "rmp-serde"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bffea85eea980d8a74453e5d02a8d93028f3c34725de143085a844ebe953258a"
+dependencies = [
+ "byteorder",
+ "rmp",
+ "serde",
+]
+
+[[package]]
 name = "roaring"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4544,6 +4568,21 @@ dependencies = [
  "time",
  "tokio",
  "tower-sessions-core",
+]
+
+[[package]]
+name = "tower-sessions-surrealdb-store"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37314ab815e01a80e53481a446bcfbbfa81f7f3ca19b4dfef296cc7d1215809a"
+dependencies = [
+ "async-trait",
+ "rmp-serde",
+ "serde",
+ "surrealdb",
+ "thiserror",
+ "tower-sessions-core",
+ "tracing",
 ]
 
 [[package]]

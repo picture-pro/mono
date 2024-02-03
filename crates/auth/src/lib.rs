@@ -1,7 +1,10 @@
-use axum_login::{AuthUser, AuthnBackend, UserId};
+use axum_login::{
+  AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
+};
+use color_eyre::eyre::Result;
 use redact::Secret;
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::Thing;
+use surrealdb::{engine::remote::ws::Client, sql::Thing};
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct User {
@@ -73,3 +76,29 @@ impl AuthnBackend for Backend {
 }
 
 pub type AuthSession = axum_login::AuthSession<Backend>;
+
+/// Builds an authentication layer for use with an Axum router.
+pub async fn build_auth_layer() -> Result<
+  AuthManagerLayer<
+    Backend,
+    tower_sessions_surrealdb_store::SurrealSessionStore<Client>,
+  >,
+> {
+  let session_store_surreal_client =
+    clients::surreal::SurrealRootClient::new().await?;
+  session_store_surreal_client
+    .use_ns("main")
+    .use_db("main")
+    .await?;
+  let session_store = tower_sessions_surrealdb_store::SurrealSessionStore::new(
+    session_store_surreal_client.into_inner(),
+    "user_session".to_string(),
+  );
+  let session_manager_layer =
+    tower_sessions::SessionManagerLayer::new(session_store);
+
+  Ok(
+    AuthManagerLayerBuilder::new(Backend::new().await?, session_manager_layer)
+      .build(),
+  )
+}

@@ -45,6 +45,9 @@ impl SurrealRootClient {
       .wrap_err("Could not sign in to SurrealDB as root")
       .map(|_| ())
   }
+
+  /// Consumes the client and returns the inner client.
+  pub fn into_inner(self) -> surrealdb::Surreal<Client> { self.client }
 }
 
 impl Deref for SurrealRootClient {
