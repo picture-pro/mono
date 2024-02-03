@@ -3,12 +3,6 @@ use redact::Secret;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-#[derive(Clone, Deserialize, Debug)]
-pub struct AuthenticatedUser {
-  pub id:  Thing,
-  pw_hash: Secret<String>,
-}
-
 #[derive(Clone, Debug, Deserialize)]
 pub struct User {
   pub id:      Thing,
@@ -17,16 +11,7 @@ pub struct User {
   pub pw_hash: Secret<String>,
 }
 
-impl From<User> for AuthenticatedUser {
-  fn from(user: User) -> Self {
-    Self {
-      id:      user.id,
-      pw_hash: user.pw_hash,
-    }
-  }
-}
-
-impl AuthUser for AuthenticatedUser {
+impl AuthUser for User {
   type Id = Thing;
 
   fn id(&self) -> Self::Id { self.id.clone() }
@@ -57,7 +42,7 @@ impl Backend {
 
 #[async_trait::async_trait]
 impl AuthnBackend for Backend {
-  type User = AuthenticatedUser;
+  type User = User;
   type Credentials = Credentials;
   type Error = surrealdb::Error;
 
@@ -75,7 +60,7 @@ impl AuthnBackend for Backend {
       .await?
       .take(0)?;
 
-    Ok(user.map(AuthenticatedUser::from))
+    Ok(user)
   }
 
   async fn get_user(
@@ -83,7 +68,7 @@ impl AuthnBackend for Backend {
     user_id: &UserId<Self>,
   ) -> Result<Option<Self::User>, Self::Error> {
     let user: Option<User> = (*self.surreal_client).select(user_id).await?;
-    Ok(user.map(AuthenticatedUser::from))
+    Ok(user)
   }
 }
 
