@@ -14,4 +14,4 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v3
       - name: Build default package
-        run: nix build "./engine"
+        run: nix build
