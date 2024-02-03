@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "cargo-leptos-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1699832556,
+        "narHash": "sha256-7o/yQanBBSA+MmMiGCYSjar4hZ8TRZoPiUniF5ELzXU=",
+        "owner": "benwis",
+        "repo": "cargo-leptos",
+        "rev": "e98b478b0c82af1469151eff30f4246b9af4a539",
+        "type": "github"
+      },
+      "original": {
+        "owner": "benwis",
+        "repo": "cargo-leptos",
+        "type": "github"
+      }
+    },
     "crane": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -100,6 +116,7 @@
     },
     "root": {
       "inputs": {
+        "cargo-leptos-src": "cargo-leptos-src",
         "crane": "crane",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs_2",
