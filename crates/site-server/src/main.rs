@@ -1,14 +1,18 @@
 use axum::{routing::post, Router};
+use color_eyre::eyre::Result;
 use fileserv::file_and_error_handler;
 use leptos::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use site_app::*;
+use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
 
 pub mod fileserv;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
+  color_eyre::install()?;
+
   simple_logger::init_with_level(log::Level::Debug)
     .expect("couldn't initialize logging");
 
@@ -28,7 +32,11 @@ async fn main() {
     .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
     .leptos_routes(&leptos_options, routes, App)
     .fallback(file_and_error_handler)
-    .layer(CompressionLayer::new())
+    .layer(
+      ServiceBuilder::new()
+        .layer(CompressionLayer::new())
+        .layer(auth::build_auth_layer().await?),
+    )
     .with_state(leptos_options);
 
   // run our app with hyper
@@ -37,4 +45,6 @@ async fn main() {
   axum::serve(tokio::net::TcpListener::bind(&addr).await.unwrap(), app)
     .await
     .unwrap();
+
+  Ok(())
 }
