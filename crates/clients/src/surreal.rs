@@ -23,7 +23,14 @@ impl SurrealRootClient {
         .wrap_err("Could not find env var \"SURREALDB_WS_URL\"")?,
     )
     .await
-    .wrap_err("Could not connect to SurrealDB endpoint")?;
+    .wrap_err_with(|| {
+      format!(
+        "Could not connect to SurrealDB endpoint: `{}`\n\tNB: don't include \
+         the ws:// or wss:// prefix, e.g. `example.com:8080` instead of \
+         `wss://example.com:8080`",
+        std::env::var("SURREALDB_WS_URL").unwrap()
+      )
+    })?;
 
     let client = Self { client };
     client.sign_in_as_root().await?;
