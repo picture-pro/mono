@@ -57,7 +57,7 @@ fn ClickMeButton() -> impl IntoView {
   view! {
     <button
       on:click=on_click
-      class="btn"
+      class="d-btn"
     >"Click Me: " {count}</button>
   }
 }
