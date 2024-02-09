@@ -33,14 +33,28 @@ pub fn App() -> impl IntoView {
 }
 
 /// Renders the home page of your application.
-#[island]
+#[component]
 fn HomePage() -> impl IntoView {
-  // Creates a reactive value to update the button
+  view! {
+    <div class="p-4">
+      <div class="flex flex-col gap-2 p-4 w-96 bg-slate-200 rounded-xl">
+        <p class="text-lg">"Welcome to Leptos!"</p>
+        <div>
+          <p>"This is a simple example of a Leptos application."</p>
+          <p>"Click the button to see how reactive values work."</p>
+        </div>
+        <ClickMeButton/>
+      </div>
+    </div>
+  }
+}
+
+#[island]
+fn ClickMeButton() -> impl IntoView {
   let (count, set_count) = create_signal(0);
   let on_click = move |_| set_count.update(|count| *count += 1);
 
   view! {
-    <p class="text-lg">"Welcome to Leptos!"</p>
     <button on:click=on_click>"Click Me: " {count}</button>
   }
 }
