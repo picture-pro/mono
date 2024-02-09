@@ -83,6 +83,7 @@
           doCheck = false;
         });
 
+        # an offline yarn registry for the tailwind packages
         style-js-packages-yarn-registry = pkgs.fetchYarnDeps {
           yarnLock = ./crates/site-app/style/tailwind/yarn.lock;
           hash = "sha256-nqOJBcjX+dFl/XkBH+HfRO6Ce+CErm3YkQjG1W+aUPw=";
@@ -93,6 +94,7 @@
         # artifacts from above.
         site-server = craneLib.buildPackage (common_args // {
           buildPhaseCargoCommand = ''
+            # install the yarn packages so `cargo-leptos` can build the styles
             export HOME=$(mktemp -d)
             cd crates/site-app/style/tailwind
             yarn config --offline set yarn-offline-mirror ${style-js-packages-yarn-registry}
@@ -100,6 +102,7 @@
             yarn install --offline --frozen-lockfile
             cd ../../../..
 
+            # build the application
             cargo leptos build --release -vvv
           '';
           installPhaseCommand = ''
