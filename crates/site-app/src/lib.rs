@@ -36,14 +36,16 @@ pub fn App() -> impl IntoView {
 #[component]
 fn HomePage() -> impl IntoView {
   view! {
-    <div class="p-4">
-      <div class="flex flex-col gap-2 p-4 w-96 bg-slate-200 rounded-xl">
-        <p class="text-lg">"Welcome to Leptos!"</p>
+    <div class="flex flex-col justify-center items-center w-full min-h-screen">
+      <div class="flex flex-col gap-2 p-4 w-96 bg-base-200 rounded-xl">
+        <p class="text-lg font-semibold tracking-tight">"Welcome to Leptos!"</p>
         <div>
           <p>"This is a simple example of a Leptos application."</p>
           <p>"Click the button to see how reactive values work."</p>
         </div>
-        <ClickMeButton/>
+        <div class="flex flex-row justify-end">
+          <ClickMeButton/>
+        </div>
       </div>
     </div>
   }
@@ -57,7 +59,7 @@ fn ClickMeButton() -> impl IntoView {
   view! {
     <button
       on:click=on_click
-      class="d-btn"
+      class="d-btn d-btn-primary"
     >"Click Me: " {count}</button>
   }
 }
