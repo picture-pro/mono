@@ -104,6 +104,7 @@
             cargo-leptos
             flyctl # fly.io
             bacon # cargo check w/ hot reload
+            nodejs
 
             # surreal stuff
             surrealdb surrealdb-migrations
