@@ -11,14 +11,14 @@ lto = true
 codegen-units = 1
 
 [workspace.dependencies]
-axum = "0.7.4"
+axum = { version = "0.7.4", features = ["macros"] }
 cfg-if = "1"
 color-eyre = "0.6"
 console_error_panic_hook = "0.1.7"
 console_log = "1"
 http = "1"
 leptos = { version = "0.6", features = ["nightly", "experimental-islands"] }
-leptos_axum = { version = "0.6", features = ["experimental-islands"] }
+leptos_axum = { version = "0.6.5", features = ["experimental-islands"] }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
 log = "0.4"

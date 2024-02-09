@@ -11,6 +11,7 @@ auth = { path = "../auth" }
 
 leptos = { workspace = true, features = [ "ssr" ]}
 leptos_axum.workspace = true
+leptos_router.workspace = true
 
 axum.workspace = true
 color-eyre.workspace = true
