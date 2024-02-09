@@ -104,7 +104,7 @@
           '';
           installPhaseCommand = ''
             mkdir -p $out/bin
-            cp target/release/site-server $out/bin/site-server
+            cp target/release/site-server $out/bin/
             cp -r target/site $out/bin/
           '';
           # Prevent cargo test and nextest from duplicating tests
