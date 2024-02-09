@@ -52,7 +52,7 @@ reload-port = 3001
 browserquery = "defaults"
 
 tailwind-input-file = "crates/site-app/style/main.scss"
-tailwind-config-file = "crates/site-app/style/tailwind.config.js"
+tailwind-config-file = "crates/site-app/style/tailwind/tailwind.config.js"
 
 # set by cargo-leptos
 watch = false

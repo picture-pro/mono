@@ -1,0 +1,9 @@
+{
+  "name": "tailwind",
+  "version": "1.0.0",
+  "main": "tailwind.config.js",
+  "dependencies": {
+    "daisyui": "^4.6.2",
+    "postcss": "^8.4.35"
+  }
+}

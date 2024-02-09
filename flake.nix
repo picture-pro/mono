@@ -27,6 +27,8 @@
           (craneLib.filterCargoSources path type)
             || (filterGenerator ".*css$" path type)
             || (filterGenerator ".*js$" path type)
+            || (filterGenerator ".*json$" path type)
+            || (filterGenerator ".*lock$" path type)
             || (filterGenerator ".*ttf$" path type)
             || (filterGenerator ".*woff2$" path type)
             || (filterGenerator ".*webp$" path type)
@@ -56,9 +58,13 @@
             cargo-leptos
             pkgs.cargo-generate
             pkgs.binaryen
+            pkgs.clang
+
+            # for styling
             pkgs.dart-sass
             pkgs.tailwindcss
-            pkgs.clang
+            pkgs.yarn
+            pkgs.yarn2nix-moretea.fixup_yarn_lock
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             # Additional darwin specific inputs can be set here
             pkgs.libiconv
@@ -77,13 +83,31 @@
           doCheck = false;
         });
 
+        # an offline yarn registry for the tailwind packages
+        style-js-packages-yarn-registry = pkgs.fetchYarnDeps {
+          yarnLock = ./crates/site-app/style/tailwind/yarn.lock;
+          hash = "sha256-nqOJBcjX+dFl/XkBH+HfRO6Ce+CErm3YkQjG1W+aUPw=";
+          # hash = "";
+        };
+
         # Build the actual crate itself, reusing the dependency
         # artifacts from above.
         site-server = craneLib.buildPackage (common_args // {
-          buildPhaseCargoCommand = "cargo leptos build --release -vvv";
+          buildPhaseCargoCommand = ''
+            # install the yarn packages so `cargo-leptos` can build the styles
+            export HOME=$(mktemp -d)
+            cd crates/site-app/style/tailwind
+            yarn config --offline set yarn-offline-mirror ${style-js-packages-yarn-registry}
+            fixup_yarn_lock yarn.lock
+            yarn install --offline --frozen-lockfile
+            cd ../../../..
+
+            # build the application
+            cargo leptos build --release -vvv
+          '';
           installPhaseCommand = ''
             mkdir -p $out/bin
-            cp target/release/site-server $out/bin/site-server
+            cp target/release/site-server $out/bin/
             cp -r target/site $out/bin/
           '';
           # Prevent cargo test and nextest from duplicating tests
