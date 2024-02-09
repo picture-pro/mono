@@ -16,6 +16,8 @@ cfg-if.workspace = true
 thiserror.workspace = true
 serde.workspace = true
 
+auth = { path = "../auth" }
+
 [features]
 default = []
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]

@@ -1,10 +1,14 @@
+pub mod error_template;
+pub mod utils;
+
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use crate::error_template::{AppError, ErrorTemplate};
-
-pub mod error_template;
+use crate::{
+  error_template::{AppError, ErrorTemplate},
+  utils::auth,
+};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -37,15 +41,16 @@ pub fn App() -> impl IntoView {
 fn HomePage() -> impl IntoView {
   view! {
     <div class="flex flex-col justify-center items-center w-full min-h-screen">
-      <div class="flex flex-col gap-2 p-4 w-96 bg-base-200 rounded-xl">
+      <div class="flex flex-col gap-2 p-4 bg-base-200 rounded-xl">
         <p class="text-lg font-semibold tracking-tight">"Welcome to Leptos!"</p>
         <div>
           <p>"This is a simple example of a Leptos application."</p>
           <p>"Click the button to see how reactive values work."</p>
         </div>
-        <div class="flex flex-row justify-end">
-          <ClickMeButton/>
-        </div>
+        // <div class="flex flex-row justify-end">
+        //   <ClickMeButton/>
+        // </div>
+        <AuthStatus/>
       </div>
     </div>
   }
@@ -61,5 +66,28 @@ fn ClickMeButton() -> impl IntoView {
       on:click=on_click
       class="d-btn d-btn-primary"
     >"Click Me: " {count}</button>
+  }
+}
+
+#[component]
+fn AuthStatus() -> impl IntoView {
+  let Some(auth_status) = auth() else {
+    return view! { <p class="text-error">"Auth status not found"</p> }
+      .into_view();
+  };
+
+  match auth_status.user {
+    Some(user) => view! {
+      <p class="text-success">
+        {format!("You are logged in as {} ({})", user.name, user.id)}
+      </p>
+    }
+    .into_view(),
+    None => view! {
+      <p class="text-error">
+        "You are not logged in."
+      </p>
+    }
+    .into_view(),
   }
 }

@@ -30,7 +30,7 @@ pub struct Credentials {
   pub next:     Option<String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Backend {
   surreal_client: clients::surreal::SurrealRootClient,
 }

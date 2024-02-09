@@ -3884,6 +3884,7 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 name = "site-app"
 version = "0.1.0"
 dependencies = [
+ "auth",
  "cfg-if",
  "http 1.0.0",
  "leptos",
