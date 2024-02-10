@@ -27,7 +27,6 @@ impl AuthUser for User {
 pub struct Credentials {
   pub email:    String,
   pub password: String,
-  pub next:     Option<String>,
 }
 
 #[derive(Clone, Debug)]

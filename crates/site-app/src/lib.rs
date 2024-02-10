@@ -1,7 +1,8 @@
 pub mod error_template;
+pub mod pages;
 pub mod utils;
 
-use leptos::*;
+use leptos::{logging::log, *};
 use leptos_meta::*;
 use leptos_router::*;
 
@@ -29,65 +30,10 @@ pub fn App() -> impl IntoView {
     }>
       <main>
         <Routes>
-          <Route path="" view=HomePage/>
+          <Route path="" view=pages::home_page::HomePage/>
+          <Route path="/login" view=pages::login_page::LoginPage/>
         </Routes>
       </main>
     </Router>
-  }
-}
-
-/// Renders the home page of your application.
-#[component]
-fn HomePage() -> impl IntoView {
-  view! {
-    <div class="flex flex-col justify-center items-center w-full min-h-screen">
-      <div class="flex flex-col gap-2 p-4 bg-base-200 rounded-xl">
-        <p class="text-lg font-semibold tracking-tight">"Welcome to Leptos!"</p>
-        <div>
-          <p>"This is a simple example of a Leptos application."</p>
-          <p>"Click the button to see how reactive values work."</p>
-        </div>
-        // <div class="flex flex-row justify-end">
-        //   <ClickMeButton/>
-        // </div>
-        <AuthStatus/>
-      </div>
-    </div>
-  }
-}
-
-#[island]
-fn ClickMeButton() -> impl IntoView {
-  let (count, set_count) = create_signal(0);
-  let on_click = move |_| set_count.update(|count| *count += 1);
-
-  view! {
-    <button
-      on:click=on_click
-      class="d-btn d-btn-primary"
-    >"Click Me: " {count}</button>
-  }
-}
-
-#[component]
-fn AuthStatus() -> impl IntoView {
-  let Some(auth_status) = auth() else {
-    return view! { <p class="text-error">"Auth status not found"</p> }
-      .into_view();
-  };
-
-  match auth_status.user {
-    Some(user) => view! {
-      <p class="text-success">
-        {format!("You are logged in as {} ({})", user.name, user.id)}
-      </p>
-    }
-    .into_view(),
-    None => view! {
-      <p class="text-error">
-        "You are not logged in."
-      </p>
-    }
-    .into_view(),
   }
 }
