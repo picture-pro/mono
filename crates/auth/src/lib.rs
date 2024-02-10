@@ -8,10 +8,10 @@ use surrealdb::{engine::remote::ws::Client, sql::Thing};
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct User {
-  pub id:      Thing,
-  pub name:    String,
-  pub email:   String,
-  pub pw_hash: Secret<String>,
+  pub id:       Thing,
+  pub name:     String,
+  pub email:    String,
+  pub password: Secret<String>,
 }
 
 impl AuthUser for User {
@@ -19,7 +19,7 @@ impl AuthUser for User {
 
   fn id(&self) -> Self::Id { self.id.clone() }
   fn session_auth_hash(&self) -> &[u8] {
-    self.pw_hash.expose_secret().as_bytes()
+    self.password.expose_secret().as_bytes()
   }
 }
 
