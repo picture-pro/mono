@@ -281,6 +281,7 @@ name = "auth"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "auth_types",
  "axum-login",
  "clients",
  "color-eyre",
@@ -290,6 +291,13 @@ dependencies = [
  "thiserror",
  "tower-sessions",
  "tower-sessions-surrealdb-store",
+]
+
+[[package]]
+name = "auth_types"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -3885,6 +3893,7 @@ name = "site-app"
 version = "0.1.0"
 dependencies = [
  "auth",
+ "auth_types",
  "cfg-if",
  "http 1.0.0",
  "leptos",
@@ -3912,6 +3921,7 @@ name = "site-server"
 version = "0.1.0"
 dependencies = [
  "auth",
+ "auth_types",
  "axum",
  "color-eyre",
  "leptos",

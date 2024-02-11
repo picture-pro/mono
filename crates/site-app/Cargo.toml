@@ -17,6 +17,7 @@ thiserror.workspace = true
 serde.workspace = true
 
 auth = { path = "../auth" }
+auth_types = { path = "../auth_types" }
 
 [features]
 default = []

@@ -2,14 +2,11 @@ pub mod error_template;
 pub mod pages;
 pub mod utils;
 
-use leptos::{logging::log, *};
+use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use crate::{
-  error_template::{AppError, ErrorTemplate},
-  utils::auth,
-};
+use crate::error_template::{AppError, ErrorTemplate};
 
 #[component]
 pub fn App() -> impl IntoView {

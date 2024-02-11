@@ -2,25 +2,32 @@ use axum_login::{
   AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
 };
 use color_eyre::eyre::Result;
-use redact::Secret;
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, sql::Thing};
 
-#[derive(Clone, Debug, Deserialize)]
-pub struct User {
-  pub id:       Thing,
-  pub name:     String,
-  pub email:    String,
-  pub password: Secret<String>,
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct AuthenticatedUser {
+  pub id:      Thing,
+  pub name:    String,
+  pub email:   String,
+  pub pw_hash: String,
 }
 
-impl AuthUser for User {
+impl From<AuthenticatedUser> for auth_types::User {
+  fn from(u: AuthenticatedUser) -> auth_types::User {
+    auth_types::User {
+      id:    u.id.to_string(),
+      name:  u.name,
+      email: u.email,
+    }
+  }
+}
+
+impl AuthUser for AuthenticatedUser {
   type Id = Thing;
 
   fn id(&self) -> Self::Id { self.id.clone() }
-  fn session_auth_hash(&self) -> &[u8] {
-    self.password.expose_secret().as_bytes()
-  }
+  fn session_auth_hash(&self) -> &[u8] { self.pw_hash.as_bytes() }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -44,7 +51,7 @@ impl Backend {
 
 #[async_trait::async_trait]
 impl AuthnBackend for Backend {
-  type User = User;
+  type User = AuthenticatedUser;
   type Credentials = Credentials;
   type Error = surrealdb::Error;
 
@@ -52,10 +59,13 @@ impl AuthnBackend for Backend {
     &self,
     credentials: Self::Credentials,
   ) -> Result<Option<Self::User>, Self::Error> {
-    let user: Option<User> = (*self.surreal_client)
+    (*self.surreal_client).use_ns("main").await?;
+    (*self.surreal_client).use_db("main").await?;
+
+    let user: Option<AuthenticatedUser> = (*self.surreal_client)
       .query(
-        "SELECT id FROM users WHERE email = $email AND \
-         crypto::argon2::compare(password, $password))",
+        "SELECT * FROM users WHERE email = $email AND \
+         crypto::argon2::compare(password, $password)",
       )
       .bind(("email", &credentials.email))
       .bind(("password", &credentials.password))
@@ -69,7 +79,8 @@ impl AuthnBackend for Backend {
     &self,
     user_id: &UserId<Self>,
   ) -> Result<Option<Self::User>, Self::Error> {
-    let user: Option<User> = (*self.surreal_client).select(user_id).await?;
+    let user: Option<AuthenticatedUser> =
+      (*self.surreal_client).select(user_id).await?;
     Ok(user)
   }
 }

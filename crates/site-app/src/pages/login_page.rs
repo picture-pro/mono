@@ -1,7 +1,4 @@
 use leptos::{logging::log, *};
-use leptos_router::ActionForm;
-
-use crate::utils::auth;
 
 #[island]
 pub fn LoginPage() -> impl IntoView {
@@ -10,13 +7,6 @@ pub fn LoginPage() -> impl IntoView {
 
   let login_action = create_server_action::<Login>();
   let value = login_action.value();
-  let is_ok = move || value().as_ref().map(|v| v.is_ok()).unwrap_or(false);
-  let error = move || {
-    with!(|value| value
-      .as_ref()
-      .map(|v| v.clone().err().map(|e| e.to_string()))
-      .flatten())
-  };
 
   view! {
     <super::SmallPageWrapper>
@@ -42,14 +32,17 @@ pub fn LoginPage() -> impl IntoView {
         </div>
 
         // error message
-        { move || error().map(|e| view! { <p class="d-input-hint text-error">{e}</p> }) }
+        { move || value().map(|v| match v {
+          Ok(true) => view! { <p class="text-success">"Logged in!"</p> }.into_view(),
+          Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
+          Err(e) => view! { <p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
+        })}
 
         // submit button
         <div class="mt-6"></div>
         <div class="d-form-control">
           <button class="d-btn d-btn-primary" on:click=move |_| {
-            log!("login action: {}", is_ok());
-            login_action.dispatch(Login { email: email().clone(), password: password().clone() });
+            login_action.dispatch(Login { email: email(), password: password() });
           }>"Login"</button>
         </div>
       </div>
@@ -61,14 +54,14 @@ pub fn LoginPage() -> impl IntoView {
 pub async fn login(
   email: String,
   password: String,
-) -> Result<(), ServerFnError> {
+) -> Result<bool, ServerFnError> {
   let creds = auth::Credentials { email, password };
-  let mut auth_session =
-    auth().ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
+  let mut auth_session = use_context::<auth::AuthSession>()
+    .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
 
   let user = match auth_session.authenticate(creds.clone()).await {
     Ok(Some(user)) => user,
-    Ok(None) => return Err(ServerFnError::new("Invalid credentials.")),
+    Ok(None) => return Ok(false),
     Err(e) => {
       return Err(ServerFnError::new(format!("Failed to authenticate: {e}")))
     }
@@ -82,5 +75,5 @@ pub async fn login(
   log!("logged in user: {} ({})", user.name, user.id);
   leptos_axum::redirect("/");
 
-  Ok(())
+  Ok(true)
 }
