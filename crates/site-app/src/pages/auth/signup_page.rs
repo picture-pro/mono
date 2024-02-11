@@ -1,6 +1,45 @@
 use leptos::*;
+use validation::{FieldValidate, SignupParams, Validate};
 
 use crate::pages::SmallPageWrapper;
+
+struct ValidationMessage<
+  P: Validate,
+  S: Fn() -> P + 'static,
+  F: Fn() -> String + 'static,
+> {
+  params:       S,
+  field_signal: F,
+  field_name:   &'static str,
+}
+
+impl<P: Validate, S: Fn() -> P + 'static, F: Fn() -> String + 'static>
+  ValidationMessage<P, S, F>
+{
+  fn new(params: S, field_signal: F, field_name: &'static str) -> Self {
+    ValidationMessage {
+      params,
+      field_signal,
+      field_name,
+    }
+  }
+}
+
+impl<P: Validate, S: Fn() -> P + 'static, F: Fn() -> String + 'static> IntoView
+  for ValidationMessage<P, S, F>
+{
+  fn into_view(self) -> View {
+    let ValidationMessage {
+      params,
+      field_signal,
+      field_name,
+    } = self;
+    view! {
+      <p class="text-error">{ move || params().field_validate(field_name).filter(|_| !field_signal().is_empty()) }</p>
+    }
+    .into_view()
+  }
+}
 
 #[island]
 pub fn SignupPage() -> impl IntoView {
@@ -9,65 +48,14 @@ pub fn SignupPage() -> impl IntoView {
   let (password, set_password) = create_signal(String::new());
   let (confirm, set_confirm) = create_signal(String::new());
 
-  let name_validity = move || {
-    name.clone().with(|name| {
-      if name.is_empty() {
-        return None;
-      }
-      if name.len() < 3 {
-        return Some(
-          view! { <p class="d-label text-error">"Name must be at least 3 characters long"</p> }
-            .into_view(),
-        );
-      }
-      None
+  let params = create_memo(move |_| {
+    with!(|name, email, password, confirm| SignupParams {
+      name:     name.clone(),
+      email:    email.clone(),
+      password: password.clone(),
+      confirm:  confirm.clone(),
     })
-  };
-
-  let email_validity = move || {
-    email.clone().with(|email| {
-      if email.is_empty() {
-        return None;
-      }
-      Some(match validator::validate_email(email) {
-        true => view! {}.into_view(),
-        false => {
-          view! { <p class="d-label text-error">"Invalid email address"</p> }
-            .into_view()
-        }
-      })
-    })
-  };
-
-  let password_validity = move || {
-    password.clone().with(|password| {
-      if password.is_empty() {
-        return None;
-      }
-      if password.len() < 8 {
-        return Some(
-          view! { <p class="d-label text-error">"Password must be at least 8 characters long"</p> }
-            .into_view(),
-        );
-      }
-      None
-    })
-  };
-
-  let confirm_validity = move || {
-    confirm.clone().with(|confirm| {
-      if confirm.is_empty() {
-        return None;
-      }
-      if *confirm != password() {
-        return Some(
-          view! { <p class="d-label text-error">"Passwords do not match"</p> }
-            .into_view(),
-        );
-      }
-      None
-    })
-  };
+  });
 
   let signup_action = create_server_action::<Signup>();
   let value = signup_action.value();
@@ -84,7 +72,7 @@ pub fn SignupPage() -> impl IntoView {
             type="text" class="d-input d-input-bordered w-full max-w-xs"
             on:input=move |ev| {set_name(event_target_value(&ev))} prop:value=name
           />
-          { name_validity }
+          { Some(ValidationMessage::new(params, name, "name")) }
         </div>
 
         // email
@@ -94,7 +82,7 @@ pub fn SignupPage() -> impl IntoView {
             type="text" class="d-input d-input-bordered w-full max-w-xs"
             on:input=move |ev| {set_email(event_target_value(&ev))} prop:value=email
           />
-          { email_validity }
+          { Some(ValidationMessage::new(params, email, "email")) }
         </div>
 
         // password
@@ -104,7 +92,7 @@ pub fn SignupPage() -> impl IntoView {
             type="password" class="d-input d-input-bordered w-full max-w-xs"
             on:input=move |ev| {set_password(event_target_value(&ev))} prop:value=password
           />
-          { password_validity }
+          { Some(ValidationMessage::new(params, password, "password")) }
         </div>
 
         // confirm password
@@ -114,7 +102,7 @@ pub fn SignupPage() -> impl IntoView {
             type="password" class="d-input d-input-bordered w-full max-w-xs"
             on:input=move |ev| {set_confirm(event_target_value(&ev))} prop:value=confirm
           />
-          { confirm_validity }
+          { Some(ValidationMessage::new(params, confirm, "confirm")) }
         </div>
 
         { move || value().map(|v| match v {
@@ -127,10 +115,12 @@ pub fn SignupPage() -> impl IntoView {
         <div class="d-form-control">
           <button class="d-btn d-btn-primary" on:click=move |_| {
             signup_action.dispatch(Signup {
-              name: name(),
-              email: email(),
-              password: password(),
-              confirm: confirm()
+              params: SignupParams {
+                name: name(),
+                email: email(),
+                password: password(),
+                confirm: confirm(),
+              }
             });
           }>"Sign Up"</button>
         </div>
@@ -140,29 +130,18 @@ pub fn SignupPage() -> impl IntoView {
 }
 
 #[server(Signup)]
-pub async fn login(
-  name: String,
-  email: String,
-  password: String,
-  confirm: String,
-) -> Result<(), ServerFnError> {
-  if name.len() < 3 {
-    return Err(ServerFnError::new(
-      "Name must be at least 3 characters long",
-    ));
-  }
-  if email.is_empty() {
-    return Err(ServerFnError::new("Email cannot be empty"));
-  }
-  if !validator::validate_email(&email) {
-    return Err(ServerFnError::new("Invalid email address"));
-  }
-  if password.is_empty() {
-    return Err(ServerFnError::new("Password cannot be empty"));
-  }
-  if password != confirm {
-    return Err(ServerFnError::new("Passwords do not match"));
-  }
+pub async fn login(params: SignupParams) -> Result<(), ServerFnError> {
+  params.validate().map_err(|e| {
+    logging::error!("Invalid signup params: {:?}", e);
+    ServerFnError::new(format!("Invalid signup params: {e}"))
+  })?;
+
+  let SignupParams {
+    name,
+    email,
+    password,
+    ..
+  } = params;
 
   let auth_session = use_context::<auth::AuthSession>()
     .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
