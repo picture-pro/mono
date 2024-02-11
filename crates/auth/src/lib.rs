@@ -1,16 +1,16 @@
 use axum_login::{
   AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
 };
-use color_eyre::eyre::Result;
+use color_eyre::eyre::{eyre, Context, Result};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, sql::Thing};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AuthenticatedUser {
-  pub id:      Thing,
-  pub name:    String,
-  pub email:   String,
-  pub pw_hash: String,
+  pub id:       Thing,
+  pub name:     String,
+  pub email:    String,
+  pub password: String,
 }
 
 impl From<AuthenticatedUser> for auth_types::User {
@@ -27,7 +27,7 @@ impl AuthUser for AuthenticatedUser {
   type Id = Thing;
 
   fn id(&self) -> Self::Id { self.id.clone() }
-  fn session_auth_hash(&self) -> &[u8] { self.pw_hash.as_bytes() }
+  fn session_auth_hash(&self) -> &[u8] { self.password.as_bytes() }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -47,6 +47,44 @@ impl Backend {
       surreal_client: clients::surreal::SurrealRootClient::new().await?,
     })
   }
+
+  pub async fn signup(
+    &self,
+    name: String,
+    email: String,
+    password: String,
+  ) -> Result<AuthenticatedUser> {
+    (*self.surreal_client).use_ns("main").await?;
+    (*self.surreal_client).use_db("main").await?;
+
+    // check whether a user with the given email already exists
+    let user: Option<AuthenticatedUser> = (*self.surreal_client)
+      .query("SELECT * FROM users WHERE email = $email")
+      .bind(("email", &email))
+      .await?
+      .take(0)
+      .wrap_err("Failed to query SurrealDB for existing user")?;
+
+    if user.is_some() {
+      return Err(eyre!("User with email {} already exists", email));
+    }
+
+    // create a new user
+    let user: Option<AuthenticatedUser> = (*self.surreal_client)
+      .query(
+        "CREATE user SET name = $name, email = $email, password = \
+         crypto::argon2::generate($password)",
+      )
+      .bind(("name", &name))
+      .bind(("email", &email))
+      .bind(("password", &password))
+      .await
+      .wrap_err("Failed to create user in SurrealDB")?
+      .take(0)
+      .wrap_err("Failed to insert user into SurrealDB")?;
+
+    user.ok_or_else(|| eyre!("Failed to create user"))
+  }
 }
 
 #[async_trait::async_trait]
@@ -64,7 +102,7 @@ impl AuthnBackend for Backend {
 
     let user: Option<AuthenticatedUser> = (*self.surreal_client)
       .query(
-        "SELECT * FROM users WHERE email = $email AND \
+        "SELECT * FROM user WHERE email = $email AND \
          crypto::argon2::compare(password, $password)",
       )
       .bind(("email", &credentials.email))

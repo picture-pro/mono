@@ -28,7 +28,8 @@ pub fn App() -> impl IntoView {
       <main>
         <Routes>
           <Route path="" view=pages::home_page::HomePage/>
-          <Route path="/login" view=pages::login_page::LoginPage/>
+          <Route path="/login" view=pages::auth::login_page::LoginPage/>
+          <Route path="/signup" view=pages::auth::signup_page::SignupPage/>
         </Routes>
       </main>
     </Router>

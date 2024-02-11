@@ -1,0 +1,15 @@
+#V2
+SELECT * FROM users
+DELETE users;
+SELECT * FROM users
+DELETE unique_email
+INFO FOR DB
+exit
+LET $pass = crypto::argon2::generate("password");
+RETURN $pass
+RETURN 123
+$pass
+RETURN crypto::argon2::generate("password")
+SELECT * FROM users
+INFO FOR DB
+SELECT * FROM user

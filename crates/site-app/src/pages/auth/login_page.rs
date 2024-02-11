@@ -1,5 +1,7 @@
 use leptos::{logging::log, *};
 
+use crate::pages::SmallPageWrapper;
+
 #[island]
 pub fn LoginPage() -> impl IntoView {
   let (email, set_email) = create_signal(String::new());
@@ -9,7 +11,7 @@ pub fn LoginPage() -> impl IntoView {
   let value = login_action.value();
 
   view! {
-    <super::SmallPageWrapper>
+    <SmallPageWrapper>
       <div class="d-card-body">
         <p class="d-card-title text-2xl">"Login"</p>
 
@@ -46,7 +48,7 @@ pub fn LoginPage() -> impl IntoView {
           }>"Login"</button>
         </div>
       </div>
-    </super::SmallPageWrapper>
+    </SmallPageWrapper>
   }
 }
 

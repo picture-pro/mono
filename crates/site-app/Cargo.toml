@@ -16,6 +16,8 @@ cfg-if.workspace = true
 thiserror.workspace = true
 serde.workspace = true
 
+validator = "0.16.1"
+
 auth = { path = "../auth" }
 auth_types = { path = "../auth_types" }
 
