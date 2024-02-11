@@ -5,10 +5,7 @@ use axum::{
   response::{IntoResponse, Response as AxumResponse},
 };
 use leptos::*;
-use site_app::{
-  error_template::{AppError, ErrorTemplate},
-  App,
-};
+use site_app::App;
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
 

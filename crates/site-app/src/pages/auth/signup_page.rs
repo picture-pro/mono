@@ -1,4 +1,4 @@
-use leptos::{logging::log, *};
+use leptos::*;
 
 use crate::pages::SmallPageWrapper;
 

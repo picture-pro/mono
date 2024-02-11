@@ -3,7 +3,7 @@ use axum::{
   extract::{FromRef, Path, State},
   http::Request,
   response::{IntoResponse, Response},
-  routing::{get, post},
+  routing::get,
   Router,
 };
 use color_eyre::eyre::Result;
@@ -26,7 +26,6 @@ pub struct AppState {
 }
 
 async fn server_fn_handler(
-  State(app_state): State<AppState>,
   auth_session: auth::AuthSession,
   path: Path<String>,
   request: Request<Body>,
