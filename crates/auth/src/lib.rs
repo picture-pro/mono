@@ -54,8 +54,7 @@ impl Backend {
     email: String,
     password: String,
   ) -> Result<AuthenticatedUser> {
-    (*self.surreal_client).use_ns("main").await?;
-    (*self.surreal_client).use_db("main").await?;
+    (*self.surreal_client).use_ns("main").use_db("main").await?;
 
     // check whether a user with the given email already exists
     let user: Option<AuthenticatedUser> = (*self.surreal_client)
@@ -97,8 +96,7 @@ impl AuthnBackend for Backend {
     &self,
     credentials: Self::Credentials,
   ) -> Result<Option<Self::User>, Self::Error> {
-    (*self.surreal_client).use_ns("main").await?;
-    (*self.surreal_client).use_db("main").await?;
+    (*self.surreal_client).use_ns("main").use_db("main").await?;
 
     let user: Option<AuthenticatedUser> = (*self.surreal_client)
       .query(
@@ -117,6 +115,8 @@ impl AuthnBackend for Backend {
     &self,
     user_id: &UserId<Self>,
   ) -> Result<Option<Self::User>, Self::Error> {
+    (*self.surreal_client).use_ns("main").use_db("main").await?;
+
     let user: Option<AuthenticatedUser> =
       (*self.surreal_client).select(user_id).await?;
     Ok(user)
