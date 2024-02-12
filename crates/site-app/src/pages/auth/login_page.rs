@@ -3,8 +3,17 @@ use validation::{FieldValidate, LoginParams, Validate};
 
 use crate::{components::form::FormElement, pages::SmallPageWrapper};
 
-#[island]
+#[component]
 pub fn LoginPage() -> impl IntoView {
+  view! {
+    <SmallPageWrapper>
+      <LoginPageInner/>
+    </SmallPageWrapper>
+  }
+}
+
+#[island]
+pub fn LoginPageInner() -> impl IntoView {
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
 
@@ -19,29 +28,27 @@ pub fn LoginPage() -> impl IntoView {
   let value = login_action.value();
 
   view! {
-    <SmallPageWrapper>
-      <div class="d-card-body">
-        <p class="d-card-title text-2xl">"Login to PicturePro"</p>
+    <div class="d-card-body">
+      <p class="d-card-title text-2xl">"Login to PicturePro"</p>
 
-        { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
-        { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
+      { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
+      { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
 
-        // error message
-        { move || value().map(|v| match v {
-          Ok(true) => view! { <p class="text-success">"Logged in!"</p> }.into_view(),
-          Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
-          Err(e) => view! { <p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
-        })}
+      // error message
+      { move || value().map(|v| match v {
+        Ok(true) => view! { <p class="text-success">"Logged in!"</p> }.into_view(),
+        Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
+        Err(e) => view! { <p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
+      })}
 
-        // submit button
-        <div class="mt-6"></div>
-        <div class="d-form-control">
-          <button class="d-btn d-btn-primary" on:click=move |_| {
-            login_action.dispatch(Login { params: params() });
-          }>"Login"</button>
-        </div>
+      // submit button
+      <div class="mt-6"></div>
+      <div class="d-form-control">
+        <button class="d-btn d-btn-primary" on:click=move |_| {
+          login_action.dispatch(Login { params: params() });
+        }>"Login"</button>
       </div>
-    </SmallPageWrapper>
+    </div>
   }
 }
 

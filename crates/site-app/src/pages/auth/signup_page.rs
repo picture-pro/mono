@@ -3,8 +3,17 @@ use validation::{FieldValidate, LoginParams, SignupParams, Validate};
 
 use crate::{components::form::FormElement, pages::SmallPageWrapper};
 
-#[island]
+#[component]
 pub fn SignupPage() -> impl IntoView {
+  view! {
+    <SmallPageWrapper>
+      <SignupPageInner/>
+    </SmallPageWrapper>
+  }
+}
+
+#[island]
+pub fn SignupPageInner() -> impl IntoView {
   let (name, set_name) = create_signal(String::new());
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
@@ -23,31 +32,29 @@ pub fn SignupPage() -> impl IntoView {
   let value = signup_action.value();
 
   view! {
-    <SmallPageWrapper>
-      <div class="d-card-body">
-        <p class="d-card-title text-2xl">"Sign Up to PicturePro"</p>
+    <div class="d-card-body">
+      <p class="d-card-title text-2xl">"Sign Up to PicturePro"</p>
 
-        { FormElement::new(params, name, set_name, "Name", "name", None).into_view() }
-        { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
-        { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
-        { FormElement::new(params, confirm, set_confirm, "Confirm Password", "confirm", Some("password")).into_view() }
+      { FormElement::new(params, name, set_name, "Name", "name", None).into_view() }
+      { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
+      { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
+      { FormElement::new(params, confirm, set_confirm, "Confirm Password", "confirm", Some("password")).into_view() }
 
-        { move || value().map(|v| match v {
-          Err(e) => view! { <p class="text-error">{ e.to_string() }</p> }.into_view(),
-          Ok(_) => view! { <p class="text-success">"Signed up!"</p> }.into_view(),
-        })}
+      { move || value().map(|v| match v {
+        Err(e) => view! { <p class="text-error">{ e.to_string() }</p> }.into_view(),
+        Ok(_) => view! { <p class="text-success">"Signed up!"</p> }.into_view(),
+      })}
 
-        // submit button
-        <div class="mt-6"></div>
-        <div class="d-form-control">
-          <button class="d-btn d-btn-primary" on:click=move |_| {
-            signup_action.dispatch(Signup {
-              params: params(),
-            });
-          }>"Sign Up"</button>
-        </div>
+      // submit button
+      <div class="mt-6"></div>
+      <div class="d-form-control">
+        <button class="d-btn d-btn-primary" on:click=move |_| {
+          signup_action.dispatch(Signup {
+            params: params(),
+          });
+        }>"Sign Up"</button>
       </div>
-    </SmallPageWrapper>
+    </div>
   }
 }
 
