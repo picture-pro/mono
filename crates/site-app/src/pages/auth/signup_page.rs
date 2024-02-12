@@ -1,5 +1,5 @@
 use leptos::*;
-use validation::{FieldValidate, LoginParams, SignupParams, Validate};
+use validation::{LoginParams, SignupParams, Validate};
 
 use crate::{components::form::FormElement, pages::SmallPageWrapper};
 
@@ -30,6 +30,7 @@ pub fn SignupPageInner() -> impl IntoView {
 
   let signup_action = create_server_action::<Signup>();
   let value = signup_action.value();
+  let pending = signup_action.pending();
 
   view! {
     <div class="d-card-body">
@@ -57,7 +58,13 @@ pub fn SignupPageInner() -> impl IntoView {
           signup_action.dispatch(Signup {
             params: params(),
           });
-        }>"Sign Up"</button>
+        }>
+          { move || match pending() {
+            true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
+            false => None,
+          } }
+          "Sign Up"
+        </button>
       </div>
     </div>
   }

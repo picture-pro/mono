@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod dashboard;
 pub mod home_page;
 
 use leptos::*;

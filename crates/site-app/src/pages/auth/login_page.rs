@@ -1,5 +1,5 @@
 use leptos::{logging::log, *};
-use validation::{FieldValidate, LoginParams, Validate};
+use validation::{LoginParams, Validate};
 
 use crate::{components::form::FormElement, pages::SmallPageWrapper};
 
@@ -26,6 +26,7 @@ pub fn LoginPageInner() -> impl IntoView {
 
   let login_action = create_server_action::<Login>();
   let value = login_action.value();
+  let pending = login_action.pending();
 
   view! {
     <div class="d-card-body">
@@ -51,7 +52,13 @@ pub fn LoginPageInner() -> impl IntoView {
       <div class="d-form-control">
         <button class="d-btn d-btn-primary" on:click=move |_| {
           login_action.dispatch(Login { params: params() });
-        }>"Login"</button>
+        }>
+          { move || match pending() {
+            true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
+            false => None,
+          } }
+          "Login"
+        </button>
       </div>
     </div>
   }

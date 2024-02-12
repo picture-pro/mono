@@ -18,6 +18,7 @@ pub fn App() -> impl IntoView {
   provide_meta_context();
 
   view! {
+    <Style>{include_str!("../style/fonts.css")}</Style>
     <Stylesheet id="leptos" href="/pkg/site.css"/>
 
     // sets the document title
@@ -29,10 +30,11 @@ pub fn App() -> impl IntoView {
       outside_errors.insert_with_default_key(AppError::NotFound);
       view! { <ErrorTemplate outside_errors/> }.into_view()
     }>
-      <div data-theme="dark" class="w-full min-h-screen flex flex-col items-stretch justify-stretch">
+      <div data-theme="corporate" class="w-full min-h-screen flex flex-col items-stretch justify-stretch">
         <Navbar/>
         <Routes>
           <Route path="" view=pages::home_page::HomePage/>
+          <Route path="/dashboard" view=pages::dashboard::DashboardPage/>
           <Route path="/login" view=pages::auth::login_page::LoginPage/>
           <Route path="/signup" view=pages::auth::signup_page::SignupPage/>
         </Routes>

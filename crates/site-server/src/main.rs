@@ -30,8 +30,6 @@ async fn server_fn_handler(
   path: Path<String>,
   request: Request<Body>,
 ) -> impl IntoResponse {
-  log!("{:?}", path);
-
   handle_server_fns_with_context(
     move || {
       provide_context(auth_session.clone());
@@ -53,7 +51,7 @@ async fn leptos_routes_handler(
     app_state.leptos_options.clone(),
     app_state.routes.clone(),
     move || {
-      provide_context(auth_session.clone());
+      // provide_context(auth_session.clone());
       provide_context(auth_types::LoggedInUser(
         auth_session.user.clone().map(auth_types::User::from),
       ))
