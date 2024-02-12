@@ -27,8 +27,6 @@ pub struct SignupParams {
 
 #[derive(Validate, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LoginParams {
-  #[validate(email)]
   pub email:    String,
-  #[validate(length(min = 8, max = 256))]
   pub password: String,
 }

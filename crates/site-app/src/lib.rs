@@ -1,3 +1,4 @@
+pub mod components;
 pub mod error_template;
 pub mod pages;
 pub mod utils;
@@ -25,7 +26,7 @@ pub fn App() -> impl IntoView {
       outside_errors.insert_with_default_key(AppError::NotFound);
       view! { <ErrorTemplate outside_errors/> }.into_view()
     }>
-      <main>
+      <main data-theme="business">
         <Routes>
           <Route path="" view=pages::home_page::HomePage/>
           <Route path="/login" view=pages::auth::login_page::LoginPage/>
