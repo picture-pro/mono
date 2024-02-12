@@ -50,17 +50,58 @@ pub fn Navbar() -> impl IntoView {
     "/"
   };
 
+  let user_area = match current_user {
+    Some(user) => view! {
+      <a class="d-btn d-btn-neutral d-btn-sm" href="/dashboard">Dashboard</a>
+      <LogoutButton class={Some("d-btn d-btn-neutral d-btn-sm".into())} />
+    }
+    .into_view(),
+    None => view! {
+      <a class="d-btn d-btn-neutral d-btn-sm" href="/login">Login</a>
+      <a class="d-btn d-btn-neutral d-btn-sm" href="/signup">Signup</a>
+    }
+    .into_view(),
+  };
+
   view! {
     <div class="bg-base-200 w-full">
-      <div class="d-navbar container mx-auto">
+      <div class="d-navbar md:container md:mx-auto">
         <div class="flex-1">
-          <a class="d-btn d-btn-ghost text-xl" href={home_url}>PicturePro</a>
+          <a class="d-btn d-btn-ghost text-xl d-btn-sm" href={home_url}>PicturePro</a>
         </div>
         <div class="flex-none flex flex-row items-center gap-2">
-          <a class="d-btn d-btn-ghost" href="/login">Login</a>
-          <a class="d-btn d-btn-ghost" href="/signup">Signup</a>
+          {user_area}
         </div>
       </div>
     </div>
   }
+}
+
+#[island]
+pub fn LogoutButton(class: Option<String>) -> impl IntoView {
+  let logout_action = create_server_action::<Logout>();
+  let logout_value = logout_action.value();
+
+  view! {
+    <button class={class} on:click=move |_| {
+      logout_action.dispatch(Logout {});
+    }>"Logout"</button>
+    { crate::components::navigation::ClientNav::new(
+      move || matches!(logout_value(), Some(Ok(_))),
+      move || "/".to_string(),
+    ) }
+  }
+}
+
+#[server(Logout)]
+pub async fn logout() -> Result<(), ServerFnError> {
+  let mut auth_session = use_context::<auth::AuthSession>()
+    .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
+
+  auth_session.logout().await.map_err(|e| {
+    logging::error!("Failed to log out: {:?}", e);
+    ServerFnError::new("Failed to log out")
+  })?;
+
+  Ok(())
 }

@@ -41,8 +41,13 @@ pub fn SignupPageInner() -> impl IntoView {
       { FormElement::new(params, confirm, set_confirm, "Confirm Password", "confirm", Some("password")).into_view() }
 
       { move || value().map(|v| match v {
-        Err(e) => view! { <p class="text-error">{ e.to_string() }</p> }.into_view(),
-        Ok(_) => view! { <p class="text-success">"Signed up!"</p> }.into_view(),
+        Ok(_) => view! {
+          <p class="text-success">"Signed up!"</p>
+          { crate::components::navigation::ClientNavInner::new(
+            move || "/".to_string(),
+          ) }
+        }.into_view(),
+        Err(e) => view! {<p class="text-error">{ e.to_string() }</p> }.into_view(),
       })}
 
       // submit button

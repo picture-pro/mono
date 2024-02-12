@@ -36,9 +36,14 @@ pub fn LoginPageInner() -> impl IntoView {
 
       // error message
       { move || value().map(|v| match v {
-        Ok(true) => view! { <p class="text-success">"Logged in!"</p> }.into_view(),
+        Ok(true) => view! {
+          <p class="text-success">"Logged in!"</p>
+          { crate::components::navigation::ClientNavInner::new(
+            move || "/".to_string(),
+          ) }
+        }.into_view(),
         Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
-        Err(e) => view! { <p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
+        Err(e) => view! {<p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
       })}
 
       // submit button
