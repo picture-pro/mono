@@ -32,34 +32,44 @@ pub fn LoginPageInner() -> impl IntoView {
     <div class="d-card-body">
       <p class="d-card-title text-2xl">"Login to PicturePro"</p>
 
-      { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
-      { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
+      <form on:submit=move |ev| {
+        ev.prevent_default();
+        login_action.dispatch(Login {
+          params: params(),
+        });
+      }>
+        { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
+        { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
 
-      // error message
-      { move || value().map(|v| match v {
-        Ok(true) => view! {
-          <p class="text-success">"Logged in!"</p>
-          { crate::components::navigation::ClientNavInner::new(
-            move || "/".to_string(),
-          ) }
-        }.into_view(),
-        Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
-        Err(e) => view! {<p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
-      })}
+        // error message
+        { move || value().map(|v| match v {
+          Ok(true) => view! {
+            <p class="text-success">"Logged in!"</p>
+            { crate::components::navigation::ClientNavInner::new(
+              move || "/".to_string(),
+            ) }
+          }.into_view(),
+          Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
+          Err(e) => view! {<p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
+        })}
 
-      // submit button
-      <div class="mt-6"></div>
-      <div class="d-form-control">
-        <button class="d-btn d-btn-primary" on:click=move |_| {
-          login_action.dispatch(Login { params: params() });
-        }>
-          { move || match pending() {
-            true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
-            false => None,
-          } }
-          "Login"
-        </button>
-      </div>
+        // submit button
+        <div class="mt-6"></div>
+        <div class="d-form-control">
+          <button
+            class="d-btn d-btn-primary" type="submit"
+            disabled={move || with!(|params, pending| {
+              *pending || !params.validate().is_ok()
+            })}
+          >
+            { move || match pending() {
+              true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
+              false => None,
+            } }
+            "Login"
+          </button>
+        </div>
+      </form>
     </div>
   }
 }
