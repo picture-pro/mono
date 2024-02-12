@@ -1,11 +1,19 @@
 use leptos::{logging::log, *};
+use validation::{FieldValidate, LoginParams, Validate};
 
-use crate::pages::SmallPageWrapper;
+use crate::{components::form::FormElement, pages::SmallPageWrapper};
 
 #[island]
 pub fn LoginPage() -> impl IntoView {
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
+
+  let params = create_memo(move |_| {
+    with!(|email, password| LoginParams {
+      email:    email.clone(),
+      password: password.clone(),
+    })
+  });
 
   let login_action = create_server_action::<Login>();
   let value = login_action.value();
@@ -13,25 +21,10 @@ pub fn LoginPage() -> impl IntoView {
   view! {
     <SmallPageWrapper>
       <div class="d-card-body">
-        <p class="d-card-title text-2xl">"Login"</p>
+        <p class="d-card-title text-2xl">"Login to PicturePro"</p>
 
-        // email
-        <div class="d-form-control">
-          <label class="d-label">"Email"</label>
-          <input
-            type="text" class="d-input d-input-bordered w-full max-w-xs"
-            on:input=move |ev| {set_email(event_target_value(&ev))} prop:value=email
-          />
-        </div>
-
-        // password
-        <div class="d-form-control">
-          <label class="d-label">"Password"</label>
-          <input
-            type="password" class="d-input d-input-bordered w-full max-w-xs"
-            on:input=move |ev| {set_password(event_target_value(&ev))} prop:value=password
-          />
-        </div>
+        { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
+        { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
 
         // error message
         { move || value().map(|v| match v {
@@ -44,7 +37,7 @@ pub fn LoginPage() -> impl IntoView {
         <div class="mt-6"></div>
         <div class="d-form-control">
           <button class="d-btn d-btn-primary" on:click=move |_| {
-            login_action.dispatch(Login { email: email(), password: password() });
+            login_action.dispatch(Login { params: params() });
           }>"Login"</button>
         </div>
       </div>
@@ -53,11 +46,16 @@ pub fn LoginPage() -> impl IntoView {
 }
 
 #[server(Login)]
-pub async fn login(
-  email: String,
-  password: String,
-) -> Result<bool, ServerFnError> {
-  let creds = auth::Credentials { email, password };
+pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
+  params.validate().map_err(|e| {
+    logging::error!("Invalid signup params: {:?}", e);
+    ServerFnError::new(format!("Invalid login params: {}", e))
+  })?;
+
+  let creds = auth::Credentials {
+    email:    params.email,
+    password: params.password,
+  };
   let mut auth_session = use_context::<auth::AuthSession>()
     .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
 
