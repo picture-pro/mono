@@ -1,5 +1,5 @@
 use leptos::*;
-use validation::{FieldValidate, SignupParams, Validate};
+use validation::{FieldValidate, Validate};
 
 pub struct FormElement<
   P: Validate,

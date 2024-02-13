@@ -30,7 +30,7 @@ pub fn App() -> impl IntoView {
       outside_errors.insert_with_default_key(AppError::NotFound);
       view! { <ErrorTemplate outside_errors/> }.into_view()
     }>
-      <div data-theme="corporate" class="w-full min-h-screen flex flex-col items-stretch justify-stretch">
+      <div data-theme="light" class="w-full min-h-screen flex flex-col items-stretch justify-stretch">
         <Navbar/>
         <Routes>
           <Route path="" view=pages::home_page::HomePage/>
@@ -53,7 +53,7 @@ pub fn Navbar() -> impl IntoView {
   };
 
   let user_area = match current_user {
-    Some(user) => view! {
+    Some(_user) => view! {
       <a class="d-btn d-btn-neutral d-btn-sm" href="/dashboard">Dashboard</a>
       <LogoutButton class={Some("d-btn d-btn-neutral d-btn-sm".into())} />
     }

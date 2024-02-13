@@ -46,7 +46,7 @@ pub fn LoginPageInner() -> impl IntoView {
           Ok(true) => view! {
             <p class="text-success">"Logged in!"</p>
             { crate::components::navigation::ClientNavInner::new(
-              move || "/".to_string(),
+              move || "/dashboard".to_string(),
             ) }
           }.into_view(),
           Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
@@ -59,7 +59,7 @@ pub fn LoginPageInner() -> impl IntoView {
           <button
             class="d-btn d-btn-primary" type="submit"
             disabled={move || with!(|params, pending| {
-              *pending || !params.validate().is_ok()
+              *pending || params.validate().is_err()
             })}
           >
             { move || match pending() {

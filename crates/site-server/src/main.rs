@@ -1,6 +1,6 @@
 use axum::{
   body::Body,
-  extract::{FromRef, Path, State},
+  extract::{FromRef, State},
   http::Request,
   response::{IntoResponse, Response},
   routing::get,
@@ -8,7 +8,7 @@ use axum::{
 };
 use color_eyre::eyre::Result;
 use fileserv::file_and_error_handler;
-use leptos::{logging::log, *};
+use leptos::*;
 use leptos_axum::{
   generate_route_list, handle_server_fns_with_context, LeptosRoutes,
 };
@@ -27,7 +27,6 @@ pub struct AppState {
 
 async fn server_fn_handler(
   auth_session: auth::AuthSession,
-  path: Path<String>,
   request: Request<Body>,
 ) -> impl IntoResponse {
   handle_server_fns_with_context(
