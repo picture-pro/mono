@@ -19,12 +19,12 @@ serde.workspace = true
 validator = "0.16.1"
 web-sys = { version = "0.3", features = [ "Window" ] }
 
-auth = { path = "../auth" }
+auth = { path = "../auth", optional = true }
 auth_types = { path = "../auth_types" }
 validation = { path = "../validation" }
 
 [features]
 default = []
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
-ssr = ["leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum"]
+ssr = ["leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum", "auth"]
 
