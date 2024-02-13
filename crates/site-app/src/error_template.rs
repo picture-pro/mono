@@ -5,6 +5,8 @@ use leptos::*;
 use leptos_axum::ResponseOptions;
 use thiserror::Error;
 
+use crate::pages::PageWrapper;
+
 #[derive(Clone, Debug, Error)]
 pub enum AppError {
   #[error("Not Found")]
@@ -53,20 +55,26 @@ pub fn ErrorTemplate(
   }}
 
   view! {
-    <div class="markdown">
-      <h1>{if errors.len() > 1 { "Server Errors" } else { "Server Error" }}</h1>
-      <For
-        each=move || { errors.clone().into_iter().enumerate() }
-        key=|(index, _error)| *index
-        children=move |error| {
-          let error_string = error.1.to_string();
-          let error_code = error.1.status_code();
-          view! {
-            <h2>{error_code.to_string()}</h2>
-            <p>"Error: " {error_string}</p>
+    <PageWrapper>
+      <div class="flex flex-col gap-4">
+        <p class="text-4xl tracking-tight font-semibold">
+          {if errors.len() > 1 { "Server Errors" } else { "Server Error" }}
+        </p>
+        <For
+          each=move || { errors.clone().into_iter().enumerate() }
+          key=|(index, _error)| *index
+          children=move |error| {
+            let error_string = error.1.to_string();
+            let error_code = error.1.status_code();
+            view! {
+              <div>
+                <p class="text-2xl tracking-tight font-semibold">{error_code.to_string()}</p>
+                <p>"Error: " {error_string}</p>
+              </div>
+            }
           }
-        }
-      />
-    </div>
+        />
+      </div>
+    </PageWrapper>
   }
 }
