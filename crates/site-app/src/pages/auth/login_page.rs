@@ -1,7 +1,10 @@
 use leptos::{logging::log, *};
 use validation::{LoginParams, Validate};
 
-use crate::{components::form::FormElement, pages::SmallPageWrapper};
+use crate::{
+  components::{form::FormElement, navigation::navigate_to},
+  pages::SmallPageWrapper,
+};
 
 #[component]
 pub fn LoginPage() -> impl IntoView {
@@ -28,6 +31,12 @@ pub fn LoginPageInner() -> impl IntoView {
   let value = login_action.value();
   let pending = login_action.pending();
 
+  create_effect(move |_| {
+    if matches!(value(), Some(Ok(_))) {
+      navigate_to("/");
+    }
+  });
+
   view! {
     <div class="d-card-body">
       <p class="d-card-title text-2xl">"Login to PicturePro"</p>
@@ -45,9 +54,6 @@ pub fn LoginPageInner() -> impl IntoView {
         { move || value().map(|v| match v {
           Ok(true) => view! {
             <p class="text-success">"Logged in!"</p>
-            { crate::components::navigation::ClientNavInner::new(
-              move || "/dashboard".to_string(),
-            ) }
           }.into_view(),
           Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
           Err(e) => view! {<p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),

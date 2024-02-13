@@ -1,50 +1,24 @@
 use leptos::*;
 
-pub struct ClientNav<
-  S: Fn() -> bool + Copy + 'static,
-  P: Fn() -> String + Copy + 'static,
->(S, ClientNavInner<P>);
-
-impl<S: Fn() -> bool + Copy + 'static, P: Fn() -> String + Copy + 'static>
-  ClientNav<S, P>
-{
-  pub fn new(is_active: S, path: P) -> Self {
-    Self(is_active, ClientNavInner::new(path))
-  }
-}
-
-impl<S: Fn() -> bool + Copy + 'static, P: Fn() -> String + Copy + 'static>
-  IntoView for ClientNav<S, P>
-{
-  fn into_view(self) -> View {
-    {
-      move || match self.0() {
-        true => self.1.into_view(),
-        false => view! {}.into_view(),
-      }
+#[island]
+pub fn ClientNav(
+  #[prop(into)] is_active: RwSignal<bool>,
+  #[prop(into)] path: RwSignal<String>,
+) -> impl IntoView {
+  create_effect(move |_| {
+    if is_active.get() {
+      navigate_to(&path.get());
     }
-    .into_view()
-  }
+  });
 }
 
-#[derive(Copy, Clone)]
-pub struct ClientNavInner<P: Fn() -> String + Copy + 'static>(P);
-
-impl<P: Fn() -> String + Copy + 'static> ClientNavInner<P> {
-  pub fn new(path: P) -> Self { Self(path) }
-}
-
-impl<P: Fn() -> String + Copy + 'static> IntoView for ClientNavInner<P> {
-  fn into_view(self) -> View {
-    {
-      move || {
-        view! {
-          <script>
-            {format!("document.location.href = '{}';", self.0())}
-          </script>
-        }
-      }
-    }
-    .into_view()
+pub fn navigate_to(path: &str) {
+  logging::log!("navigating to: {}", path);
+  let result = web_sys::window()
+    .expect("Failed to get window")
+    .location()
+    .set_href(&path);
+  if let Err(e) = result {
+    logging::error!("failed to navigate: {:?}", e);
   }
 }

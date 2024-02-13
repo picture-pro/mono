@@ -8,6 +8,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::{
+  components::navigation::navigate_to,
   error_template::{AppError, ErrorTemplate},
   utils::authenticated_user,
 };
@@ -84,14 +85,16 @@ pub fn LogoutButton(class: Option<String>) -> impl IntoView {
   let logout_action = create_server_action::<Logout>();
   let logout_value = logout_action.value();
 
+  create_effect(move |_| {
+    if matches!(logout_value(), Some(Ok(_))) {
+      navigate_to("/");
+    }
+  });
+
   view! {
     <button class={class} on:click=move |_| {
       logout_action.dispatch(Logout {});
     }>"Logout"</button>
-    { crate::components::navigation::ClientNav::new(
-      move || matches!(logout_value(), Some(Ok(_))),
-      move || "/".to_string(),
-    ) }
   }
 }
 

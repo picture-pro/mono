@@ -17,6 +17,7 @@ thiserror.workspace = true
 serde.workspace = true
 
 validator = "0.16.1"
+web-sys = { version = "0.3", features = [ "Window" ] }
 
 auth = { path = "../auth" }
 auth_types = { path = "../auth_types" }
