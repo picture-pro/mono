@@ -54,6 +54,7 @@ pub async fn upload_single_photo(
   original_bytes: Bytes,
   group_meta: PhotoGroupUploadMeta,
 ) -> Result<PhotoGroup, PhotoUploadError> {
+  // load the original and make sure it's valid
   let original_image =
     image::load_from_memory(&original_bytes).map_err(|e| {
       PhotoUploadError::InvalidImage(format!(
@@ -61,6 +62,7 @@ pub async fn upload_single_photo(
       ))
     })?;
 
+  // upload the original as an artifact
   let original_artifact = PrivateArtifact::new(Some(original_bytes));
   original_artifact.upload_and_push().await.map_err(|e| {
     PhotoUploadError::ArtifactCreationError(format!(
@@ -68,6 +70,7 @@ pub async fn upload_single_photo(
     ))
   })?;
 
+  // create a thumbnail and upload it as an artifact
   let aspect_ratio =
     original_image.width() as f32 / original_image.height() as f32;
   let thumbnail_size = thumbnail_size(aspect_ratio);
@@ -85,6 +88,7 @@ pub async fn upload_single_photo(
     ))
   })?;
 
+  // create a photo and upload it to surreal
   let photo = Photo {
     id:           ulid::Ulid::new(),
     photographer: user_id.clone(),
@@ -114,6 +118,7 @@ pub async fn upload_single_photo(
     PhotoUploadError::DBError("Failed to create photo in surreal".to_string())
   })?;
 
+  // create a photo group and upload it to surreal
   let group = PhotoGroup {
     id:     ulid::Ulid::new(),
     photos: vec![photo_thing],
