@@ -1,8 +1,4 @@
-DEFINE TABLE user SCHEMALESS
-    PERMISSIONS
-        FOR select FULL
-        FOR update WHERE id = $auth.id
-        FOR create, delete NONE;
+DEFINE TABLE user SCHEMALESS;
 
 DEFINE FIELD name ON user TYPE string;
 DEFINE FIELD email ON user TYPE string;

@@ -1,0 +1,4 @@
+DEFINE TABLE artifact SCHEMAFULL;
+
+DEFINE FIELD provider ON user TYPE string;
+DEFINE FIELD location ON user TYPE string;
