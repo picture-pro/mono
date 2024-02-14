@@ -6,13 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ulid = "1.1.2"
 object_store = { version = "0.9.0", features = ["aws"] }
-bytes = "1.5.0"
 
-thiserror = { workspace = true }
-serde = { workspace = true }
-color-eyre = { workspace = true }
-surrealdb = { workspace = true }
+bytes.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+color-eyre.workspace = true
+surrealdb.workspace = true
+ulid.workspace = true
 
 clients = { path = "../clients" }

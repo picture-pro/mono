@@ -6,30 +6,24 @@ use serde::{Deserialize, Serialize};
 const ARTIFACT_PRIVATE_LTS_BUCKET: &str = "artifact-private-lts";
 const ARTIFACT_PUBLIC_LTS_BUCKET: &str = "artifact-public-lts";
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SurrealPrivateArtifact {
-  pub id: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SurrealPublicArtifact {
-  pub id: String,
-}
-
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PrivateArtifact {
   id:       ulid::Ulid,
+  #[serde(skip)]
   contents: Option<bytes::Bytes>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PublicArtifact {
   id:       ulid::Ulid,
+  #[serde(skip)]
   contents: Option<bytes::Bytes>,
 }
 
 pub trait Artifact {
   fn new(contents: Option<bytes::Bytes>) -> Self;
+
+  fn upload_and_push(&self) -> impl Future<Output = Result<()>> + Send;
 
   fn id(&self) -> ulid::Ulid;
   fn has_contents(&self) -> bool;
@@ -40,6 +34,7 @@ pub trait Artifact {
   fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>>;
 
   /// Downloads the artifact contents from the object store
+  #[allow(async_fn_in_trait)]
   async fn download(&mut self) -> Result<()> {
     let object_store = self.object_store()?;
     let path = object_store::path::Path::from(self.id().to_string());
@@ -60,6 +55,7 @@ pub trait Artifact {
   }
 
   /// Uploads the artifact contents to the object store
+  #[allow(async_fn_in_trait)]
   async fn upload(&self) -> Result<()> {
     let object_store = self.object_store()?;
     let path = object_store::path::Path::from(self.id().to_string());
@@ -91,6 +87,16 @@ impl Artifact for PublicArtifact {
     }
   }
 
+  async fn upload_and_push(&self) -> Result<()> {
+    self.upload().await.wrap_err("Failed to upload artifact")?;
+    self
+      .push_to_surreal()
+      .await
+      .wrap_err("Failed to push to surreal")?;
+
+    Ok(())
+  }
+
   fn id(&self) -> ulid::Ulid { self.id }
   fn has_contents(&self) -> bool { self.contents.is_some() }
   fn contents(&self) -> Option<&bytes::Bytes> { self.contents.as_ref() }
@@ -116,13 +122,10 @@ impl Artifact for PublicArtifact {
       .wrap_err("Failed to create surreal client")?;
 
     client.use_ns("main").use_db("main").await?;
-    let surreal_artifact = SurrealPublicArtifact {
-      id: self.id.to_string(),
-    };
 
     let thing: Option<surrealdb::sql::Thing> = client
-      .create(("artifacts", &surreal_artifact.id))
-      .content(surreal_artifact)
+      .create(("artifacts", self.id.to_string()))
+      .content(self.clone())
       .await
       .wrap_err("Failed to create artifact in surreal")?;
 
@@ -137,15 +140,14 @@ impl Artifact for PublicArtifact {
       .wrap_err("Failed to create surreal client")?;
 
     client.use_ns("main").use_db("main").await?;
-    let surreal_artifact: Option<SurrealPublicArtifact> = client
+    let artifact: Option<PublicArtifact> = client
       .select(("artifacts", &id.to_string()))
       .await
       .wrap_err("Failed to get artifact from surreal")?;
 
-    let surreal_artifact =
-      surreal_artifact.ok_or_eyre("Artifact does not exist in surreal")?;
+    let artifact = artifact.ok_or_eyre("Artifact does not exist in surreal")?;
     let artifact = PublicArtifact {
-      id:       surreal_artifact.id.parse().wrap_err("Failed to parse id")?,
+      id:       artifact.id,
       contents: None,
     };
 
@@ -159,6 +161,16 @@ impl Artifact for PrivateArtifact {
       id: ulid::Ulid::new(),
       contents,
     }
+  }
+
+  async fn upload_and_push(&self) -> Result<()> {
+    self.upload().await.wrap_err("Failed to upload artifact")?;
+    self
+      .push_to_surreal()
+      .await
+      .wrap_err("Failed to push to surreal")?;
+
+    Ok(())
   }
 
   fn id(&self) -> ulid::Ulid { self.id }
@@ -186,13 +198,10 @@ impl Artifact for PrivateArtifact {
       .wrap_err("Failed to create surreal client")?;
 
     client.use_ns("main").use_db("main").await?;
-    let surreal_artifact = SurrealPrivateArtifact {
-      id: self.id.to_string(),
-    };
 
     let thing: Option<surrealdb::sql::Thing> = client
-      .create(("artifacts", &surreal_artifact.id))
-      .content(surreal_artifact)
+      .create(("artifacts", self.id.to_string()))
+      .content(self.clone())
       .await
       .wrap_err("Failed to create artifact in surreal")?;
 
@@ -207,15 +216,14 @@ impl Artifact for PrivateArtifact {
       .wrap_err("Failed to create surreal client")?;
 
     client.use_ns("main").use_db("main").await?;
-    let surreal_artifact: Option<SurrealPrivateArtifact> = client
+    let artifact: Option<PrivateArtifact> = client
       .select(("artifacts", &id.to_string()))
       .await
       .wrap_err("Failed to get artifact from surreal")?;
 
-    let surreal_artifact =
-      surreal_artifact.ok_or_eyre("Artifact does not exist in surreal")?;
+    let artifact = artifact.ok_or_eyre("Artifact does not exist in surreal")?;
     let artifact = PrivateArtifact {
-      id:       surreal_artifact.id.parse().wrap_err("Failed to parse id")?,
+      id:       artifact.id,
       contents: None,
     };
 
