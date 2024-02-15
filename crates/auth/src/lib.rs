@@ -13,9 +13,9 @@ pub struct AuthenticatedUser {
   pub password: String,
 }
 
-impl From<AuthenticatedUser> for auth_types::User {
-  fn from(u: AuthenticatedUser) -> auth_types::User {
-    auth_types::User {
+impl From<AuthenticatedUser> for core_types::User {
+  fn from(u: AuthenticatedUser) -> core_types::User {
+    core_types::User {
       id:    u.id.to_string(),
       name:  u.name,
       email: u.email,

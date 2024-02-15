@@ -2,20 +2,24 @@ use std::future::Future;
 
 use color_eyre::eyre::{OptionExt, Result, WrapErr};
 use serde::{Deserialize, Serialize};
+use surrealdb::sql::{Id, Thing};
 
-const ARTIFACT_PRIVATE_LTS_BUCKET: &str = "artifact-private-lts";
-const ARTIFACT_PUBLIC_LTS_BUCKET: &str = "artifact-public-lts";
+const ARTIFACT_PRIVATE_TABLE: &str = "private-artifact";
+const ARTIFACT_PUBLIC_TABLE: &str = "public-artifact";
+const ARTIFACT_PRIVATE_LTS_BUCKET: &str = "picturepro-artifact-private-lts";
+const ARTIFACT_PUBLIC_LTS_BUCKET: &str = "picturepro-artifact-public-lts";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PrivateArtifact {
-  id:       ulid::Ulid,
+  id:       Thing,
   #[serde(skip)]
   contents: Option<bytes::Bytes>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PublicArtifact {
-  id:       ulid::Ulid,
+  id:       Thing,
+  url:      String,
   #[serde(skip)]
   contents: Option<bytes::Bytes>,
 }
@@ -25,7 +29,7 @@ pub trait Artifact {
 
   fn upload_and_push(&self) -> impl Future<Output = Result<()>> + Send;
 
-  fn id(&self) -> ulid::Ulid;
+  fn id(&self) -> Thing;
   fn has_contents(&self) -> bool;
   fn contents(&self) -> Option<&bytes::Bytes>;
   fn contents_mut(&mut self) -> Option<&mut bytes::Bytes>;
@@ -37,7 +41,7 @@ pub trait Artifact {
   #[allow(async_fn_in_trait)]
   async fn download(&mut self) -> Result<()> {
     let object_store = self.object_store()?;
-    let path = object_store::path::Path::from(self.id().to_string());
+    let path = object_store::path::Path::from(self.id().id.to_string());
 
     let object = object_store
       .get(&path)
@@ -58,7 +62,7 @@ pub trait Artifact {
   #[allow(async_fn_in_trait)]
   async fn upload(&self) -> Result<()> {
     let object_store = self.object_store()?;
-    let path = object_store::path::Path::from(self.id().to_string());
+    let path = object_store::path::Path::from(self.id().id.to_string());
 
     let _object = object_store
       .put(
@@ -75,15 +79,25 @@ pub trait Artifact {
   }
   fn push_to_surreal(&self) -> impl Future<Output = Result<()>> + Send;
   fn pull_from_surreal(
-    id: ulid::Ulid,
+    id: Thing,
   ) -> impl Future<Output = Result<Box<Self>>> + Send;
 }
 
 impl Artifact for PublicArtifact {
   fn new(contents: Option<bytes::Bytes>) -> Self {
+    let id = Thing {
+      tb: ARTIFACT_PUBLIC_TABLE.to_string(),
+      id: Id::String(ulid::Ulid::new().to_string()),
+    };
     Self {
-      id: ulid::Ulid::new(),
+      id: id.clone(),
       contents,
+      url: format!(
+        "s3.{}.amazonaws.com/{}/{}",
+        std::env::var("AWS_DEFAULT_REGION").unwrap(),
+        ARTIFACT_PUBLIC_LTS_BUCKET,
+        id.id
+      ),
     }
   }
 
@@ -97,7 +111,7 @@ impl Artifact for PublicArtifact {
     Ok(())
   }
 
-  fn id(&self) -> ulid::Ulid { self.id }
+  fn id(&self) -> Thing { self.id.clone() }
   fn has_contents(&self) -> bool { self.contents.is_some() }
   fn contents(&self) -> Option<&bytes::Bytes> { self.contents.as_ref() }
   fn contents_mut(&mut self) -> Option<&mut bytes::Bytes> {
@@ -109,6 +123,11 @@ impl Artifact for PublicArtifact {
 
   fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>> {
     let object_store = object_store::aws::AmazonS3Builder::from_env()
+      .with_region(
+        std::env::var("AWS_DEFAULT_REGION")
+          .wrap_err("Failed to get AWS region from environment")
+          .unwrap(),
+      )
       .with_bucket_name(ARTIFACT_PUBLIC_LTS_BUCKET)
       .build()
       .wrap_err("Failed to create object store")?;
@@ -123,33 +142,30 @@ impl Artifact for PublicArtifact {
 
     client.use_ns("main").use_db("main").await?;
 
-    let thing: Option<surrealdb::sql::Thing> = client
-      .create(("artifacts", self.id.to_string()))
+    let pushed_artifact: Option<Self> = client
+      .create(self.id())
       .content(self.clone())
       .await
       .wrap_err("Failed to create artifact in surreal")?;
 
-    let _thing = thing.ok_or_eyre("Failed to create artifact in surreal")?;
+    let _pushed_artifact =
+      pushed_artifact.ok_or_eyre("Failed to create artifact in surreal")?;
 
     Ok(())
   }
 
-  async fn pull_from_surreal(id: ulid::Ulid) -> Result<Box<Self>> {
+  async fn pull_from_surreal(id: Thing) -> Result<Box<Self>> {
     let client = clients::surreal::SurrealRootClient::new()
       .await
       .wrap_err("Failed to create surreal client")?;
 
     client.use_ns("main").use_db("main").await?;
     let artifact: Option<PublicArtifact> = client
-      .select(("artifacts", &id.to_string()))
+      .select(&id)
       .await
       .wrap_err("Failed to get artifact from surreal")?;
 
     let artifact = artifact.ok_or_eyre("Artifact does not exist in surreal")?;
-    let artifact = PublicArtifact {
-      id:       artifact.id,
-      contents: None,
-    };
 
     Ok(Box::new(artifact))
   }
@@ -158,7 +174,10 @@ impl Artifact for PublicArtifact {
 impl Artifact for PrivateArtifact {
   fn new(contents: Option<bytes::Bytes>) -> Self {
     Self {
-      id: ulid::Ulid::new(),
+      id: Thing {
+        tb: ARTIFACT_PRIVATE_TABLE.to_string(),
+        id: Id::String(ulid::Ulid::new().to_string()),
+      },
       contents,
     }
   }
@@ -173,7 +192,7 @@ impl Artifact for PrivateArtifact {
     Ok(())
   }
 
-  fn id(&self) -> ulid::Ulid { self.id }
+  fn id(&self) -> Thing { self.id.clone() }
   fn has_contents(&self) -> bool { self.contents.is_some() }
   fn contents(&self) -> Option<&bytes::Bytes> { self.contents.as_ref() }
   fn contents_mut(&mut self) -> Option<&mut bytes::Bytes> {
@@ -185,6 +204,11 @@ impl Artifact for PrivateArtifact {
 
   fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>> {
     let object_store = object_store::aws::AmazonS3Builder::from_env()
+      .with_region(
+        std::env::var("AWS_DEFAULT_REGION")
+          .wrap_err("Failed to get AWS region from environment")
+          .unwrap(),
+      )
       .with_bucket_name(ARTIFACT_PRIVATE_LTS_BUCKET)
       .build()
       .wrap_err("Failed to create object store")?;
@@ -199,25 +223,26 @@ impl Artifact for PrivateArtifact {
 
     client.use_ns("main").use_db("main").await?;
 
-    let thing: Option<surrealdb::sql::Thing> = client
-      .create(("artifacts", self.id.to_string()))
+    let pushed_artifact: Option<Self> = client
+      .create(self.id())
       .content(self.clone())
       .await
       .wrap_err("Failed to create artifact in surreal")?;
 
-    let _thing = thing.ok_or_eyre("Failed to create artifact in surreal")?;
+    let _pushed_artifact =
+      pushed_artifact.ok_or_eyre("Failed to create artifact in surreal")?;
 
     Ok(())
   }
 
-  async fn pull_from_surreal(id: ulid::Ulid) -> Result<Box<Self>> {
+  async fn pull_from_surreal(id: Thing) -> Result<Box<Self>> {
     let client = clients::surreal::SurrealRootClient::new()
       .await
       .wrap_err("Failed to create surreal client")?;
 
     client.use_ns("main").use_db("main").await?;
     let artifact: Option<PrivateArtifact> = client
-      .select(("artifacts", &id.to_string()))
+      .select(id)
       .await
       .wrap_err("Failed to get artifact from surreal")?;
 

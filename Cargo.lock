@@ -295,23 +295,16 @@ name = "auth"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "auth_types",
  "axum-login",
  "clients",
  "color-eyre",
+ "core_types",
  "redact",
  "serde",
  "surrealdb",
  "thiserror",
  "tower-sessions",
  "tower-sessions-surrealdb-store",
-]
-
-[[package]]
-name = "auth_types"
-version = "0.1.0"
-dependencies = [
- "serde",
 ]
 
 [[package]]
@@ -968,6 +961,13 @@ name = "core-foundation-sys"
 version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06ea2b9bc92be3c2baa9334a323ebca2d6f074ff852cd1d7b11064035cd3868f"
+
+[[package]]
+name = "core_types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "cpufeatures"
@@ -4008,6 +4008,7 @@ dependencies = [
  "hyper 1.1.0",
  "inventory",
  "js-sys",
+ "multer",
  "once_cell",
  "send_wrapper",
  "serde",
@@ -4146,14 +4147,17 @@ name = "site-app"
 version = "0.1.0"
 dependencies = [
  "auth",
- "auth_types",
+ "bl",
+ "bytes",
  "cfg-if",
+ "core_types",
  "http 1.0.0",
  "leptos",
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
  "serde",
+ "server_fn",
  "thiserror",
  "validation",
  "validator",
@@ -4177,9 +4181,9 @@ name = "site-server"
 version = "0.1.0"
 dependencies = [
  "auth",
- "auth_types",
  "axum",
  "color-eyre",
+ "core_types",
  "leptos",
  "leptos_axum",
  "leptos_router",

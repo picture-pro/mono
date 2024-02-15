@@ -31,7 +31,7 @@ pub fn App() -> impl IntoView {
       outside_errors.insert_with_default_key(AppError::NotFound);
       view! { <ErrorTemplate outside_errors/> }.into_view()
     }>
-      <div data-theme="light" class="w-full min-h-screen flex flex-col items-stretch justify-stretch">
+      <div data-theme="light" class="w-full min-h-screen flex flex-col items-stretch justify-stretch bg-base-200">
         <Navbar/>
         <Routes>
           <Route path="" view=pages::home_page::HomePage/>
@@ -61,13 +61,13 @@ pub fn Navbar() -> impl IntoView {
     .into_view(),
     None => view! {
       <a class="d-btn d-btn-neutral d-btn-sm" href="/login">Login</a>
-      <a class="d-btn d-btn-neutral d-btn-sm" href="/signup">Signup</a>
+      <a class="d-btn d-btn-neutral d-btn-sm" href="/signup">Sign Up</a>
     }
     .into_view(),
   };
 
   view! {
-    <div class="bg-base-200 w-full">
+    <div class="bg-base-100 w-full shadow">
       <div class="d-navbar md:container md:mx-auto">
         <div class="flex-1">
           <a class="d-btn d-btn-ghost text-xl d-btn-sm" href={home_url}>PicturePro</a>

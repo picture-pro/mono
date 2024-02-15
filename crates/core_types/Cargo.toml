@@ -1,5 +1,5 @@
 [package]
-name = "auth_types"
+name = "core_types"
 version = "0.1.0"
 edition = "2021"
 

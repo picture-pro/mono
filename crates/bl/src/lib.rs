@@ -1,13 +1,16 @@
 use artifact::{Artifact, PrivateArtifact, PublicArtifact};
 use bytes::Bytes;
 use clients::surreal::SurrealRootClient;
-use color_eyre::eyre::{Result, WrapErr};
+use color_eyre::eyre::Result;
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::Thing;
+use surrealdb::sql::{Id, Thing};
+
+const PHOTO_TABLE: &str = "photo";
+const PHOTO_GROUP_TABLE: &str = "photo_group";
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Photo {
-  pub id:           ulid::Ulid,
+  pub id:           Thing,
   pub photographer: Thing,
   pub owner:        Thing,
   pub artifacts:    PhotoArtifacts,
@@ -21,7 +24,7 @@ pub struct PhotoArtifacts {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PhotoGroup {
-  pub id:     ulid::Ulid,
+  pub id:     Thing,
   pub photos: Vec<Thing>,
   pub public: bool,
 }
@@ -58,7 +61,7 @@ pub async fn upload_single_photo(
   let original_image =
     image::load_from_memory(&original_bytes).map_err(|e| {
       PhotoUploadError::InvalidImage(format!(
-        "Failed to parse original image: {e}"
+        "Failed to parse original image: {e:?}"
       ))
     })?;
 
@@ -66,7 +69,7 @@ pub async fn upload_single_photo(
   let original_artifact = PrivateArtifact::new(Some(original_bytes));
   original_artifact.upload_and_push().await.map_err(|e| {
     PhotoUploadError::ArtifactCreationError(format!(
-      "Failed to create original artifact: {e}"
+      "Failed to create original artifact: {e:?}"
     ))
   })?;
 
@@ -84,13 +87,16 @@ pub async fn upload_single_photo(
   let thumbnail_artifact = PublicArtifact::new(Some(thumbnail_bytes));
   thumbnail_artifact.upload_and_push().await.map_err(|e| {
     PhotoUploadError::ArtifactCreationError(format!(
-      "Failed to create thumbnail artifact: {e}"
+      "Failed to create thumbnail artifact: {e:?}"
     ))
   })?;
 
   // create a photo and upload it to surreal
   let photo = Photo {
-    id:           ulid::Ulid::new(),
+    id:           Thing {
+      tb: PHOTO_TABLE.to_string(),
+      id: Id::String(ulid::Ulid::new().to_string()),
+    },
     photographer: user_id.clone(),
     owner:        user_id,
     artifacts:    PhotoArtifacts {
@@ -102,40 +108,47 @@ pub async fn upload_single_photo(
   let client = SurrealRootClient::new().await.map_err(|_| {
     PhotoUploadError::DBError("Failed to create surreal client".to_string())
   })?;
-  client.use_ns("main").use_db("main").await.map_err(|_| {
-    PhotoUploadError::DBError("Failed to use surreal namespace".to_string())
+  client.use_ns("main").use_db("main").await.map_err(|e| {
+    PhotoUploadError::DBError(format!(
+      "Failed to use surreal namespace/database: {e}"
+    ))
   })?;
 
-  let photo_thing: Option<Thing> = client
-    .create(("photo", photo.id.to_string()))
+  let photo: Option<Photo> = client
+    .create(photo.id.clone())
     .content(photo)
     .await
-    .map_err(|_| {
-      PhotoUploadError::DBError("Failed to create photo in surreal".to_string())
+    .map_err(|e| {
+      PhotoUploadError::DBError(format!(
+        "Failed to create photo in surreal: {e}"
+      ))
     })?;
 
-  let photo_thing = photo_thing.ok_or_else(|| {
+  let photo = photo.ok_or_else(|| {
     PhotoUploadError::DBError("Failed to create photo in surreal".to_string())
   })?;
 
   // create a photo group and upload it to surreal
   let group = PhotoGroup {
-    id:     ulid::Ulid::new(),
-    photos: vec![photo_thing],
+    id:     Thing {
+      tb: PHOTO_GROUP_TABLE.to_string(),
+      id: Id::String(ulid::Ulid::new().to_string()),
+    },
+    photos: vec![photo.id],
     public: group_meta.public,
   };
 
-  let group_thing: Option<Thing> = client
-    .create(("photo_group", group.id.to_string()))
+  let group: Option<PhotoGroup> = client
+    .create(group.id.clone())
     .content(group.clone())
     .await
-    .map_err(|_| {
-      PhotoUploadError::DBError(
-        "Failed to create photo group in surreal".to_string(),
-      )
+    .map_err(|e| {
+      PhotoUploadError::DBError(format!(
+        "Failed to create photo group in surreal: {e}"
+      ))
     })?;
 
-  let _group_thing = group_thing.ok_or_else(|| {
+  let group = group.ok_or_else(|| {
     PhotoUploadError::DBError(
       "Failed to create photo group in surreal".to_string(),
     )

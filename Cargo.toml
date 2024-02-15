@@ -22,6 +22,7 @@ leptos = { version = "0.6", features = ["nightly", "experimental-islands"] }
 leptos_axum = { version = "0.6", features = ["experimental-islands"] }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
+server_fn = { version = "0.6", features = ["multipart"] }
 log = "0.4"
 serde = { version = "1", features = ["derive"] }
 simple_logger = "4.2.0"

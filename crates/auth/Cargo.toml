@@ -18,4 +18,4 @@ thiserror.workspace = true
 surrealdb.workspace = true
 
 clients = { path = "../clients" }
-auth_types = { path = "../auth_types" }
+core_types = { path = "../core_types" }
