@@ -1,38 +1,12 @@
-use artifact::{Artifact, PrivateArtifact, PublicArtifact};
+use artifact::Artifact;
 use bytes::Bytes;
 use clients::surreal::SurrealRootClient;
-use color_eyre::eyre::Result;
+use color_eyre::eyre::{Context, Result};
+use core_types::{
+  AsThing, NewId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
+  PrivateArtifact, PublicArtifact,
+};
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{Id, Thing};
-
-const PHOTO_TABLE: &str = "photo";
-const PHOTO_GROUP_TABLE: &str = "photo_group";
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Photo {
-  pub id:           Thing,
-  pub photographer: Thing,
-  pub owner:        Thing,
-  pub artifacts:    PhotoArtifacts,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct PhotoArtifacts {
-  pub original:  PrivateArtifact,
-  pub thumbnail: PublicArtifact,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct PhotoGroup {
-  pub id:     Thing,
-  pub photos: Vec<Thing>,
-  pub public: bool,
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct PhotoGroupUploadMeta {
-  pub public: bool,
-}
 
 #[derive(Clone, Debug, Deserialize, Serialize, thiserror::Error)]
 pub enum PhotoUploadError {
@@ -53,7 +27,7 @@ fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
 }
 
 pub async fn upload_single_photo(
-  user_id: Thing,
+  user_id: core_types::UserRecordId,
   original_bytes: Bytes,
   group_meta: PhotoGroupUploadMeta,
 ) -> Result<PhotoGroup, PhotoUploadError> {
@@ -93,12 +67,9 @@ pub async fn upload_single_photo(
 
   // create a photo and upload it to surreal
   let photo = Photo {
-    id:           Thing {
-      tb: PHOTO_TABLE.to_string(),
-      id: Id::String(ulid::Ulid::new().to_string()),
-    },
+    id:           core_types::PhotoRecordId(ulid::Ulid::new()),
     photographer: user_id.clone(),
-    owner:        user_id,
+    owner:        user_id.clone(),
     artifacts:    PhotoArtifacts {
       original:  original_artifact,
       thumbnail: thumbnail_artifact,
@@ -114,8 +85,8 @@ pub async fn upload_single_photo(
     ))
   })?;
 
-  let photo: Option<Photo> = client
-    .create(photo.id.clone())
+  let photo: Vec<Photo> = client
+    .create(core_types::PhotoRecordId::TABLE)
     .content(photo)
     .await
     .map_err(|e| {
@@ -124,22 +95,20 @@ pub async fn upload_single_photo(
       ))
     })?;
 
-  let photo = photo.ok_or_else(|| {
+  let photo = photo.first().ok_or_else(|| {
     PhotoUploadError::DBError("Failed to create photo in surreal".to_string())
   })?;
 
   // create a photo group and upload it to surreal
   let group = PhotoGroup {
-    id:     Thing {
-      tb: PHOTO_GROUP_TABLE.to_string(),
-      id: Id::String(ulid::Ulid::new().to_string()),
-    },
-    photos: vec![photo.id],
+    id:     core_types::PhotoGroupRecordId(ulid::Ulid::new()),
+    owner:  user_id.clone(),
+    photos: vec![photo.id.clone()],
     public: group_meta.public,
   };
 
-  let group: Option<PhotoGroup> = client
-    .create(group.id.clone())
+  let group: Vec<PhotoGroup> = client
+    .create(core_types::PhotoGroupRecordId::TABLE)
     .content(group.clone())
     .await
     .map_err(|e| {
@@ -148,11 +117,39 @@ pub async fn upload_single_photo(
       ))
     })?;
 
-  let group = group.ok_or_else(|| {
+  let group = group.first().ok_or_else(|| {
     PhotoUploadError::DBError(
       "Failed to create photo group in surreal".to_string(),
     )
   })?;
 
-  Ok(group)
+  Ok(group.clone())
+}
+
+pub async fn get_user_photo_groups(
+  user_id: core_types::UserRecordId,
+) -> Result<Vec<PhotoGroup>> {
+  let client = SurrealRootClient::new()
+    .await
+    .wrap_err("Failed to create surreal client")?;
+  client
+    .use_ns("main")
+    .use_db("main")
+    .await
+    .wrap_err("Failed to use surreal namespace/database")?;
+
+  let mut result = client
+    .query(format!(
+      "SELECT * FROM {} WHERE owner = $user_id",
+      core_types::PhotoGroupRecordId::TABLE
+    ))
+    .bind(("user_id", user_id.0.to_string()))
+    .await
+    .wrap_err("Failed to query photo groups")?;
+
+  let groups: Vec<PhotoGroup> = result
+    .take(0)
+    .wrap_err("Failed to take result of photo groups query")?;
+
+  Ok(groups)
 }

@@ -1,11 +1,13 @@
-use serde::{Deserialize, Serialize};
+mod artifact;
+mod auth;
+#[cfg(feature = "ssr")]
+pub(crate) mod conv;
+mod photo;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct User {
-  pub id:    String,
-  pub name:  String,
-  pub email: String,
-}
+#[cfg(feature = "ssr")]
+pub use surreal_id::NewId;
+pub use ulid::Ulid;
 
-#[derive(Clone, Debug)]
-pub struct LoggedInUser(pub Option<User>);
+#[cfg(feature = "ssr")]
+pub use self::conv::AsThing;
+pub use self::{artifact::*, auth::*, photo::*};

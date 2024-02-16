@@ -33,7 +33,7 @@ async fn server_fn_handler(
     move || {
       provide_context(auth_session.clone());
       provide_context(core_types::LoggedInUser(
-        auth_session.user.clone().map(core_types::User::from),
+        auth_session.user.clone().map(core_types::PublicUser::from),
       ))
     },
     request,
@@ -52,7 +52,7 @@ async fn leptos_routes_handler(
     move || {
       // provide_context(auth_session.clone());
       provide_context(core_types::LoggedInUser(
-        auth_session.user.clone().map(core_types::User::from),
+        auth_session.user.clone().map(core_types::PublicUser::from),
       ))
     },
     site_app::App,

@@ -1,94 +1,37 @@
 use std::future::Future;
 
 use color_eyre::eyre::{OptionExt, Result, WrapErr};
-use serde::{Deserialize, Serialize};
-use surrealdb::sql::{Id, Thing};
+use core_types::{NewId, PrivateArtifact, PublicArtifact};
 
-const ARTIFACT_PRIVATE_TABLE: &str = "private-artifact";
-const ARTIFACT_PUBLIC_TABLE: &str = "public-artifact";
 const ARTIFACT_PRIVATE_LTS_BUCKET: &str = "picturepro-artifact-private-lts";
 const ARTIFACT_PUBLIC_LTS_BUCKET: &str = "picturepro-artifact-public-lts";
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct PrivateArtifact {
-  id:       Thing,
-  #[serde(skip)]
-  contents: Option<bytes::Bytes>,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct PublicArtifact {
-  id:       Thing,
-  url:      String,
-  #[serde(skip)]
-  contents: Option<bytes::Bytes>,
-}
-
 pub trait Artifact {
-  fn new(contents: Option<bytes::Bytes>) -> Self;
+  type Id: core_types::NewId;
 
+  fn new(contents: Option<bytes::Bytes>) -> Self;
+  fn new_with_id(id: Self::Id, contents: Option<bytes::Bytes>) -> Self;
+
+  fn download(&mut self) -> impl Future<Output = Result<()>> + Send;
+  fn upload(&self) -> impl Future<Output = Result<()>> + Send;
   fn upload_and_push(&self) -> impl Future<Output = Result<()>> + Send;
 
-  fn id(&self) -> Thing;
-  fn has_contents(&self) -> bool;
-  fn contents(&self) -> Option<&bytes::Bytes>;
-  fn contents_mut(&mut self) -> Option<&mut bytes::Bytes>;
-  fn set_contents(&mut self, contents: bytes::Bytes);
-
-  fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>>;
-
-  /// Downloads the artifact contents from the object store
-  #[allow(async_fn_in_trait)]
-  async fn download(&mut self) -> Result<()> {
-    let object_store = self.object_store()?;
-    let path = object_store::path::Path::from(self.id().id.to_string());
-
-    let object = object_store
-      .get(&path)
-      .await
-      .wrap_err("Failed to download artifact")?;
-
-    self.set_contents(
-      object
-        .bytes()
-        .await
-        .wrap_err("Failed to read object contents")?,
-    );
-
-    Ok(())
-  }
-
-  /// Uploads the artifact contents to the object store
-  #[allow(async_fn_in_trait)]
-  async fn upload(&self) -> Result<()> {
-    let object_store = self.object_store()?;
-    let path = object_store::path::Path::from(self.id().id.to_string());
-
-    let _object = object_store
-      .put(
-        &path,
-        self
-          .contents()
-          .ok_or_eyre("Artifact has no contents")?
-          .clone(),
-      )
-      .await
-      .wrap_err("Failed to upload artifact")?;
-
-    Ok(())
-  }
   fn push_to_surreal(&self) -> impl Future<Output = Result<()>> + Send;
   fn pull_from_surreal(
-    id: Thing,
+    id: Self::Id,
   ) -> impl Future<Output = Result<Box<Self>>> + Send;
+  fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>>;
 }
 
 impl Artifact for PublicArtifact {
+  type Id = core_types::PublicArtifactRecordId;
+
   fn new(contents: Option<bytes::Bytes>) -> Self {
-    let id = Thing {
-      tb: ARTIFACT_PUBLIC_TABLE.to_string(),
-      id: Id::String(ulid::Ulid::new().to_string()),
-    };
+    let id = core_types::PublicArtifactRecordId(ulid::Ulid::new());
+    Self::new_with_id(id, contents)
+  }
+
+  fn new_with_id(id: Self::Id, contents: Option<bytes::Bytes>) -> Self {
     Self {
       id: id.clone(),
       contents,
@@ -96,9 +39,43 @@ impl Artifact for PublicArtifact {
         "s3.{}.amazonaws.com/{}/{}",
         std::env::var("AWS_DEFAULT_REGION").unwrap(),
         ARTIFACT_PUBLIC_LTS_BUCKET,
-        id.id
+        id.0
       ),
     }
+  }
+
+  async fn download(&mut self) -> Result<()> {
+    let object_store = self.object_store()?;
+    let path = object_store::path::Path::from(self.id.0.to_string());
+
+    let contents = object_store
+      .get(&path)
+      .await
+      .wrap_err("Failed to download artifact")?;
+
+    self.contents = Some(
+      contents
+        .bytes()
+        .await
+        .wrap_err("Failed to read bytes of downloaded artifact")?,
+    );
+
+    Ok(())
+  }
+
+  async fn upload(&self) -> Result<()> {
+    let object_store = self.object_store()?;
+    let path = object_store::path::Path::from(self.id.0.to_string());
+
+    object_store
+      .put(
+        &path,
+        self.contents.clone().ok_or_eyre("No contents to upload")?,
+      )
+      .await
+      .wrap_err("Failed to upload artifact")?;
+
+    Ok(())
   }
 
   async fn upload_and_push(&self) -> Result<()> {
@@ -111,14 +88,40 @@ impl Artifact for PublicArtifact {
     Ok(())
   }
 
-  fn id(&self) -> Thing { self.id.clone() }
-  fn has_contents(&self) -> bool { self.contents.is_some() }
-  fn contents(&self) -> Option<&bytes::Bytes> { self.contents.as_ref() }
-  fn contents_mut(&mut self) -> Option<&mut bytes::Bytes> {
-    self.contents.as_mut()
+  async fn push_to_surreal(&self) -> Result<()> {
+    let client = clients::surreal::SurrealRootClient::new()
+      .await
+      .wrap_err("Failed to create surreal client")?;
+
+    client.use_ns("main").use_db("main").await?;
+
+    let pushed_artifact: Vec<Self> = client
+      .create(Self::Id::TABLE)
+      .content(self.clone())
+      .await
+      .wrap_err("Failed to create artifact in surreal")?;
+
+    let _pushed_artifact = pushed_artifact
+      .first()
+      .ok_or_eyre("Failed to create artifact in surreal")?;
+
+    Ok(())
   }
-  fn set_contents(&mut self, contents: bytes::Bytes) {
-    self.contents = Some(contents)
+
+  async fn pull_from_surreal(id: Self::Id) -> Result<Box<Self>> {
+    let client = clients::surreal::SurrealRootClient::new()
+      .await
+      .wrap_err("Failed to create surreal client")?;
+
+    client.use_ns("main").use_db("main").await?;
+    let artifact: Option<PublicArtifact> = client
+      .select((Self::Id::TABLE, id.id_with_brackets()))
+      .await
+      .wrap_err("Failed to get artifact from surreal")?;
+
+    let artifact = artifact.ok_or_eyre("Artifact does not exist in surreal")?;
+
+    Ok(Box::new(artifact))
   }
 
   fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>> {
@@ -134,52 +137,52 @@ impl Artifact for PublicArtifact {
 
     Ok(Box::new(object_store))
   }
+}
 
-  async fn push_to_surreal(&self) -> Result<()> {
-    let client = clients::surreal::SurrealRootClient::new()
+impl Artifact for PrivateArtifact {
+  type Id = core_types::PrivateArtifactRecordId;
+
+  fn new(contents: Option<bytes::Bytes>) -> Self {
+    let id = core_types::PrivateArtifactRecordId(ulid::Ulid::new());
+    Self::new_with_id(id, contents)
+  }
+
+  fn new_with_id(id: Self::Id, contents: Option<bytes::Bytes>) -> Self {
+    Self { id, contents }
+  }
+
+  async fn download(&mut self) -> Result<()> {
+    let object_store = self.object_store()?;
+    let path = object_store::path::Path::from(self.id.0.to_string());
+
+    let contents = object_store
+      .get(&path)
       .await
-      .wrap_err("Failed to create surreal client")?;
+      .wrap_err("Failed to download artifact")?;
 
-    client.use_ns("main").use_db("main").await?;
-
-    let pushed_artifact: Option<Self> = client
-      .create(self.id())
-      .content(self.clone())
-      .await
-      .wrap_err("Failed to create artifact in surreal")?;
-
-    let _pushed_artifact =
-      pushed_artifact.ok_or_eyre("Failed to create artifact in surreal")?;
+    self.contents = Some(
+      contents
+        .bytes()
+        .await
+        .wrap_err("Failed to read bytes of downloaded artifact")?,
+    );
 
     Ok(())
   }
 
-  async fn pull_from_surreal(id: Thing) -> Result<Box<Self>> {
-    let client = clients::surreal::SurrealRootClient::new()
+  async fn upload(&self) -> Result<()> {
+    let object_store = self.object_store()?;
+    let path = object_store::path::Path::from(self.id.0.to_string());
+
+    object_store
+      .put(
+        &path,
+        self.contents.clone().ok_or_eyre("No contents to upload")?,
+      )
       .await
-      .wrap_err("Failed to create surreal client")?;
+      .wrap_err("Failed to upload artifact")?;
 
-    client.use_ns("main").use_db("main").await?;
-    let artifact: Option<PublicArtifact> = client
-      .select(&id)
-      .await
-      .wrap_err("Failed to get artifact from surreal")?;
-
-    let artifact = artifact.ok_or_eyre("Artifact does not exist in surreal")?;
-
-    Ok(Box::new(artifact))
-  }
-}
-
-impl Artifact for PrivateArtifact {
-  fn new(contents: Option<bytes::Bytes>) -> Self {
-    Self {
-      id: Thing {
-        tb: ARTIFACT_PRIVATE_TABLE.to_string(),
-        id: Id::String(ulid::Ulid::new().to_string()),
-      },
-      contents,
-    }
+    Ok(())
   }
 
   async fn upload_and_push(&self) -> Result<()> {
@@ -192,14 +195,40 @@ impl Artifact for PrivateArtifact {
     Ok(())
   }
 
-  fn id(&self) -> Thing { self.id.clone() }
-  fn has_contents(&self) -> bool { self.contents.is_some() }
-  fn contents(&self) -> Option<&bytes::Bytes> { self.contents.as_ref() }
-  fn contents_mut(&mut self) -> Option<&mut bytes::Bytes> {
-    self.contents.as_mut()
+  async fn push_to_surreal(&self) -> Result<()> {
+    let client = clients::surreal::SurrealRootClient::new()
+      .await
+      .wrap_err("Failed to create surreal client")?;
+
+    client.use_ns("main").use_db("main").await?;
+
+    let pushed_artifact: Vec<Self> = client
+      .create(Self::Id::TABLE)
+      .content(self.clone())
+      .await
+      .wrap_err("Failed to create artifact in surreal")?;
+
+    let _pushed_artifact = pushed_artifact
+      .first()
+      .ok_or_eyre("Failed to create artifact in surreal")?;
+
+    Ok(())
   }
-  fn set_contents(&mut self, contents: bytes::Bytes) {
-    self.contents = Some(contents)
+
+  async fn pull_from_surreal(id: Self::Id) -> Result<Box<Self>> {
+    let client = clients::surreal::SurrealRootClient::new()
+      .await
+      .wrap_err("Failed to create surreal client")?;
+
+    client.use_ns("main").use_db("main").await?;
+    let artifact: Option<PrivateArtifact> = client
+      .select((Self::Id::TABLE, id.id_with_brackets()))
+      .await
+      .wrap_err("Failed to get artifact from surreal")?;
+
+    let artifact = artifact.ok_or_eyre("Artifact does not exist in surreal")?;
+
+    Ok(Box::new(artifact))
   }
 
   fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>> {
@@ -214,44 +243,5 @@ impl Artifact for PrivateArtifact {
       .wrap_err("Failed to create object store")?;
 
     Ok(Box::new(object_store))
-  }
-
-  async fn push_to_surreal(&self) -> Result<()> {
-    let client = clients::surreal::SurrealRootClient::new()
-      .await
-      .wrap_err("Failed to create surreal client")?;
-
-    client.use_ns("main").use_db("main").await?;
-
-    let pushed_artifact: Option<Self> = client
-      .create(self.id())
-      .content(self.clone())
-      .await
-      .wrap_err("Failed to create artifact in surreal")?;
-
-    let _pushed_artifact =
-      pushed_artifact.ok_or_eyre("Failed to create artifact in surreal")?;
-
-    Ok(())
-  }
-
-  async fn pull_from_surreal(id: Thing) -> Result<Box<Self>> {
-    let client = clients::surreal::SurrealRootClient::new()
-      .await
-      .wrap_err("Failed to create surreal client")?;
-
-    client.use_ns("main").use_db("main").await?;
-    let artifact: Option<PrivateArtifact> = client
-      .select(id)
-      .await
-      .wrap_err("Failed to get artifact from surreal")?;
-
-    let artifact = artifact.ok_or_eyre("Artifact does not exist in surreal")?;
-    let artifact = PrivateArtifact {
-      id:       artifact.id,
-      contents: None,
-    };
-
-    Ok(Box::new(artifact))
   }
 }

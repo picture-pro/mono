@@ -21,6 +21,7 @@ pub fn DashboardPage() -> impl IntoView {
     <PageWrapper>
       <p class="text-4xl font-semibold tracking-tight">"Dashboard Page"</p>
       <crate::components::photo_upload::PhotoUpload />
+      <crate::components::gallery::Gallery />
     </PageWrapper>
   }
 }

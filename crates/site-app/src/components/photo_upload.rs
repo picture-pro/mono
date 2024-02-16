@@ -42,7 +42,7 @@ pub fn PhotoUpload() -> impl IntoView {
 #[server(input = MultipartFormData)]
 pub async fn photo_upload(
   data: MultipartData,
-) -> Result<String, ServerFnError> {
+) -> Result<core_types::PhotoGroupRecordId, ServerFnError> {
   // get the user, and abort if not logged in
   let user = crate::authenticated_user()
     .ok_or_else(|| ServerFnError::new("Not logged in"))?;
@@ -80,16 +80,14 @@ pub async fn photo_upload(
     public.ok_or_else(|| ServerFnError::new("Missing public field"))?;
   let photo = photo.ok_or_else(|| ServerFnError::new("Missing photo field"))?;
 
-  let photo_group = bl::upload_single_photo(
-    user
-      .id
-      .parse()
-      .map_err(|_| ServerFnError::new(format!("Failed to parse user ID")))?,
-    photo,
-    bl::PhotoGroupUploadMeta { public },
-  )
-  .await
-  .map_err(|e| ServerFnError::new(format!("Failed to upload photo: {}", e)))?;
+  let photo_group =
+    bl::upload_single_photo(user.id, photo, core_types::PhotoGroupUploadMeta {
+      public,
+    })
+    .await
+    .map_err(|e| {
+      ServerFnError::new(format!("Failed to upload photo: {}", e))
+    })?;
 
-  Ok(photo_group.id.to_string())
+  Ok(photo_group.id)
 }
