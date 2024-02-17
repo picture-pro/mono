@@ -99,15 +99,14 @@ pub async fn fetch_photo_thumbnail(
       ServerFnError::new(format!("Failed to load thumbnail as image: {e:?}"))
     })?;
 
-  // encode to jpeg bytes
+  // encode to avif bytes
   let mut buffer = Vec::new();
-  let mut encoder =
-    image::codecs::jpeg::JpegEncoder::new_with_quality(&mut buffer, 95);
-  encoder.encode_image(&thumbnail_image).map_err(|e| {
+  let encoder = image::codecs::avif::AvifEncoder::new(&mut buffer);
+  thumbnail_image.write_with_encoder(encoder).map_err(|e| {
     ServerFnError::new(format!("Failed to encode thumbnail: {e:?}"))
   })?;
 
-  // encode to base64
+  // encode avif bytes to base64
   let data = BASE64_STANDARD.encode(&buffer);
 
   Ok(PhotoThumbnailDisplayParams {
