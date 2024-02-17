@@ -2,8 +2,8 @@ use leptos::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct PhotoDisplayParams {
-  url:  String,
+pub struct PhotoThumbnailDisplayParams {
+  data: String,
   alt:  String,
   size: (u32, u32),
 }
@@ -19,7 +19,9 @@ pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
         { move || match photo() {
           Some(Ok(photo)) => {
             Some(view! {
-              <img src={photo.url} alt={photo.alt} />
+              <img
+                src={format!("data:image/png;base64,{}", photo.data)}
+                alt={photo.alt} width={photo.size.0} height={photo.size.1} />
             }
             .into_view())
           }
@@ -39,7 +41,7 @@ pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
 #[server]
 pub async fn fetch_photo_thumbnail(
   photo_id: core_types::PhotoRecordId,
-) -> Result<PhotoDisplayParams, ServerFnError> {
+) -> Result<PhotoThumbnailDisplayParams, ServerFnError> {
   let surreal_client = clients::surreal::SurrealRootClient::new()
     .await
     .map_err(|e| {
@@ -77,9 +79,34 @@ pub async fn fetch_photo_thumbnail(
     ServerFnError::new("Thumbnail artifact not found".to_string())
   })?;
 
-  Ok(PhotoDisplayParams {
-    url:  thumbnail_artifact.url,
-    alt:  "Photo".to_string(),
+  // fetch the artifact using the url
+  let thumbnail_image = reqwest::get(thumbnail_artifact.url)
+    .await
+    .map_err(|e| {
+      ServerFnError::new(format!("Failed to fetch thumbnail: {e:?}"))
+    })?
+    .bytes()
+    .await
+    .map_err(|e| {
+      ServerFnError::new(format!("Failed to fetch thumbnail: {e:?}"))
+    })?;
+
+  let thumbnail_image =
+    image::load_from_memory(&thumbnail_image).map_err(|e| {
+      ServerFnError::new(format!("Failed to load thumbnail as image: {e:?}"))
+    })?;
+  let mut buffer = Vec::new();
+  let mut encoder =
+    image::codecs::jpeg::JpegEncoder::new_with_quality(&mut buffer, 95);
+  encoder.encode_image(&thumbnail_image).map_err(|e| {
+    ServerFnError::new(format!("Failed to encode thumbnail: {e:?}"))
+  })?;
+
+  let data = format!("data:image/jpeg;base64,{}", base64::encode(&buffer));
+
+  Ok(PhotoThumbnailDisplayParams {
+    data,
+    alt: "Thumbnail".to_string(),
     size: photo.artifacts.thumbnail.size,
   })
 }
