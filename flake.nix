@@ -66,6 +66,9 @@
             pkgs.tailwindcss
             pkgs.yarn
             pkgs.yarn2nix-moretea.fixup_yarn_lock
+          ] ++ pkgs.lib.optionals (system == "x86_64-linux") [
+            # extra packages only for x86_64-linux
+            pkgs.nasm
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             # Additional darwin specific inputs can be set here
             pkgs.libiconv
