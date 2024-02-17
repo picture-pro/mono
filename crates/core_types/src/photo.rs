@@ -4,8 +4,7 @@ pub const PHOTO_TABLE: &str = "photo";
 pub const PHOTO_GROUP_TABLE: &str = "photo_group";
 
 use crate::{
-  artifact::{PrivateArtifact, PublicArtifact},
-  auth::UserRecordId,
+  auth::UserRecordId, PrivateArtifactRecordId, PublicArtifactRecordId,
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize, Copy)]
@@ -22,8 +21,20 @@ pub struct Photo {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PhotoArtifacts {
-  pub original:  PrivateArtifact,
-  pub thumbnail: PublicArtifact,
+  pub original:  PrivateImageArtifact,
+  pub thumbnail: PublicImageArtifact,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PublicImageArtifact {
+  pub artifact_id: PublicArtifactRecordId,
+  pub size:        (u32, u32),
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PrivateImageArtifact {
+  pub artifact_id: PrivateArtifactRecordId,
+  pub size:        (u32, u32),
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Copy)]
