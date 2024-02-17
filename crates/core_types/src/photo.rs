@@ -8,7 +8,7 @@ use crate::{
   auth::UserRecordId,
 };
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, Copy)]
 #[cfg_attr(feature = "ssr", serde(from = "crate::conv::UlidOrThing"))]
 pub struct PhotoRecordId(pub ulid::Ulid);
 
@@ -26,7 +26,7 @@ pub struct PhotoArtifacts {
   pub thumbnail: PublicArtifact,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, Copy)]
 #[cfg_attr(feature = "ssr", serde(from = "crate::conv::UlidOrThing"))]
 pub struct PhotoGroupRecordId(pub ulid::Ulid);
 
