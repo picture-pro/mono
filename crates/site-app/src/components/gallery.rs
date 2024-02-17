@@ -11,7 +11,7 @@ pub fn Gallery() -> impl IntoView {
 
   let photo_groups = create_resource(
     move || (),
-    move |_| get_user_photo_groups(user.id.clone()),
+    move |_| fetch_user_photo_groups(user.id.clone()),
   );
 
   view! {
@@ -40,7 +40,7 @@ pub fn Gallery() -> impl IntoView {
 #[component]
 fn PhotoGroupList(groups: Vec<core_types::PhotoGroup>) -> impl IntoView {
   view! {
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-row flex-wrap gap-4">
       { groups.into_iter().map(|group| {
         view! {
           <PhotoGroup group=group />
@@ -59,7 +59,7 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
       <div class="flex gap-4">
         { group.photos.into_iter().map(|photo_id| {
           view! {
-            <Photo photo_id=photo_id />
+            <crate::components::photo::Photo photo_id=photo_id />
           }
           .into_view()
         }).collect::<Vec<_>>() }
@@ -68,17 +68,8 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
   }
 }
 
-#[component]
-fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
-  view! {
-    <div class="bg-base-300 h-32 w-32 rounded-box">
-      <p>{ format!("{photo_id:?}") }</p>
-    </div>
-  }
-}
-
 #[server]
-pub async fn get_user_photo_groups(
+pub async fn fetch_user_photo_groups(
   user_id: core_types::UserRecordId,
 ) -> Result<Vec<core_types::PhotoGroup>, ServerFnError> {
   bl::get_user_photo_groups(user_id).await.map_err(|e| {
