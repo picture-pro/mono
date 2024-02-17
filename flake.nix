@@ -87,7 +87,7 @@
         # an offline yarn registry for the tailwind packages
         style-js-packages-yarn-registry = pkgs.fetchYarnDeps {
           yarnLock = ./crates/site-app/style/tailwind/yarn.lock;
-          hash = "sha256-nqOJBcjX+dFl/XkBH+HfRO6Ce+CErm3YkQjG1W+aUPw=";
+          hash = "sha256-uYcqauHqsk58oWtA2uUYsJ2OuW8o2Rh6KrW88fK9UfE=";
           # hash = "";
         };
 
