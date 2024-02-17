@@ -42,6 +42,7 @@ pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
 pub async fn fetch_photo_thumbnail(
   photo_id: core_types::PhotoRecordId,
 ) -> Result<PhotoThumbnailDisplayParams, ServerFnError> {
+  use artifact::Artifact;
   use base64::prelude::*;
 
   // prep the surreal client
@@ -77,25 +78,26 @@ pub async fn fetch_photo_thumbnail(
           "Failed to select thumbnail artifact: {e:?}"
         ))
       })?;
-  let thumbnail_artifact = thumbnail_artifact.ok_or_else(|| {
+  let mut thumbnail_artifact = thumbnail_artifact.ok_or_else(|| {
     ServerFnError::new("Thumbnail artifact not found".to_string())
   })?;
 
-  // fetch the artifact using the url
-  let thumbnail_image = reqwest::get(thumbnail_artifact.url)
-    .await
-    .map_err(|e| {
-      ServerFnError::new(format!("Failed to fetch thumbnail: {e:?}"))
-    })?
-    .bytes()
-    .await
-    .map_err(|e| {
-      ServerFnError::new(format!("Failed to fetch thumbnail: {e:?}"))
-    })?;
+  // download the thumbnail artifact and get the content
+  thumbnail_artifact.download().await.map_err(|e| {
+    ServerFnError::new(format!("Failed to download thumbnail: {e:?}"))
+  })?;
+  let thumbnail_artifact_content = match thumbnail_artifact.contents {
+    Some(content) => content,
+    None => {
+      return Err(ServerFnError::new(
+        "Thumbnail artifact content not found".to_string(),
+      ))
+    }
+  };
 
   // load using the image crate
-  let thumbnail_image =
-    image::load_from_memory(&thumbnail_image).map_err(|e| {
+  let thumbnail_image = image::load_from_memory(&thumbnail_artifact_content)
+    .map_err(|e| {
       ServerFnError::new(format!("Failed to load thumbnail as image: {e:?}"))
     })?;
 
