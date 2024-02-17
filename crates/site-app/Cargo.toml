@@ -25,6 +25,7 @@ core_types = { path = "../core_types" }
 validation = { path = "../validation" }
 
 auth = { path = "../auth", optional = true }
+clients = { path = "../clients", optional = true }
 bl = { path = "../bl", optional = true }
 
 [features]
@@ -32,6 +33,6 @@ default = []
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
   "leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum",
-  "auth", "bl", "bytes"
+  "auth", "bl", "bytes", "clients"
 ]
 
