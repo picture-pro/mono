@@ -42,6 +42,8 @@ pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
 pub async fn fetch_photo_thumbnail(
   photo_id: core_types::PhotoRecordId,
 ) -> Result<PhotoThumbnailDisplayParams, ServerFnError> {
+  use base64::prelude::*;
+
   // prep the surreal client
   let surreal_client = clients::surreal::SurrealRootClient::new()
     .await
@@ -106,7 +108,7 @@ pub async fn fetch_photo_thumbnail(
   })?;
 
   // encode to base64
-  let data = base64::encode(&buffer);
+  let data = BASE64_STANDARD.encode(&buffer);
 
   Ok(PhotoThumbnailDisplayParams {
     data,
