@@ -25,7 +25,7 @@ pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
           }
           Some(Err(e)) => {
             Some(view! {
-              <p>"Failed to load photo: {e}"</p>
+              <p>{ format!("Failed to load photo: {e}") }</p>
             }
             .into_view())
           }
