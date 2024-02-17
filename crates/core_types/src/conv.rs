@@ -1,6 +1,9 @@
 use serde::Deserialize;
 use surreal_id::NewId;
-use surrealdb::sql::{Id, Thing};
+use surrealdb::{
+  opt::{IntoResource, Resource},
+  sql::{Id, Thing},
+};
 
 use crate::{
   PhotoGroupRecordId, PhotoRecordId, PrivateArtifactRecordId,
@@ -64,3 +67,19 @@ impl<T: NewId> AsThing for T {
     }
   }
 }
+
+macro_rules! impl_into_resource {
+  ($type:ty) => {
+    impl<R> IntoResource<Option<R>> for $type {
+      fn into_resource(self) -> Result<Resource, surrealdb::Error> {
+        Ok(Resource::RecordId(self.as_thing()))
+      }
+    }
+  };
+}
+
+impl_into_resource!(UserRecordId);
+impl_into_resource!(PhotoRecordId);
+impl_into_resource!(PhotoGroupRecordId);
+impl_into_resource!(PrivateArtifactRecordId);
+impl_into_resource!(PublicArtifactRecordId);
