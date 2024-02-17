@@ -71,8 +71,14 @@ pub async fn upload_single_photo(
     photographer: user_id.clone(),
     owner:        user_id.clone(),
     artifacts:    PhotoArtifacts {
-      original:  original_artifact,
-      thumbnail: thumbnail_artifact,
+      original:  core_types::PrivateImageArtifact {
+        artifact_id: original_artifact.id,
+        size:        (original_image.width(), original_image.height()),
+      },
+      thumbnail: core_types::PublicImageArtifact {
+        artifact_id: thumbnail_artifact.id,
+        size:        (thumbnail_image.width(), thumbnail_image.height()),
+      },
     },
   };
 

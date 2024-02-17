@@ -10,7 +10,8 @@ pub struct PhotoDisplayParams {
 
 #[component]
 pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
-  let photo = create_resource(move || (), move |_| fetch_photo(photo_id));
+  let photo =
+    create_resource(move || (), move |_| fetch_photo_thumbnail(photo_id));
 
   view! {
     <div class="bg-base-300 h-32 w-32 rounded-box">
@@ -36,11 +37,9 @@ pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
 }
 
 #[server]
-pub async fn fetch_photo(
+pub async fn fetch_photo_thumbnail(
   photo_id: core_types::PhotoRecordId,
 ) -> Result<PhotoDisplayParams, ServerFnError> {
-  use core_types::NewId;
-
   let surreal_client = clients::surreal::SurrealRootClient::new()
     .await
     .map_err(|e| {
@@ -64,9 +63,23 @@ pub async fn fetch_photo(
     ServerFnError::new(format!("Photo not found: {photo_id:?}"))
   })?;
 
+  let thumbnail_artifact: Option<core_types::PublicArtifact> =
+    (*surreal_client)
+      .select(photo.artifacts.thumbnail.artifact_id)
+      .await
+      .map_err(|e| {
+        ServerFnError::new(format!(
+          "Failed to select thumbnail artifact: {e:?}"
+        ))
+      })?;
+
+  let thumbnail_artifact = thumbnail_artifact.ok_or_else(|| {
+    ServerFnError::new("Thumbnail artifact not found".to_string())
+  })?;
+
   Ok(PhotoDisplayParams {
-    url:  photo.artifacts.thumbnail.url,
+    url:  thumbnail_artifact.url,
     alt:  "Photo".to_string(),
-    size: (0, 0),
+    size: photo.artifacts.thumbnail.size,
   })
 }
