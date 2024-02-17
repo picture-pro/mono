@@ -36,7 +36,7 @@ impl Artifact for PublicArtifact {
       id: id.clone(),
       contents,
       url: format!(
-        "s3.{}.amazonaws.com/{}/{}",
+        "https://s3.{}.amazonaws.com/{}/{}",
         std::env::var("AWS_DEFAULT_REGION").unwrap(),
         ARTIFACT_PUBLIC_LTS_BUCKET,
         id.0
