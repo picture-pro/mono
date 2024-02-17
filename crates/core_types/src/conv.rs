@@ -60,7 +60,6 @@ pub trait AsThing {
 
 impl<T: NewId> AsThing for T {
   fn as_thing(&self) -> Thing {
-    println!("converting to thing: {:?}", self.get_inner_string());
     Thing {
       tb: T::TABLE.to_string(),
       id: Id::String(self.get_inner_string()),
