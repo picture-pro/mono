@@ -106,7 +106,7 @@ pub async fn fetch_photo_thumbnail(
   })?;
 
   // encode to base64
-  let data = format!("data:image/jpeg;base64,{}", base64::encode(&buffer));
+  let data = base64::encode(&buffer);
 
   Ok(PhotoThumbnailDisplayParams {
     data,
