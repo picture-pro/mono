@@ -8,7 +8,7 @@ use leptos::*;
 pub fn SmallPageWrapper(children: Children) -> impl IntoView {
   view! {
     <div class="flex-1 flex flex-col justify-center items-center h-full">
-      <div class="d-card w-full max-w-sm bg-base-200 rounded-lg shadow-xl">
+      <div class="d-card w-full max-w-sm bg-base-100 rounded-lg shadow-xl">
         {children()}
       </div>
     </div>
@@ -18,7 +18,7 @@ pub fn SmallPageWrapper(children: Children) -> impl IntoView {
 #[component]
 pub fn PageWrapper(children: Children) -> impl IntoView {
   view! {
-    <div class="flex-1 flex flex-col md:container md:mx-auto mt-8 mb-0 md:my-8 md:rounded-xl shadow p-4 md:px-6 bg-base-200">
+    <div class="flex-1 flex flex-col gap-4 md:container md:mx-auto mt-8 mb-0 md:my-8 md:rounded-xl shadow p-4 md:px-6 bg-base-100">
       {children()}
     </div>
   }

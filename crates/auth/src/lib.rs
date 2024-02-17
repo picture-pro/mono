@@ -1,34 +1,10 @@
 use axum_login::{
-  AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
+  AuthManagerLayer, AuthManagerLayerBuilder, AuthnBackend, UserId,
 };
-use color_eyre::eyre::{eyre, Context, Result};
+use color_eyre::eyre::{eyre, Context, OptionExt, Result};
+use core_types::NewId;
 use serde::{Deserialize, Serialize};
-use surrealdb::{engine::remote::ws::Client, sql::Thing};
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct AuthenticatedUser {
-  pub id:       Thing,
-  pub name:     String,
-  pub email:    String,
-  pub password: String,
-}
-
-impl From<AuthenticatedUser> for auth_types::User {
-  fn from(u: AuthenticatedUser) -> auth_types::User {
-    auth_types::User {
-      id:    u.id.to_string(),
-      name:  u.name,
-      email: u.email,
-    }
-  }
-}
-
-impl AuthUser for AuthenticatedUser {
-  type Id = Thing;
-
-  fn id(&self) -> Self::Id { self.id.clone() }
-  fn session_auth_hash(&self) -> &[u8] { self.password.as_bytes() }
-}
+use surrealdb::engine::remote::ws::Client;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Credentials {
@@ -53,11 +29,11 @@ impl Backend {
     name: String,
     email: String,
     password: String,
-  ) -> Result<AuthenticatedUser> {
+  ) -> Result<core_types::User> {
     (*self.surreal_client).use_ns("main").use_db("main").await?;
 
     // check whether a user with the given email already exists
-    let user: Option<AuthenticatedUser> = (*self.surreal_client)
+    let user: Option<core_types::User> = (*self.surreal_client)
       .query("SELECT * FROM users WHERE email = $email")
       .bind(("email", &email))
       .await?
@@ -69,26 +45,30 @@ impl Backend {
     }
 
     // create a new user
-    let user: Option<AuthenticatedUser> = (*self.surreal_client)
+    let user: Option<core_types::User> = (*self.surreal_client)
       .query(
-        "CREATE user SET name = $name, email = $email, password = \
-         crypto::argon2::generate($password)",
+        "CREATE user SET name = $name, email = $email, pw_hash = \
+         crypto::argon2::generate($password), id = $id",
       )
       .bind(("name", &name))
       .bind(("email", &email))
       .bind(("password", &password))
+      .bind((
+        "id",
+        core_types::UserRecordId(core_types::Ulid::new()).id_without_brackets(),
+      ))
       .await
       .wrap_err("Failed to create user in SurrealDB")?
       .take(0)
       .wrap_err("Failed to insert user into SurrealDB")?;
 
-    user.ok_or_else(|| eyre!("Failed to create user"))
+    user.ok_or_eyre("Failed to create user")
   }
 }
 
 #[async_trait::async_trait]
 impl AuthnBackend for Backend {
-  type User = AuthenticatedUser;
+  type User = core_types::User;
   type Credentials = Credentials;
   type Error = surrealdb::Error;
 
@@ -98,10 +78,10 @@ impl AuthnBackend for Backend {
   ) -> Result<Option<Self::User>, Self::Error> {
     (*self.surreal_client).use_ns("main").use_db("main").await?;
 
-    let user: Option<AuthenticatedUser> = (*self.surreal_client)
+    let user: Option<core_types::User> = (*self.surreal_client)
       .query(
         "SELECT * FROM user WHERE email = $email AND \
-         crypto::argon2::compare(password, $password)",
+         crypto::argon2::compare(pw_hash, $password)",
       )
       .bind(("email", &credentials.email))
       .bind(("password", &credentials.password))
@@ -117,8 +97,14 @@ impl AuthnBackend for Backend {
   ) -> Result<Option<Self::User>, Self::Error> {
     (*self.surreal_client).use_ns("main").use_db("main").await?;
 
-    let user: Option<AuthenticatedUser> =
-      (*self.surreal_client).select(user_id).await?;
+    let user: Option<core_types::User> = (*self.surreal_client)
+      .select((
+        core_types::UserRecordId::TABLE,
+        core_types::UserRecordId::new(user_id.to_string())
+          .unwrap()
+          .id_without_brackets(),
+      ))
+      .await?;
     Ok(user)
   }
 }

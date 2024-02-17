@@ -6,16 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum-login = "0.13.1"
 async-trait = "0.1.77"
 redact = { version = "0.1.8", features = [ "serde" ] }
 tower-sessions = { version = "0.10" }
 tower-sessions-surrealdb-store = { version = "0.3" }
 
+axum-login.workspace = true
 serde.workspace = true
 color-eyre.workspace = true
 thiserror.workspace = true
 surrealdb.workspace = true
 
 clients = { path = "../clients" }
-auth_types = { path = "../auth_types" }
+core_types = { path = "../core_types", features = [ "ssr", "auth" ] }
