@@ -15,17 +15,66 @@ pub fn Gallery() -> impl IntoView {
   );
 
   view! {
-    <Suspense fallback=|| view!{<p>"Loading..."</p>}>
-      { move || photo_groups.map(|groups| view! {
-        <pre class="text-sm leading-6 flex ligatures-none overflow-auto whitespace-pre-wrap">
-          <code class="bg-base-200 rounded-box p-2">
-            {format!("Photo Groups: {:#?}", groups)}
-          </code>
-        </pre>
-      })}
+    <Suspense fallback=|| view!{ }>
+      { move || photo_groups.map(|groups| {
+        match groups {
+          Ok(groups) => {
+            view! {
+              <PhotoGroupList groups=groups.clone() />
+            }
+            .into_view()
+          }
+          Err(e) => {
+            view! {
+              <p>"Failed to load photo groups: {e}"</p>
+            }
+            .into_view()
+          }
+        }
+      }) }
     </Suspense>
   }
   .into_view()
+}
+
+#[component]
+fn PhotoGroupList(groups: Vec<core_types::PhotoGroup>) -> impl IntoView {
+  view! {
+    <div class="flex flex-col gap-4">
+      { groups.into_iter().map(|group| {
+        view! {
+          <PhotoGroup group=group />
+        }
+        .into_view()
+      }).collect::<Vec<_>>() }
+    </div>
+  }
+  .into_view()
+}
+
+#[component]
+fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
+  view! {
+    <div class="flex p-4 bg-base-200 rounded-box border">
+      <div class="flex gap-4">
+        { group.photos.into_iter().map(|photo_id| {
+          view! {
+            <Photo photo_id=photo_id />
+          }
+          .into_view()
+        }).collect::<Vec<_>>() }
+      </div>
+    </div>
+  }
+}
+
+#[component]
+fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
+  view! {
+    <div class="bg-base-300 h-32 w-32 rounded-box">
+      <p>{ format!("{photo_id:?}") }</p>
+    </div>
+  }
 }
 
 #[server]
