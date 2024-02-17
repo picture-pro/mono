@@ -42,12 +42,12 @@ pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
 pub async fn fetch_photo_thumbnail(
   photo_id: core_types::PhotoRecordId,
 ) -> Result<PhotoThumbnailDisplayParams, ServerFnError> {
+  // prep the surreal client
   let surreal_client = clients::surreal::SurrealRootClient::new()
     .await
     .map_err(|e| {
       ServerFnError::new(format!("Failed to create surreal client: {e:?}"))
     })?;
-
   (*surreal_client)
     .use_ns("main")
     .use_db("main")
@@ -56,15 +56,16 @@ pub async fn fetch_photo_thumbnail(
       ServerFnError::new(format!("Failed to use namespace/db: {e:?}"))
     })?;
 
+  // select the photo
   let photo: Option<core_types::Photo> =
     (*surreal_client).select(photo_id).await.map_err(|e| {
       ServerFnError::new(format!("Failed to select photo: {e:?}"))
     })?;
-
   let photo = photo.ok_or_else(|| {
     ServerFnError::new(format!("Photo not found: {photo_id:?}"))
   })?;
 
+  // select the thumbnail artifact
   let thumbnail_artifact: Option<core_types::PublicArtifact> =
     (*surreal_client)
       .select(photo.artifacts.thumbnail.artifact_id)
@@ -74,7 +75,6 @@ pub async fn fetch_photo_thumbnail(
           "Failed to select thumbnail artifact: {e:?}"
         ))
       })?;
-
   let thumbnail_artifact = thumbnail_artifact.ok_or_else(|| {
     ServerFnError::new("Thumbnail artifact not found".to_string())
   })?;
@@ -91,10 +91,13 @@ pub async fn fetch_photo_thumbnail(
       ServerFnError::new(format!("Failed to fetch thumbnail: {e:?}"))
     })?;
 
+  // load using the image crate
   let thumbnail_image =
     image::load_from_memory(&thumbnail_image).map_err(|e| {
       ServerFnError::new(format!("Failed to load thumbnail as image: {e:?}"))
     })?;
+
+  // encode to jpeg bytes
   let mut buffer = Vec::new();
   let mut encoder =
     image::codecs::jpeg::JpegEncoder::new_with_quality(&mut buffer, 95);
@@ -102,6 +105,7 @@ pub async fn fetch_photo_thumbnail(
     ServerFnError::new(format!("Failed to encode thumbnail: {e:?}"))
   })?;
 
+  // encode to base64
   let data = format!("data:image/jpeg;base64,{}", base64::encode(&buffer));
 
   Ok(PhotoThumbnailDisplayParams {
