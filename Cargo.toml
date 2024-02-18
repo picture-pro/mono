@@ -13,18 +13,20 @@ codegen-units = 1
 [workspace.dependencies]
 axum = { version = "0.7.4", features = ["macros"] }
 axum-login = "0.13"
+base64 = { version = "0.21" }
 bytes = "1.5.0"
 cfg-if = "1"
 color-eyre = "0.6"
 console_error_panic_hook = "0.1.7"
 console_log = "1"
 http = "1"
+image = { version = "0.24", features = [ "avif-encoder" ] }
 leptos = { version = "0.6", features = ["nightly", "experimental-islands"] }
 leptos_axum = { version = "0.6", features = ["experimental-islands"] }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
-server_fn = { version = "0.6", features = ["multipart"] }
 log = "0.4"
+server_fn = { version = "0.6", features = ["multipart"] }
 serde = { version = "1", features = ["derive"] }
 simple_logger = "4.2.0"
 surrealdb = { version = "1" }

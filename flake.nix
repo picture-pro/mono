@@ -66,6 +66,9 @@
             pkgs.tailwindcss
             pkgs.yarn
             pkgs.yarn2nix-moretea.fixup_yarn_lock
+          ] ++ pkgs.lib.optionals (system == "x86_64-linux") [
+            # extra packages only for x86_64-linux
+            pkgs.nasm
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             # Additional darwin specific inputs can be set here
             pkgs.libiconv
@@ -87,7 +90,7 @@
         # an offline yarn registry for the tailwind packages
         style-js-packages-yarn-registry = pkgs.fetchYarnDeps {
           yarnLock = ./crates/site-app/style/tailwind/yarn.lock;
-          hash = "sha256-nqOJBcjX+dFl/XkBH+HfRO6Ce+CErm3YkQjG1W+aUPw=";
+          hash = "sha256-uYcqauHqsk58oWtA2uUYsJ2OuW8o2Rh6KrW88fK9UfE=";
           # hash = "";
         };
 

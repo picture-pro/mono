@@ -6,6 +6,7 @@ use core_types::{
   AsThing, NewId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
   PrivateArtifact, PublicArtifact,
 };
+use image::ImageEncoder;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, thiserror::Error)]
@@ -47,7 +48,7 @@ pub async fn upload_single_photo(
     ))
   })?;
 
-  // create a thumbnail and upload it as an artifact
+  // create a thumbnail image
   let aspect_ratio =
     original_image.width() as f32 / original_image.height() as f32;
   let thumbnail_size = thumbnail_size(aspect_ratio);
@@ -57,7 +58,17 @@ pub async fn upload_single_photo(
     thumbnail_size.1,
     image::imageops::FilterType::Lanczos3,
   );
-  let thumbnail_bytes: Bytes = thumbnail_image.as_bytes().to_vec().into();
+
+  // encode as png to bytes
+  let mut thumbnail_bytes = Vec::new();
+  let encoder = image::codecs::png::PngEncoder::new(&mut thumbnail_bytes);
+  thumbnail_image.write_with_encoder(encoder).map_err(|e| {
+    PhotoUploadError::InvalidImage(format!(
+      "Failed to encode thumbnail image: {e:?}"
+    ))
+  })?;
+
+  let thumbnail_bytes: Bytes = thumbnail_bytes.into();
   let thumbnail_artifact = PublicArtifact::new(Some(thumbnail_bytes));
   thumbnail_artifact.upload_and_push().await.map_err(|e| {
     PhotoUploadError::ArtifactCreationError(format!(
@@ -71,8 +82,14 @@ pub async fn upload_single_photo(
     photographer: user_id.clone(),
     owner:        user_id.clone(),
     artifacts:    PhotoArtifacts {
-      original:  original_artifact,
-      thumbnail: thumbnail_artifact,
+      original:  core_types::PrivateImageArtifact {
+        artifact_id: original_artifact.id,
+        size:        (original_image.width(), original_image.height()),
+      },
+      thumbnail: core_types::PublicImageArtifact {
+        artifact_id: thumbnail_artifact.id,
+        size:        (thumbnail_image.width(), thumbnail_image.height()),
+      },
     },
   };
 

@@ -17,6 +17,8 @@ cfg-if.workspace = true
 thiserror.workspace = true
 serde.workspace = true
 bytes = { workspace = true, optional = true }
+base64 = { workspace = true, optional = true }
+image = { workspace = true, optional = true }
 
 validator = "0.16.1"
 web-sys = { version = "0.3", features = [ "Window", "EventTarget" ] }
@@ -24,7 +26,9 @@ web-sys = { version = "0.3", features = [ "Window", "EventTarget" ] }
 core_types = { path = "../core_types" }
 validation = { path = "../validation" }
 
+artifact = { path = "../artifact", optional = true }
 auth = { path = "../auth", optional = true }
+clients = { path = "../clients", optional = true }
 bl = { path = "../bl", optional = true }
 
 [features]
@@ -32,6 +36,6 @@ default = []
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
   "leptos/ssr", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum",
-  "auth", "bl", "bytes"
+  "artifact", "auth", "base64", "bl", "bytes", "clients", "image"
 ]
 
