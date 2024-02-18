@@ -33,7 +33,7 @@ impl Artifact for PublicArtifact {
 
   fn new_with_id(id: Self::Id, contents: Option<bytes::Bytes>) -> Self {
     Self {
-      id: id.clone(),
+      id,
       contents,
       url: format!(
         "https://s3.{}.amazonaws.com/{}/{}",

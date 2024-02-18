@@ -52,7 +52,7 @@ mod ssr {
 }
 
 #[cfg(feature = "auth")]
-mod auth {
+mod auth_traits {
   use axum_login::AuthUser;
 
   use super::*;

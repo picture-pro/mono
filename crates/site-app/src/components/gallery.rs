@@ -9,10 +9,8 @@ pub fn Gallery() -> impl IntoView {
     .into_view();
   };
 
-  let photo_groups = create_resource(
-    move || (),
-    move |_| fetch_user_photo_groups(user.id.clone()),
-  );
+  let photo_groups =
+    create_resource(move || (), move |_| fetch_user_photo_groups(user.id));
 
   view! {
     <Suspense fallback=|| view!{ }>
@@ -26,7 +24,7 @@ pub fn Gallery() -> impl IntoView {
           }
           Err(e) => {
             view! {
-              <p>"Failed to load photo groups: {e}"</p>
+              <p>{ format!("Failed to load photo groups: {e}") }</p>
             }
             .into_view()
           }
