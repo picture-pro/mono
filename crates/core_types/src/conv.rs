@@ -26,34 +26,6 @@ impl From<UlidOrThing> for ulid::Ulid {
   }
 }
 
-impl From<UlidOrThing> for UserRecordId {
-  fn from(u: UlidOrThing) -> UserRecordId { UserRecordId(ulid::Ulid::from(u)) }
-}
-
-impl From<UlidOrThing> for PhotoRecordId {
-  fn from(u: UlidOrThing) -> PhotoRecordId {
-    PhotoRecordId(ulid::Ulid::from(u))
-  }
-}
-
-impl From<UlidOrThing> for PhotoGroupRecordId {
-  fn from(u: UlidOrThing) -> PhotoGroupRecordId {
-    PhotoGroupRecordId(ulid::Ulid::from(u))
-  }
-}
-
-impl From<UlidOrThing> for PrivateArtifactRecordId {
-  fn from(u: UlidOrThing) -> PrivateArtifactRecordId {
-    PrivateArtifactRecordId(ulid::Ulid::from(u))
-  }
-}
-
-impl From<UlidOrThing> for PublicArtifactRecordId {
-  fn from(u: UlidOrThing) -> PublicArtifactRecordId {
-    PublicArtifactRecordId(ulid::Ulid::from(u))
-  }
-}
-
 pub trait AsThing {
   fn as_thing(&self) -> Thing;
 }
@@ -67,8 +39,12 @@ impl<T: NewId> AsThing for T {
   }
 }
 
-macro_rules! impl_into_resource {
-  ($type:ty) => {
+macro_rules! impl_record_id {
+  ($type:ident) => {
+    impl From<UlidOrThing> for $type {
+      fn from(u: UlidOrThing) -> $type { $type(ulid::Ulid::from(u)) }
+    }
+
     impl<R> IntoResource<Option<R>> for $type {
       fn into_resource(self) -> Result<Resource, surrealdb::Error> {
         Ok(Resource::RecordId(self.as_thing()))
@@ -77,8 +53,8 @@ macro_rules! impl_into_resource {
   };
 }
 
-impl_into_resource!(UserRecordId);
-impl_into_resource!(PhotoRecordId);
-impl_into_resource!(PhotoGroupRecordId);
-impl_into_resource!(PrivateArtifactRecordId);
-impl_into_resource!(PublicArtifactRecordId);
+impl_record_id!(UserRecordId);
+impl_record_id!(PhotoRecordId);
+impl_record_id!(PhotoGroupRecordId);
+impl_record_id!(PrivateArtifactRecordId);
+impl_record_id!(PublicArtifactRecordId);
