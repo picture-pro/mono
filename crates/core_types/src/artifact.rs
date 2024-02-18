@@ -25,29 +25,3 @@ pub struct PublicArtifact {
   #[serde(skip)]
   pub contents: Option<bytes::Bytes>,
 }
-
-#[cfg(feature = "ssr")]
-mod ssr {
-  use surreal_id::NewId;
-  use surrealdb::sql::Id;
-
-  use super::*;
-
-  impl NewId for PrivateArtifactRecordId {
-    const TABLE: &'static str = PRIVATE_ARTIFACT_TABLE;
-
-    fn from_inner_id<T: Into<Id>>(inner_id: T) -> Self {
-      Self(inner_id.into().to_string().parse().unwrap())
-    }
-    fn get_inner_string(&self) -> String { self.0.to_string() }
-  }
-
-  impl NewId for PublicArtifactRecordId {
-    const TABLE: &'static str = PUBLIC_ARTIFACT_TABLE;
-
-    fn from_inner_id<T: Into<Id>>(inner_id: T) -> Self {
-      Self(inner_id.into().to_string().parse().unwrap())
-    }
-    fn get_inner_string(&self) -> String { self.0.to_string() }
-  }
-}

@@ -7,7 +7,8 @@ use surrealdb::{
 
 use crate::{
   PhotoGroupRecordId, PhotoRecordId, PrivateArtifactRecordId,
-  PublicArtifactRecordId, UserRecordId,
+  PublicArtifactRecordId, UserRecordId, PHOTO_GROUP_TABLE, PHOTO_TABLE,
+  PRIVATE_ARTIFACT_TABLE, PUBLIC_ARTIFACT_TABLE, USER_TABLE,
 };
 
 #[derive(Deserialize, Debug, Clone)]
@@ -40,7 +41,16 @@ impl<T: NewId> AsThing for T {
 }
 
 macro_rules! impl_record_id {
-  ($type:ident) => {
+  ($type:ident, $table:ident) => {
+    impl NewId for $type {
+      const TABLE: &'static str = $table;
+
+      fn from_inner_id<T: Into<Id>>(inner_id: T) -> Self {
+        Self(inner_id.into().to_string().parse().unwrap())
+      }
+      fn get_inner_string(&self) -> String { self.0.to_string() }
+    }
+
     impl From<UlidOrThing> for $type {
       fn from(u: UlidOrThing) -> $type { $type(ulid::Ulid::from(u)) }
     }
@@ -53,8 +63,8 @@ macro_rules! impl_record_id {
   };
 }
 
-impl_record_id!(UserRecordId);
-impl_record_id!(PhotoRecordId);
-impl_record_id!(PhotoGroupRecordId);
-impl_record_id!(PrivateArtifactRecordId);
-impl_record_id!(PublicArtifactRecordId);
+impl_record_id!(UserRecordId, USER_TABLE);
+impl_record_id!(PhotoRecordId, PHOTO_TABLE);
+impl_record_id!(PhotoGroupRecordId, PHOTO_GROUP_TABLE);
+impl_record_id!(PrivateArtifactRecordId, PRIVATE_ARTIFACT_TABLE);
+impl_record_id!(PublicArtifactRecordId, PUBLIC_ARTIFACT_TABLE);

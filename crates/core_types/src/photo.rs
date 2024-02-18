@@ -53,29 +53,3 @@ pub struct PhotoGroup {
 pub struct PhotoGroupUploadMeta {
   pub public: bool,
 }
-
-#[cfg(feature = "ssr")]
-mod ssr {
-  use surreal_id::NewId;
-  use surrealdb::sql::Id;
-
-  use super::*;
-
-  impl NewId for PhotoRecordId {
-    const TABLE: &'static str = PHOTO_TABLE;
-
-    fn from_inner_id<T: Into<Id>>(inner_id: T) -> Self {
-      Self(inner_id.into().to_string().parse().unwrap())
-    }
-    fn get_inner_string(&self) -> String { self.0.to_string() }
-  }
-
-  impl NewId for PhotoGroupRecordId {
-    const TABLE: &'static str = PHOTO_GROUP_TABLE;
-
-    fn from_inner_id<T: Into<Id>>(inner_id: T) -> Self {
-      Self(inner_id.into().to_string().parse().unwrap())
-    }
-    fn get_inner_string(&self) -> String { self.0.to_string() }
-  }
-}
