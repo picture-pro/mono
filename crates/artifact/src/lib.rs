@@ -33,6 +33,9 @@ use self::methods::*;
 const ARTIFACT_PRIVATE_LTS_BUCKET: &str = "picturepro-artifact-private-lts";
 const ARTIFACT_PUBLIC_LTS_BUCKET: &str = "picturepro-artifact-public-lts";
 
+type ObjectStoreGenerator =
+  Box<dyn Fn() -> Result<Box<dyn object_store::ObjectStore>> + Send + 'static>;
+
 /// The core artifact trait.
 pub trait Artifact {
   /// The type of the ID of the artifact.
@@ -75,7 +78,7 @@ pub trait Artifact {
     id: Self::Id,
   ) -> impl Future<Output = Result<Box<Self>>> + Send;
   /// Get the object store for the artifact.
-  fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>>;
+  fn object_store() -> Result<Box<dyn object_store::ObjectStore>>;
 }
 
 impl Artifact for PublicArtifact {
@@ -98,16 +101,16 @@ impl Artifact for PublicArtifact {
     }
   }
   async fn download(&mut self) -> Result<()> {
-    let object_store = self.object_store()?;
+    let object_store = Box::new(|| Self::object_store());
     self.contents =
-      Some(download_artifact(&*object_store, &self.id.0.to_string()).await?);
+      Some(download_artifact(object_store, &self.id.0.to_string()).await?);
 
     Ok(())
   }
   async fn upload(&self) -> Result<()> {
-    let object_store = self.object_store()?;
+    let object_store = Box::new(|| Self::object_store());
     upload_artifact(
-      &*object_store,
+      object_store,
       &self.id.0.to_string(),
       self.contents.clone().unwrap(),
     )
@@ -121,7 +124,7 @@ impl Artifact for PublicArtifact {
   async fn pull_from_surreal(id: Self::Id) -> Result<Box<Self>> {
     pull_from_surreal::<Self::Id, PublicArtifact>(id).await
   }
-  fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>> {
+  fn object_store() -> Result<Box<dyn object_store::ObjectStore>> {
     object_store_from_env(ARTIFACT_PUBLIC_LTS_BUCKET)
   }
 }
@@ -137,16 +140,16 @@ impl Artifact for PrivateArtifact {
     Self { id, contents }
   }
   async fn download(&mut self) -> Result<()> {
-    let object_store = self.object_store()?;
+    let object_store = Box::new(|| Self::object_store());
     self.contents =
-      Some(download_artifact(&*object_store, &self.id.0.to_string()).await?);
+      Some(download_artifact(object_store, &self.id.0.to_string()).await?);
 
     Ok(())
   }
   async fn upload(&self) -> Result<()> {
-    let object_store = self.object_store()?;
+    let object_store = Box::new(|| Self::object_store());
     upload_artifact(
-      &*object_store,
+      object_store,
       &self.id.0.to_string(),
       self.contents.clone().unwrap(),
     )
@@ -160,7 +163,7 @@ impl Artifact for PrivateArtifact {
   async fn pull_from_surreal(id: Self::Id) -> Result<Box<Self>> {
     pull_from_surreal::<Self::Id, PrivateArtifact>(id).await
   }
-  fn object_store(&self) -> Result<Box<dyn object_store::ObjectStore>> {
+  fn object_store() -> Result<Box<dyn object_store::ObjectStore>> {
     object_store_from_env(ARTIFACT_PRIVATE_LTS_BUCKET)
   }
 }

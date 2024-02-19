@@ -66,6 +66,7 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
   }
 }
 
+#[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server]
 pub async fn fetch_user_photo_groups(
   user_id: core_types::UserRecordId,

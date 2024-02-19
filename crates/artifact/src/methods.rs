@@ -2,6 +2,8 @@ use color_eyre::eyre::{OptionExt, Result, WrapErr};
 use core_types::NewId;
 use tracing::instrument;
 
+use crate::ObjectStoreGenerator;
+
 pub fn object_store_from_env(
   bucket_name: &str,
 ) -> Result<Box<dyn object_store::ObjectStore>> {
@@ -21,7 +23,7 @@ fn cache_path(id: &str) -> std::path::PathBuf { std::env::temp_dir().join(id) }
 
 #[instrument(skip(object_store))]
 pub async fn download_artifact(
-  object_store: &dyn object_store::ObjectStore,
+  object_store: ObjectStoreGenerator,
   id: &str,
 ) -> Result<bytes::Bytes> {
   let cache_path = cache_path(id);
@@ -32,7 +34,8 @@ pub async fn download_artifact(
     return Ok(contents.into());
   }
 
-  let contents = inner_download_artifact(object_store, id).await?;
+  let object_store = object_store()?;
+  let contents = inner_download_artifact(&*object_store, id).await?;
   tokio::fs::write(&cache_path, &contents)
     .await
     .wrap_err("Failed to write cached artifact")?;
@@ -60,7 +63,7 @@ async fn inner_download_artifact(
 
 #[instrument(skip(object_store))]
 pub async fn upload_artifact(
-  object_store: &dyn object_store::ObjectStore,
+  object_store: ObjectStoreGenerator,
   id: &str,
   contents: bytes::Bytes,
 ) -> Result<()> {
@@ -69,7 +72,8 @@ pub async fn upload_artifact(
     .await
     .wrap_err("Failed to write cached artifact")?;
 
-  inner_upload_artifact(object_store, id, contents).await
+  let object_store = object_store()?;
+  inner_upload_artifact(&*object_store, id, contents).await
 }
 
 #[instrument(skip(object_store))]

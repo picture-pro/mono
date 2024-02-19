@@ -80,6 +80,7 @@ pub fn LoginPageInner() -> impl IntoView {
   }
 }
 
+#[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server(Login)]
 pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   params.validate().map_err(|e| {
