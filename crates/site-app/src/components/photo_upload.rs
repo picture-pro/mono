@@ -9,6 +9,15 @@ pub fn PhotoUpload() -> impl IntoView {
     // `MultipartData` implements `From<FormData>`
     photo_upload(data.into())
   });
+  let pending = upload_action.pending();
+  let value = upload_action.value();
+  let successful = move || matches!(value(), Some(Ok(_)));
+
+  create_effect(move |_| {
+    if successful() {
+      crate::components::navigation::reload();
+    }
+  });
 
   view! {
     <div class="d-card bg-base-200 shadow max-w-sm">
@@ -31,7 +40,13 @@ pub fn PhotoUpload() -> impl IntoView {
           </div>
           <div class="mt-6"></div>
           <div class="d-form-control">
-            <button type="submit" class="d-btn d-btn-primary w-full">"Upload"</button>
+            <button
+              type="submit" class="d-btn d-btn-primary w-full"
+              disabled={move || pending()}
+            >
+              { move || if pending() { view!{ <span class="d-loading d-loading-spinner" /> }.into_view() } else { view! {}.into_view() } }
+              "Upload"
+            </button>
           </div>
         </form>
       </div>
@@ -39,7 +54,7 @@ pub fn PhotoUpload() -> impl IntoView {
   }
 }
 
-#[cfg_attr(feature = "ssr", tracing::instrument)]
+#[cfg_attr(feature = "ssr", tracing::instrument(skip(data)))]
 #[server(input = MultipartFormData)]
 pub async fn photo_upload(
   data: MultipartData,

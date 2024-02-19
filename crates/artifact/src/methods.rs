@@ -61,7 +61,7 @@ async fn inner_download_artifact(
     .wrap_err("Failed to read bytes of downloaded artifact")
 }
 
-#[instrument(skip(object_store))]
+#[instrument(skip(object_store, contents))]
 pub async fn upload_artifact(
   object_store: ObjectStoreGenerator,
   id: &str,
@@ -76,7 +76,7 @@ pub async fn upload_artifact(
   inner_upload_artifact(&*object_store, id, contents).await
 }
 
-#[instrument(skip(object_store))]
+#[instrument(skip(object_store, contents))]
 async fn inner_upload_artifact(
   object_store: &dyn object_store::ObjectStore,
   id: &str,
