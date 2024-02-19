@@ -3,10 +3,9 @@ use bytes::Bytes;
 use clients::surreal::SurrealRootClient;
 use color_eyre::eyre::{Context, Result};
 use core_types::{
-  AsThing, NewId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
+  NewId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
   PrivateArtifact, PublicArtifact,
 };
-use image::ImageEncoder;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, thiserror::Error)]
@@ -79,8 +78,8 @@ pub async fn upload_single_photo(
   // create a photo and upload it to surreal
   let photo = Photo {
     id:           core_types::PhotoRecordId(ulid::Ulid::new()),
-    photographer: user_id.clone(),
-    owner:        user_id.clone(),
+    photographer: user_id,
+    owner:        user_id,
     artifacts:    PhotoArtifacts {
       original:  core_types::PrivateImageArtifact {
         artifact_id: original_artifact.id,
@@ -119,8 +118,8 @@ pub async fn upload_single_photo(
   // create a photo group and upload it to surreal
   let group = PhotoGroup {
     id:     core_types::PhotoGroupRecordId(ulid::Ulid::new()),
-    owner:  user_id.clone(),
-    photos: vec![photo.id.clone()],
+    owner:  user_id,
+    photos: vec![photo.id],
     public: group_meta.public,
   };
 

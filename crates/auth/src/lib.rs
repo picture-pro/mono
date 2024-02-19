@@ -1,3 +1,8 @@
+#![warn(missing_docs)]
+
+//! This crate implements [`axum_login`] for picturepro types, using a SurrealDB
+//! backend.
+
 use axum_login::{
   AuthManagerLayer, AuthManagerLayerBuilder, AuthnBackend, UserId,
 };
@@ -6,24 +11,39 @@ use core_types::NewId;
 use serde::{Deserialize, Serialize};
 use surrealdb::engine::remote::ws::Client;
 
+/// The credentials type for the authentication layer.
+///
+/// This type will be transformed into an enum when we implement additional
+/// authentication methods.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Credentials {
+  /// The email address of the user.
   pub email:    String,
+  /// The password of the user.
   pub password: String,
 }
 
+/// The backend type for the authentication layer.
+///
+/// This type implements the [`AuthnBackend`] trait for the picturepro types,
+/// and has a [`signup`](Backend::signup) method for creating new users.
 #[derive(Clone, Debug)]
 pub struct Backend {
   surreal_client: clients::surreal::SurrealRootClient,
 }
 
 impl Backend {
+  /// Create a new backend instance.
   pub async fn new() -> color_eyre::Result<Self> {
     Ok(Self {
       surreal_client: clients::surreal::SurrealRootClient::new().await?,
     })
   }
 
+  /// Create a new user.
+  ///
+  /// This method has checks to ensure that a user with the given email does
+  /// not already exist.
   pub async fn signup(
     &self,
     name: String,
@@ -109,6 +129,12 @@ impl AuthnBackend for Backend {
   }
 }
 
+/// The authentication session type.
+///
+/// This is an alias for the [`axum_login::AuthSession`] type with our backend
+/// type. We can pull this type out of the axum router after we've added the
+/// auth layer, and it's generally all we need to read at runtime for auth
+/// state.
 pub type AuthSession = axum_login::AuthSession<Backend>;
 
 /// Builds an authentication layer for use with an Axum router.
