@@ -335,6 +335,7 @@ dependencies = [
  "thiserror",
  "tower-sessions",
  "tower-sessions-surrealdb-store",
+ "tracing",
 ]
 
 [[package]]

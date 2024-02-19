@@ -10,6 +10,7 @@ use color_eyre::eyre::{eyre, Context, OptionExt, Result};
 use core_types::NewId;
 use serde::{Deserialize, Serialize};
 use surrealdb::engine::remote::ws::Client;
+use tracing::instrument;
 
 /// The credentials type for the authentication layer.
 ///
@@ -44,6 +45,7 @@ impl Backend {
   ///
   /// This method has checks to ensure that a user with the given email does
   /// not already exist.
+  #[instrument(skip(password))]
   pub async fn signup(
     &self,
     name: String,
@@ -92,6 +94,7 @@ impl AuthnBackend for Backend {
   type Credentials = Credentials;
   type Error = surrealdb::Error;
 
+  #[instrument(skip(self, credentials))]
   async fn authenticate(
     &self,
     credentials: Self::Credentials,
@@ -111,6 +114,7 @@ impl AuthnBackend for Backend {
     Ok(user)
   }
 
+  #[instrument(skip(self))]
   async fn get_user(
     &self,
     user_id: &UserId<Self>,
