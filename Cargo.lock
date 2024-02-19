@@ -1075,7 +1075,6 @@ dependencies = [
  "axum-login",
  "bytes",
  "serde",
- "surreal-id",
  "surrealdb",
  "ulid",
 ]
@@ -4788,16 +4787,6 @@ name = "subtle"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
-
-[[package]]
-name = "surreal-id"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba35159bfefbbd3a7b989ea22eb0db4a69f5bc4891abc5b86fba0b2834fe12f4"
-dependencies = [
- "surrealdb",
- "thiserror",
-]
 
 [[package]]
 name = "surrealdb"
