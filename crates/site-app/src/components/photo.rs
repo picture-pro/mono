@@ -98,27 +98,6 @@ pub async fn fetch_photo_thumbnail(
     }
   };
 
-  // load using the image crate
-  // let thumbnail_image =
-  //   info_span!("load_image_from_artifact_data").in_scope(|| {
-  //     image::load_from_memory(&thumbnail_artifact_content).map_err(|e| {
-  //       ServerFnError::new(format!("Failed to load thumbnail as image:
-  // {e:?}"))     })
-  //   })?;
-
-  // // encode to avif bytes
-  // let mut buffer = Vec::new();
-  // let encoder = image::codecs::avif::AvifEncoder::new(&mut buffer);
-  // info_span!("encode_thumbnail_to_avif").in_scope(|| {
-  //   thumbnail_image.write_with_encoder(encoder).map_err(|e| {
-  //     ServerFnError::new(format!("Failed to encode thumbnail: {e:?}"))
-  //   })
-  // })?;
-
-  // // encode avif bytes to base64
-  // let data = info_span!("encode_thumbnail_to_base64")
-  //   .in_scope(|| BASE64_STANDARD.encode(&buffer));
-
   let data = BASE64_STANDARD.encode(&thumbnail_artifact_content);
 
   Ok(PhotoThumbnailDisplayParams {
