@@ -96,14 +96,13 @@ pub async fn photo_upload(
     public.ok_or_else(|| ServerFnError::new("Missing public field"))?;
   let photo = photo.ok_or_else(|| ServerFnError::new("Missing photo field"))?;
 
-  let photo_group =
-    bl::upload_single_photo(user.id, photo, core_types::PhotoGroupUploadMeta {
-      public,
-    })
-    .await
-    .map_err(|e| {
-      ServerFnError::new(format!("Failed to upload photo: {}", e))
-    })?;
+  let photo_group = bl::upload::upload_single_photo(
+    user.id,
+    photo,
+    core_types::PhotoGroupUploadMeta { public },
+  )
+  .await
+  .map_err(|e| ServerFnError::new(format!("Failed to upload photo: {}", e)))?;
 
   Ok(photo_group.id)
 }
