@@ -27,7 +27,12 @@ impl From<UlidOrThing> for ulid::Ulid {
   }
 }
 
+/// A trait for converting a type into a [`Thing`].
+///
+/// This is its own trait for ownership reasons, so that we can have a blanket
+/// implementation.
 pub trait AsThing {
+  /// Convert the type into a [`Thing`].
   fn as_thing(&self) -> Thing;
 }
 
