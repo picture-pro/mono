@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 use surrealdb::opt::PatchOp;
 use tracing::instrument;
 
+use crate::model_ext::ModelExt;
+
 #[derive(Clone, Debug, Deserialize, Serialize, thiserror::Error)]
 pub enum PhotoUploadError {
   #[error("Failed to load original image: {0}")]
@@ -104,18 +106,8 @@ pub async fn upload_single_photo(
     ))
   })?;
 
-  let photo: Vec<Photo> = client
-    .create(core_types::PhotoRecordId::TABLE)
-    .content(photo)
-    .await
-    .map_err(|e| {
-      PhotoUploadError::DBError(format!(
-        "Failed to create photo in surreal: {e}"
-      ))
-    })?;
-
-  let photo = photo.first().ok_or_else(|| {
-    PhotoUploadError::DBError("Failed to create photo in surreal".to_string())
+  photo.create(&client).await.map_err(|e| {
+    PhotoUploadError::DBError(format!("Failed to create photo in surreal: {e}"))
   })?;
 
   // create a photo group and upload it to surreal
@@ -127,32 +119,22 @@ pub async fn upload_single_photo(
     public:       group_meta.public,
   };
 
-  let group: Vec<PhotoGroup> = client
-    .create(core_types::PhotoGroupRecordId::TABLE)
-    .content(group.clone())
-    .await
-    .map_err(|e| {
-      PhotoUploadError::DBError(format!(
-        "Failed to create photo group in surreal: {e}"
-      ))
-    })?;
-
-  let group = group.first().ok_or_else(|| {
-    PhotoUploadError::DBError(
-      "Failed to create photo group in surreal".to_string(),
-    )
+  group.create(&client).await.map_err(|e| {
+    PhotoUploadError::DBError(format!(
+      "Failed to create photo group in surreal: {e}"
+    ))
   })?;
 
-  // update the photo with the group id
-  let _photo: Option<Photo> = client
-    .update(photo.id)
-    .patch(PatchOp::replace("/group", group.id))
-    .await
-    .map_err(|e| {
-      PhotoUploadError::DBError(format!(
-        "Failed to update photo with group id in surreal: {e}"
-      ))
-    })?;
+  let photo = Photo {
+    group: group.id,
+    ..photo
+  };
+
+  photo.update(&client).await.map_err(|e| {
+    PhotoUploadError::DBError(format!(
+      "Failed to update photo with group in surreal: {e}"
+    ))
+  })?;
 
   Ok(group.clone())
 }
