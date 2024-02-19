@@ -11,7 +11,7 @@ use surrealdb::opt::PatchOp;
 use tracing::instrument;
 
 #[instrument]
-pub async fn get_user_photo_groups(
+pub async fn fetch_user_owned_photo_groups(
   user_id: core_types::UserRecordId,
 ) -> Result<Vec<PhotoGroup>> {
   let client = SurrealRootClient::new()
