@@ -53,6 +53,8 @@
           pname = "site-server";
           version = "0.1.0";
 
+          doCheck = false;
+
           nativeBuildInputs = [
             # Add additional build inputs here
             cargo-leptos
@@ -84,7 +86,10 @@
         # Build *just* the cargo dependencies, so we can reuse
         # all of that work (e.g. via cachix) when running in CI
         site-server-deps = craneLib.buildDepsOnly (common_args // {
-          doCheck = false;
+          buildPhaseCargoCommand = ''
+            cargo build -p site-server --release --locked
+            cargo build -p site-frontend --release --locked
+          '';
         });
 
         # an offline yarn registry for the tailwind packages
@@ -132,6 +137,48 @@
         };
       
       in {
+        checks = {
+          # Run clippy (and deny all warnings) on the crate source,
+          # again, resuing the dependency artifacts from above.
+          #
+          # Note that this is done as a separate derivation so that
+          # we can block the CI if there are issues here, but not
+          # prevent downstream consumers from building our crate by itself.
+          site-server-clippy = craneLib.cargoClippy (common_args // {
+            cargoArtifacts = site-server-deps;
+            cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+          });
+
+          site-server-doc = craneLib.cargoDoc (common_args // {
+            cargoArtifacts = site-server-deps;
+          });
+
+          # Check formatting
+          site-server-fmt = craneLib.cargoFmt {
+            pname = common_args.pname;
+            version = common_args.version;
+            
+            inherit src;
+          };
+
+          # Audit licenses
+          site-server-deny = craneLib.cargoDeny {
+            pname = common_args.pname;
+            version = common_args.version;
+
+            inherit src;
+          };
+
+          # Run tests with cargo-nextest
+          # Consider setting `doCheck = false` on `site-server` if you do not want
+          # the tests to run twice
+          site-server-nextest = craneLib.cargoNextest (common_args // {
+            cargoArtifacts = site-server-deps;
+            partitions = 1;
+            partitionType = "count";
+          });
+        };
+
         packages = {
           inherit site-server site-server-container;
           default = site-server;
@@ -144,6 +191,7 @@
             cargo-leptos
             flyctl # fly.io
             bacon # cargo check w/ hot reload
+            cargo-deny # license checking
 
             # surreal stuff
             surrealdb surrealdb-migrations

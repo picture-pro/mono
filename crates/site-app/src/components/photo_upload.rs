@@ -42,7 +42,7 @@ pub fn PhotoUpload() -> impl IntoView {
           <div class="d-form-control">
             <button
               type="submit" class="d-btn d-btn-primary w-full"
-              disabled={move || pending()}
+              disabled=pending
             >
               { move || if pending() { view!{ <span class="d-loading d-loading-spinner" /> }.into_view() } else { view! {}.into_view() } }
               "Upload"

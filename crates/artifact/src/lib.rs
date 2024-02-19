@@ -101,14 +101,14 @@ impl Artifact for PublicArtifact {
     }
   }
   async fn download(&mut self) -> Result<()> {
-    let object_store = Box::new(|| Self::object_store());
+    let object_store = Box::new(Self::object_store);
     self.contents =
       Some(download_artifact(object_store, &self.id.0.to_string()).await?);
 
     Ok(())
   }
   async fn upload(&self) -> Result<()> {
-    let object_store = Box::new(|| Self::object_store());
+    let object_store = Box::new(Self::object_store);
     upload_artifact(
       object_store,
       &self.id.0.to_string(),
@@ -140,14 +140,14 @@ impl Artifact for PrivateArtifact {
     Self { id, contents }
   }
   async fn download(&mut self) -> Result<()> {
-    let object_store = Box::new(|| Self::object_store());
+    let object_store = Box::new(Self::object_store);
     self.contents =
       Some(download_artifact(object_store, &self.id.0.to_string()).await?);
 
     Ok(())
   }
   async fn upload(&self) -> Result<()> {
-    let object_store = Box::new(|| Self::object_store());
+    let object_store = Box::new(Self::object_store);
     upload_artifact(
       object_store,
       &self.id.0.to_string(),
