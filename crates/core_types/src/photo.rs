@@ -18,13 +18,11 @@ pub struct PhotoRecordId(pub ulid::Ulid);
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Photo {
   /// The record ID.
-  pub id:           PhotoRecordId,
-  /// The user who created the photo.
-  pub photographer: UserRecordId,
-  /// The user who owns the photo.
-  pub owner:        UserRecordId,
+  pub id:        PhotoRecordId,
+  /// The photo group that contains this photo.
+  pub group:     PhotoGroupRecordId,
   /// The photo's artifacts.
-  pub artifacts:    PhotoArtifacts,
+  pub artifacts: PhotoArtifacts,
 }
 
 /// The artifacts for a photo. Not a table.
@@ -73,13 +71,15 @@ pub struct PhotoGroupRecordId(pub ulid::Ulid);
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PhotoGroup {
   /// The record ID.
-  pub id:     PhotoGroupRecordId,
+  pub id:           PhotoGroupRecordId,
+  /// The user who uploaded the photo group.
+  pub photographer: UserRecordId,
   /// The user who owns the photo group.
-  pub owner:  UserRecordId,
+  pub owner:        UserRecordId,
   /// The photos in the group.
-  pub photos: Vec<PhotoRecordId>,
+  pub photos:       Vec<PhotoRecordId>,
   /// Whether the group is publicly visible.
-  pub public: bool,
+  pub public:       bool,
 }
 
 /// The metadata for uploading a photo group. Not a table.

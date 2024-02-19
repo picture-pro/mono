@@ -7,6 +7,7 @@ use core_types::{
   PrivateArtifact, PublicArtifact,
 };
 use serde::{Deserialize, Serialize};
+use surrealdb::opt::PatchOp;
 use tracing::instrument;
 
 #[derive(Clone, Debug, Deserialize, Serialize, thiserror::Error)]
@@ -79,10 +80,10 @@ pub async fn upload_single_photo(
 
   // create a photo and upload it to surreal
   let photo = Photo {
-    id:           core_types::PhotoRecordId(ulid::Ulid::new()),
-    photographer: user_id,
-    owner:        user_id,
-    artifacts:    PhotoArtifacts {
+    id:        core_types::PhotoRecordId(ulid::Ulid::new()),
+    // this is set to nil because we don't have a group yet
+    group:     core_types::PhotoGroupRecordId(ulid::Ulid::nil()),
+    artifacts: PhotoArtifacts {
       original:  core_types::PrivateImageArtifact {
         artifact_id: original_artifact.id,
         size:        (original_image.width(), original_image.height()),
@@ -119,10 +120,11 @@ pub async fn upload_single_photo(
 
   // create a photo group and upload it to surreal
   let group = PhotoGroup {
-    id:     core_types::PhotoGroupRecordId(ulid::Ulid::new()),
-    owner:  user_id,
-    photos: vec![photo.id],
-    public: group_meta.public,
+    id:           core_types::PhotoGroupRecordId(ulid::Ulid::new()),
+    owner:        user_id,
+    photographer: user_id,
+    photos:       vec![photo.id],
+    public:       group_meta.public,
   };
 
   let group: Vec<PhotoGroup> = client
@@ -140,6 +142,17 @@ pub async fn upload_single_photo(
       "Failed to create photo group in surreal".to_string(),
     )
   })?;
+
+  // update the photo with the group id
+  let _photo: Option<Photo> = client
+    .update(photo.id)
+    .patch(PatchOp::replace("/group", group.id))
+    .await
+    .map_err(|e| {
+      PhotoUploadError::DBError(format!(
+        "Failed to update photo with group id in surreal: {e}"
+      ))
+    })?;
 
   Ok(group.clone())
 }
