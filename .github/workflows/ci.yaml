@@ -15,5 +15,5 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v3
-      - name: Build default package
-        run: nix build
+      - name: Check default package
+        run: nix check
