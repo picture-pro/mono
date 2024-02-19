@@ -42,6 +42,7 @@ pub struct PublicUser {
   pub email: String,
 }
 
+#[cfg(feature = "ssr")]
 impl From<User> for PublicUser {
   fn from(u: User) -> PublicUser {
     PublicUser {
