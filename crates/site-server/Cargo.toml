@@ -22,6 +22,9 @@ tower.workspace = true
 tower-http.workspace = true
 log.workspace = true
 
-tracing-chrome = { version = "0.7" }
+tracing-chrome = { version = "0.7", optional = true }
 tracing-subscriber = { version = "0.3" }
 
+[features]
+default = []
+chrome-tracing = [ "tracing-chrome" ]

@@ -16,8 +16,6 @@ use leptos_router::RouteListing;
 use site_app::*;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
-use tracing_chrome::ChromeLayerBuilder;
-use tracing_subscriber::{prelude::*, registry::Registry};
 
 pub mod fileserv;
 
@@ -64,11 +62,17 @@ async fn leptos_routes_handler(
 
 #[tokio::main]
 async fn main() -> Result<()> {
-  // let (chrome_layer, _guard) = ChromeLayerBuilder::new().build();
-  // tracing_subscriber::registry().with(chrome_layer).init();
-
   color_eyre::install()?;
 
+  #[cfg(feature = "chrome-tracing")]
+  {
+    use tracing_chrome::ChromeLayerBuilder;
+    use tracing_subscriber::{prelude::*, registry::Registry};
+    let (chrome_layer, _guard) = ChromeLayerBuilder::new().build();
+    tracing_subscriber::registry().with(chrome_layer).init();
+  }
+
+  #[cfg(not(feature = "chrome-tracing"))]
   simple_logger::init_with_level(log::Level::Info)
     .expect("couldn't initialize logging");
 
