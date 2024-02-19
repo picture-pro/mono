@@ -98,6 +98,7 @@ pub fn LogoutButton(class: Option<String>) -> impl IntoView {
   }
 }
 
+#[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server(Logout)]
 pub async fn logout() -> Result<(), ServerFnError> {
   let mut auth_session = use_context::<auth::AuthSession>()

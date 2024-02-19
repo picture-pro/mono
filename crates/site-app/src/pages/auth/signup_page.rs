@@ -84,6 +84,7 @@ pub fn SignupPageInner() -> impl IntoView {
   }
 }
 
+#[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server(Signup)]
 pub async fn login(params: SignupParams) -> Result<(), ServerFnError> {
   params.validate().map_err(|e| {

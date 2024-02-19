@@ -60,12 +60,34 @@ async fn leptos_routes_handler(
   handler(req).await.into_response()
 }
 
+fn init_logging() {
+  color_eyre::install().expect("Failed to install color_eyre");
+
+  let filter = tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or(
+    tracing_subscriber::EnvFilter::new("info,site_server=debug,site_app=debug"),
+  );
+
+  #[cfg(not(feature = "chrome-tracing"))]
+  {
+    tracing_subscriber::fmt().with_env_filter(filter).init();
+  }
+  #[cfg(feature = "chrome-tracing")]
+  {
+    use tracing_subscriber::prelude::*;
+
+    let (chrome_layer, _guard) =
+      tracing_chrome::ChromeLayerBuilder::new().build();
+    tracing_subscriber::registry()
+      .with(tracing_subscriber::fmt::layer())
+      .with(filter)
+      .with(chrome_layer)
+      .init();
+  }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
-  color_eyre::install()?;
-
-  simple_logger::init_with_level(log::Level::Debug)
-    .expect("couldn't initialize logging");
+  init_logging();
 
   // Setting get_configuration(None) means we'll be using cargo-leptos's env
   // values For deployment these variables are:

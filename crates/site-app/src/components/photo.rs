@@ -38,15 +38,18 @@ pub fn Photo(photo_id: core_types::PhotoRecordId) -> impl IntoView {
   }
 }
 
+#[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server]
 pub async fn fetch_photo_thumbnail(
   photo_id: core_types::PhotoRecordId,
 ) -> Result<PhotoThumbnailDisplayParams, ServerFnError> {
   use artifact::Artifact;
   use base64::prelude::*;
+  use tracing::{info_span, Instrument};
 
   // prep the surreal client
   let surreal_client = clients::surreal::SurrealRootClient::new()
+    .instrument(info_span!("create_surreal_client"))
     .await
     .map_err(|e| {
       ServerFnError::new(format!("Failed to create surreal client: {e:?}"))
@@ -96,20 +99,27 @@ pub async fn fetch_photo_thumbnail(
   };
 
   // load using the image crate
-  let thumbnail_image = image::load_from_memory(&thumbnail_artifact_content)
-    .map_err(|e| {
-      ServerFnError::new(format!("Failed to load thumbnail as image: {e:?}"))
-    })?;
+  // let thumbnail_image =
+  //   info_span!("load_image_from_artifact_data").in_scope(|| {
+  //     image::load_from_memory(&thumbnail_artifact_content).map_err(|e| {
+  //       ServerFnError::new(format!("Failed to load thumbnail as image:
+  // {e:?}"))     })
+  //   })?;
 
-  // encode to avif bytes
-  let mut buffer = Vec::new();
-  let encoder = image::codecs::avif::AvifEncoder::new(&mut buffer);
-  thumbnail_image.write_with_encoder(encoder).map_err(|e| {
-    ServerFnError::new(format!("Failed to encode thumbnail: {e:?}"))
-  })?;
+  // // encode to avif bytes
+  // let mut buffer = Vec::new();
+  // let encoder = image::codecs::avif::AvifEncoder::new(&mut buffer);
+  // info_span!("encode_thumbnail_to_avif").in_scope(|| {
+  //   thumbnail_image.write_with_encoder(encoder).map_err(|e| {
+  //     ServerFnError::new(format!("Failed to encode thumbnail: {e:?}"))
+  //   })
+  // })?;
 
-  // encode avif bytes to base64
-  let data = BASE64_STANDARD.encode(&buffer);
+  // // encode avif bytes to base64
+  // let data = info_span!("encode_thumbnail_to_base64")
+  //   .in_scope(|| BASE64_STANDARD.encode(&buffer));
+
+  let data = BASE64_STANDARD.encode(&thumbnail_artifact_content);
 
   Ok(PhotoThumbnailDisplayParams {
     data,
