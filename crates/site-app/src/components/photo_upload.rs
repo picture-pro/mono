@@ -39,7 +39,7 @@ pub fn PhotoUpload() -> impl IntoView {
   }
 }
 
-#[cfg_attr(feature = "ssr", tracing::instrument)]
+#[cfg_attr(feature = "ssr", tracing::instrument(skip(data)))]
 #[server(input = MultipartFormData)]
 pub async fn photo_upload(
   data: MultipartData,
