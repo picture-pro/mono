@@ -1,13 +1,6 @@
-use artifact::Artifact;
-use bytes::Bytes;
 use clients::surreal::SurrealRootClient;
 use color_eyre::eyre::{Context, Result};
-use core_types::{
-  NewId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
-  PrivateArtifact, PublicArtifact,
-};
-use serde::{Deserialize, Serialize};
-use surrealdb::opt::PatchOp;
+use core_types::{NewId, PhotoGroup};
 use tracing::instrument;
 
 #[instrument]

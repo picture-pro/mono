@@ -1,7 +1,7 @@
 use artifact::Artifact;
 use bytes::Bytes;
 use clients::surreal::SurrealRootClient;
-use color_eyre::eyre::{Context, Result};
+use color_eyre::eyre::Result;
 use core_types::{
   NewId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
   PrivateArtifact, PublicArtifact,
