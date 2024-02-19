@@ -1,6 +1,6 @@
 use clients::surreal::SurrealRootClient;
 use color_eyre::eyre::{Context, Result};
-use core_types::{NewId, PhotoGroup};
+use core_types::{CoreId, PhotoGroup};
 use tracing::instrument;
 
 #[instrument]

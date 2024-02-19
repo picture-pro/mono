@@ -3,7 +3,7 @@ use bytes::Bytes;
 use clients::surreal::SurrealRootClient;
 use color_eyre::eyre::Result;
 use core_types::{
-  NewId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
+  CoreId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
   PrivateArtifact, PublicArtifact,
 };
 use serde::{Deserialize, Serialize};

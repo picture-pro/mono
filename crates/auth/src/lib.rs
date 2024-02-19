@@ -7,7 +7,7 @@ use axum_login::{
   AuthManagerLayer, AuthManagerLayerBuilder, AuthnBackend, UserId,
 };
 use color_eyre::eyre::{eyre, Context, OptionExt, Result};
-use core_types::NewId;
+use core_types::CoreId;
 use serde::{Deserialize, Serialize};
 use surrealdb::engine::remote::ws::Client;
 use tracing::instrument;
@@ -77,7 +77,7 @@ impl Backend {
       .bind(("password", &password))
       .bind((
         "id",
-        core_types::UserRecordId(core_types::Ulid::new()).id_without_brackets(),
+        core_types::UserRecordId(core_types::Ulid::new()).to_thing(),
       ))
       .await
       .wrap_err("Failed to create user in SurrealDB")?
@@ -122,12 +122,7 @@ impl AuthnBackend for Backend {
     (*self.surreal_client).use_ns("main").use_db("main").await?;
 
     let user: Option<core_types::User> = (*self.surreal_client)
-      .select((
-        core_types::UserRecordId::TABLE,
-        core_types::UserRecordId::new(user_id.to_string())
-          .unwrap()
-          .id_without_brackets(),
-      ))
+      .select(core_types::UserRecordId::new_with_id(*user_id))
       .await?;
     Ok(user)
   }
