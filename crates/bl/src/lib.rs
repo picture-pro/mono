@@ -7,6 +7,7 @@ use core_types::{
   PrivateArtifact, PublicArtifact,
 };
 use serde::{Deserialize, Serialize};
+use tracing::instrument;
 
 #[derive(Clone, Debug, Deserialize, Serialize, thiserror::Error)]
 pub enum PhotoUploadError {
@@ -26,6 +27,7 @@ fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
   }
 }
 
+#[instrument(skip(original_bytes))]
 pub async fn upload_single_photo(
   user_id: core_types::UserRecordId,
   original_bytes: Bytes,
@@ -142,6 +144,7 @@ pub async fn upload_single_photo(
   Ok(group.clone())
 }
 
+#[instrument]
 pub async fn get_user_photo_groups(
   user_id: core_types::UserRecordId,
 ) -> Result<Vec<PhotoGroup>> {

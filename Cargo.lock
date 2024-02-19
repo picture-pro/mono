@@ -576,6 +576,7 @@ dependencies = [
  "serde",
  "surrealdb",
  "thiserror",
+ "tracing",
  "ulid",
 ]
 
