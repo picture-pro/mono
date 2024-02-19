@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize, Copy)]
-#[cfg_attr(feature = "ssr", serde(from = "crate::conv::UlidOrThing"))]
+#[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct PhotoRecordId(pub ulid::Ulid);
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -38,7 +38,7 @@ pub struct PrivateImageArtifact {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Copy)]
-#[cfg_attr(feature = "ssr", serde(from = "crate::conv::UlidOrThing"))]
+#[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct PhotoGroupRecordId(pub ulid::Ulid);
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

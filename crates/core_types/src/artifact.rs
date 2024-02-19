@@ -4,7 +4,7 @@ pub const PRIVATE_ARTIFACT_TABLE: &str = "private_artifact";
 pub const PUBLIC_ARTIFACT_TABLE: &str = "public_artifact";
 
 #[derive(Clone, Debug, Deserialize, Serialize, Copy)]
-#[cfg_attr(feature = "ssr", serde(from = "crate::conv::UlidOrThing"))]
+#[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct PrivateArtifactRecordId(pub ulid::Ulid);
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -15,7 +15,7 @@ pub struct PrivateArtifact {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Copy)]
-#[cfg_attr(feature = "ssr", serde(from = "crate::conv::UlidOrThing"))]
+#[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct PublicArtifactRecordId(pub ulid::Ulid);
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

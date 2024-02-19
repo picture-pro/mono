@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 pub const USER_TABLE: &str = "user";
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
-#[cfg_attr(feature = "ssr", serde(from = "crate::conv::UlidOrThing"))]
+#[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct UserRecordId(pub ulid::Ulid);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
