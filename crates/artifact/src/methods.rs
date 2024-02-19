@@ -1,5 +1,6 @@
 use color_eyre::eyre::{OptionExt, Result, WrapErr};
 use core_types::NewId;
+use tracing::instrument;
 
 pub fn object_store_from_env(
   bucket_name: &str,
@@ -18,6 +19,7 @@ pub fn object_store_from_env(
 
 fn cache_path(id: &str) -> std::path::PathBuf { std::env::temp_dir().join(id) }
 
+#[instrument(skip(object_store))]
 pub async fn download_artifact(
   object_store: &dyn object_store::ObjectStore,
   id: &str,
@@ -38,6 +40,7 @@ pub async fn download_artifact(
   Ok(contents)
 }
 
+#[instrument(skip(object_store))]
 async fn inner_download_artifact(
   object_store: &dyn object_store::ObjectStore,
   id: &str,
@@ -55,6 +58,7 @@ async fn inner_download_artifact(
     .wrap_err("Failed to read bytes of downloaded artifact")
 }
 
+#[instrument(skip(object_store))]
 pub async fn upload_artifact(
   object_store: &dyn object_store::ObjectStore,
   id: &str,
@@ -68,6 +72,7 @@ pub async fn upload_artifact(
   inner_upload_artifact(object_store, id, contents).await
 }
 
+#[instrument(skip(object_store))]
 async fn inner_upload_artifact(
   object_store: &dyn object_store::ObjectStore,
   id: &str,
@@ -83,6 +88,7 @@ async fn inner_upload_artifact(
   Ok(())
 }
 
+#[instrument(skip(artifact))]
 pub async fn push_to_surreal<Id, T>(artifact: T) -> Result<()>
 where
   Id: NewId,
@@ -107,6 +113,7 @@ where
   Ok(())
 }
 
+#[instrument(skip(id))]
 pub async fn pull_from_surreal<Id, T>(id: Id) -> Result<Box<T>>
 where
   Id: NewId,

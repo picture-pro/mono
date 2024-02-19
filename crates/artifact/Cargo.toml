@@ -15,6 +15,7 @@ color-eyre.workspace = true
 surrealdb.workspace = true
 ulid.workspace = true
 tokio = { workspace = true, features = [ "fs" ] }
+tracing.workspace = true
 
 core_types = { path = "../core_types", features = [ "ssr" ] }
 clients = { path = "../clients" }
