@@ -60,9 +60,9 @@ pub async fn upload_single_photo(
     image::imageops::FilterType::Lanczos3,
   );
 
-  // encode as png to bytes
+  // encode as avif to bytes
   let mut thumbnail_bytes = Vec::new();
-  let encoder = image::codecs::png::PngEncoder::new(&mut thumbnail_bytes);
+  let encoder = image::codecs::avif::AvifEncoder::new(&mut thumbnail_bytes);
   thumbnail_image.write_with_encoder(encoder).map_err(|e| {
     PhotoUploadError::InvalidImage(format!(
       "Failed to encode thumbnail image: {e:?}"
