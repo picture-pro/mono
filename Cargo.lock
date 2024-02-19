@@ -172,6 +172,7 @@ dependencies = [
  "serde",
  "surrealdb",
  "thiserror",
+ "tokio",
  "ulid",
 ]
 

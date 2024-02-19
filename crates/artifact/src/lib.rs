@@ -53,7 +53,20 @@ pub trait Artifact {
   /// fails if the `contents` field is `None`.
   fn upload(&self) -> impl Future<Output = Result<()>> + Send;
   /// Convenience method for uploading and pushing to SurrealDB.
-  fn upload_and_push(&self) -> impl Future<Output = Result<()>> + Send;
+  fn upload_and_push(&self) -> impl Future<Output = Result<()>> + Send
+  where
+    Self: Sync,
+  {
+    async move {
+      self.upload().await.wrap_err("Failed to upload artifact")?;
+      self
+        .push_to_surreal()
+        .await
+        .wrap_err("Failed to push to surreal")?;
+
+      Ok(())
+    }
+  }
 
   /// Push the artifact to SurrealDB.
   fn push_to_surreal(&self) -> impl Future<Output = Result<()>> + Send;
@@ -102,15 +115,6 @@ impl Artifact for PublicArtifact {
 
     Ok(())
   }
-  async fn upload_and_push(&self) -> Result<()> {
-    self.upload().await.wrap_err("Failed to upload artifact")?;
-    self
-      .push_to_surreal()
-      .await
-      .wrap_err("Failed to push to surreal")?;
-
-    Ok(())
-  }
   async fn push_to_surreal(&self) -> Result<()> {
     push_to_surreal::<Self::Id, PublicArtifact>(self.clone()).await
   }
@@ -147,15 +151,6 @@ impl Artifact for PrivateArtifact {
       self.contents.clone().unwrap(),
     )
     .await?;
-
-    Ok(())
-  }
-  async fn upload_and_push(&self) -> Result<()> {
-    self.upload().await.wrap_err("Failed to upload artifact")?;
-    self
-      .push_to_surreal()
-      .await
-      .wrap_err("Failed to push to surreal")?;
 
     Ok(())
   }

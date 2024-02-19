@@ -14,6 +14,7 @@ serde.workspace = true
 color-eyre.workspace = true
 surrealdb.workspace = true
 ulid.workspace = true
+tokio = { workspace = true, features = [ "fs" ] }
 
 core_types = { path = "../core_types", features = [ "ssr" ] }
 clients = { path = "../clients" }

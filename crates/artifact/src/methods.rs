@@ -16,7 +16,29 @@ pub fn object_store_from_env(
   Ok(Box::new(object_store))
 }
 
+fn cache_path(id: &str) -> std::path::PathBuf { std::env::temp_dir().join(id) }
+
 pub async fn download_artifact(
+  object_store: &dyn object_store::ObjectStore,
+  id: &str,
+) -> Result<bytes::Bytes> {
+  let cache_path = cache_path(id);
+  if cache_path.exists() {
+    let contents = tokio::fs::read(cache_path)
+      .await
+      .wrap_err("Failed to read cached artifact")?;
+    return Ok(contents.into());
+  }
+
+  let contents = inner_download_artifact(object_store, id).await?;
+  tokio::fs::write(&cache_path, &contents)
+    .await
+    .wrap_err("Failed to write cached artifact")?;
+
+  Ok(contents)
+}
+
+async fn inner_download_artifact(
   object_store: &dyn object_store::ObjectStore,
   id: &str,
 ) -> Result<bytes::Bytes> {
@@ -34,6 +56,19 @@ pub async fn download_artifact(
 }
 
 pub async fn upload_artifact(
+  object_store: &dyn object_store::ObjectStore,
+  id: &str,
+  contents: bytes::Bytes,
+) -> Result<()> {
+  let cache_path = cache_path(id);
+  tokio::fs::write(&cache_path, &contents)
+    .await
+    .wrap_err("Failed to write cached artifact")?;
+
+  inner_upload_artifact(object_store, id, contents).await
+}
+
+async fn inner_upload_artifact(
   object_store: &dyn object_store::ObjectStore,
   id: &str,
   contents: bytes::Bytes,
