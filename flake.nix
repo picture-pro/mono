@@ -123,8 +123,20 @@
           LEPTOS_LIB_PROFILE_RELEASE = "release-wasm-size";
           APP_ENVIRONMENT = "production";
         });
+
+        site-server-container = pkgs.dockerTools.buildLayeredImage {
+          name = "site-server";
+          tag = "latest";
+          contents = [ site-server pkgs.cacert ];
+          config.Cmd = [ "${site-server}/bin/site-server" ];
+        };
+      
       in {
-        defaultPackage = site-server;
+        packages = {
+          inherit site-server site-server-container;
+          default = site-server;
+        };
+        
         devShell = pkgs.mkShell {
           nativeBuildInputs = (with pkgs; [
             toolchain # cargo and such
