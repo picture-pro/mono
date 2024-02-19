@@ -84,7 +84,10 @@
         # Build *just* the cargo dependencies, so we can reuse
         # all of that work (e.g. via cachix) when running in CI
         site-server-deps = craneLib.buildDepsOnly (common_args // {
-          doCheck = false;
+          buildPhaseCargoCommand = ''
+            cargo build -p site-server --release --locked
+            cargo build -p site-frontend --release --locked
+          '';
         });
 
         # an offline yarn registry for the tailwind packages
