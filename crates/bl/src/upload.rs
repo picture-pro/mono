@@ -3,11 +3,10 @@ use bytes::Bytes;
 use clients::surreal::SurrealRootClient;
 use color_eyre::eyre::Result;
 use core_types::{
-  CoreId, Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta,
-  PrivateArtifact, PublicArtifact,
+  Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta, PrivateArtifact,
+  PublicArtifact,
 };
 use serde::{Deserialize, Serialize};
-use surrealdb::opt::PatchOp;
 use tracing::instrument;
 
 use crate::model_ext::ModelExt;
