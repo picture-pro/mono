@@ -568,6 +568,7 @@ name = "bl"
 version = "0.1.0"
 dependencies = [
  "artifact",
+ "base64",
  "bytes",
  "clients",
  "color-eyre",
@@ -4567,13 +4568,10 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 name = "site-app"
 version = "0.1.0"
 dependencies = [
- "artifact",
  "auth",
- "base64",
  "bl",
  "bytes",
  "cfg-if",
- "clients",
  "core_types",
  "http 1.0.0",
  "image",
