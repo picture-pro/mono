@@ -26,6 +26,7 @@ module.exports = {
           "base-100": "oklch(100% 0 0)",
           "base-200": "#eeeeee",
           "base-300": "#dddddd",
+          "base-content": "#282828",
           "info": "#0000ff",
           "success": "#008000",
           "warning": "#a6a659",

@@ -20,9 +20,9 @@ pub fn PhotoUpload() -> impl IntoView {
   });
 
   view! {
-    <div class="d-card bg-base-200 shadow max-w-sm">
+    <div class="d-card bg-base-100 shadow max-w-sm">
       <div class="d-card-body">
-        <p class="d-card-title text-2xl">"Upload Photo"</p>
+        <p class="text-2xl font-semibold tracking-tight">"Upload Photo"</p>
         <form on:submit=move |ev: SubmitEvent| {
           ev.prevent_default();
           let target = ev.target().unwrap().unchecked_into::<HtmlFormElement>();

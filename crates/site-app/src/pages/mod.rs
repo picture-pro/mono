@@ -16,9 +16,13 @@ pub fn SmallPageWrapper(children: Children) -> impl IntoView {
 }
 
 #[component]
-pub fn PageWrapper(children: Children) -> impl IntoView {
+pub fn PageWrapper(
+  children: Children,
+  #[prop(default = "bg-base-100")] bg_color: &'static str,
+  #[prop(default = "shadow")] shadow: &'static str,
+) -> impl IntoView {
   view! {
-    <div class="flex-1 flex flex-col gap-4 md:container md:mx-auto mt-8 mb-0 md:my-8 md:rounded-xl shadow p-4 md:px-6 bg-base-100">
+    <div class={format!("flex-1 flex flex-col gap-4 md:container md:mx-auto mt-8 mb-0 md:my-8 md:rounded-xl {shadow} p-4 md:px-6 {bg_color}")}>
       {children()}
     </div>
   }

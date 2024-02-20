@@ -18,10 +18,12 @@ pub fn DashboardPage() -> impl IntoView {
   }
 
   view! {
-    <PageWrapper>
+    <PageWrapper bg_color="" shadow="">
       <p class="text-4xl font-semibold tracking-tight">"Dashboard Page"</p>
-      <crate::components::photo_upload::PhotoUpload />
-      <crate::components::gallery::Gallery />
+      <div class="flex flex-row justify-between gap-4 items-start">
+        <crate::components::gallery::Gallery />
+        <crate::components::photo_upload::PhotoUpload />
+      </div>
     </PageWrapper>
   }
 }
