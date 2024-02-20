@@ -35,11 +35,11 @@ impl PhotoSize {
 }
 
 #[component]
-#[allow(clippy::useless_format)]
 pub fn Photo(
   photo_id: core_types::PhotoRecordId,
   #[prop(default = PhotoSize::Regular)] size: PhotoSize,
   #[prop(default = "rounded-box")] rounded: &'static str,
+  #[prop(default = "")] extra_class: &'static str,
 ) -> impl IntoView {
   let photo =
     create_resource(move || (), move |_| fetch_photo_thumbnail(photo_id));
@@ -52,7 +52,7 @@ pub fn Photo(
             <img
               src={format!("data:image/png;base64,{}", photo.data)} alt={photo.alt}
               width={size.physical(photo.size).0} height={size.physical(photo.size).1}
-              class={format!("{rounded}")}
+              class={format!("{rounded} {extra_class}")}
             />
           }
           .into_view())

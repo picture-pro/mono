@@ -1,6 +1,7 @@
 pub mod components;
 pub mod error_template;
 pub mod pages;
+pub mod server_fns;
 pub mod utils;
 
 use leptos::*;

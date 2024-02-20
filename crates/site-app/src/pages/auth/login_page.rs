@@ -1,4 +1,6 @@
-use leptos::{logging::log, *};
+#[cfg(feature = "ssr")]
+use leptos::logging::log;
+use leptos::*;
 use validation::{LoginParams, Validate};
 
 use crate::{
@@ -33,7 +35,7 @@ pub fn LoginPageInner() -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(_))) {
-      navigate_to("/");
+      navigate_to("/dashboard");
     }
   });
 

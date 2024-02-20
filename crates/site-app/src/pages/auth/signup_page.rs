@@ -1,5 +1,7 @@
 use leptos::*;
-use validation::{LoginParams, SignupParams, Validate};
+#[cfg(feature = "ssr")]
+use validation::LoginParams;
+use validation::{SignupParams, Validate};
 
 use crate::{
   components::{form::FormElement, navigation::navigate_to},
@@ -37,7 +39,7 @@ pub fn SignupPageInner() -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(_))) {
-      navigate_to("/");
+      navigate_to("/dashboard");
     }
   });
 
