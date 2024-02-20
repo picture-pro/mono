@@ -88,3 +88,14 @@ pub struct PhotoGroupUploadMeta {
   /// Whether the group should be publicly visible.
   pub public: bool,
 }
+
+/// The display parameters for a photo thumbnail. Not a table.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PhotoThumbnailDisplayParams {
+  /// The base64-encoded image data.
+  pub data: String,
+  /// The alt text for the image.
+  pub alt:  String,
+  /// The image size.
+  pub size: (u32, u32),
+}

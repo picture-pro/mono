@@ -1,5 +1,4 @@
 use color_eyre::eyre::{OptionExt, Result, WrapErr};
-use core_types::NewId;
 use tracing::instrument;
 
 use crate::ObjectStoreGenerator;
@@ -95,7 +94,7 @@ async fn inner_upload_artifact(
 #[instrument(skip(artifact))]
 pub async fn push_to_surreal<Id, T>(artifact: T) -> Result<()>
 where
-  Id: NewId,
+  Id: core_types::CoreId,
   T: serde::Serialize + for<'a> serde::Deserialize<'a> + Clone,
 {
   let client = clients::surreal::SurrealRootClient::new()
@@ -120,7 +119,7 @@ where
 #[instrument(skip(id))]
 pub async fn pull_from_surreal<Id, T>(id: Id) -> Result<Box<T>>
 where
-  Id: NewId,
+  Id: core_types::CoreId<Model = T>,
   T: serde::Serialize + for<'a> serde::Deserialize<'a> + Clone,
 {
   let client = clients::surreal::SurrealRootClient::new()
@@ -129,7 +128,7 @@ where
 
   client.use_ns("main").use_db("main").await?;
   let artifact: Option<T> = client
-    .select((Id::TABLE, id.id_with_brackets()))
+    .select(id)
     .await
     .wrap_err("Failed to get artifact from surreal")?;
 

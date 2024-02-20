@@ -71,7 +71,9 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
 pub async fn fetch_user_photo_groups(
   user_id: core_types::UserRecordId,
 ) -> Result<Vec<core_types::PhotoGroup>, ServerFnError> {
-  bl::get_user_photo_groups(user_id).await.map_err(|e| {
-    ServerFnError::new(format!("Failed to get user photo groups: {e}"))
-  })
+  bl::fetch::fetch_user_owned_photo_groups(user_id)
+    .await
+    .map_err(|e| {
+      ServerFnError::new(format!("Failed to get user photo groups: {e}"))
+    })
 }

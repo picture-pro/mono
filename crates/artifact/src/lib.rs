@@ -39,7 +39,7 @@ type ObjectStoreGenerator =
 /// The core artifact trait.
 pub trait Artifact {
   /// The type of the ID of the artifact.
-  type Id: core_types::NewId;
+  type Id: core_types::CoreId<Model = Self>;
 
   /// Create a new artifact with the given contents.
   fn new(contents: Option<bytes::Bytes>) -> Self;

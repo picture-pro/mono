@@ -10,12 +10,10 @@ bytes.workspace = true
 serde.workspace = true
 ulid.workspace = true
 
-surreal-id = { version = "0.2", optional = true }
-
 axum-login = { workspace = true, optional = true }
 surrealdb = { workspace = true, optional = true }
 
 [features]
 default = []
 auth = [ "dep:axum-login" ]
-ssr = [ "dep:surreal-id", "dep:surrealdb" ]
+ssr = [ "dep:surrealdb" ]

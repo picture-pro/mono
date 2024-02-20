@@ -31,7 +31,7 @@ pub fn App() -> impl IntoView {
       outside_errors.insert_with_default_key(AppError::NotFound);
       view! { <ErrorTemplate outside_errors/> }.into_view()
     }>
-      <div data-theme="light" class="w-full min-h-screen flex flex-col items-stretch justify-stretch bg-base-200">
+      <div data-theme="wireframe" class="w-full min-h-screen flex flex-col items-stretch justify-stretch bg-base-200">
         <Navbar/>
         <Routes>
           <Route path="" view=pages::home_page::HomePage/>
