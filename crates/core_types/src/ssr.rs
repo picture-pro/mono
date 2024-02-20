@@ -49,12 +49,14 @@ pub trait CoreModel:
 pub trait CoreId:
   Copy
   + Clone
+  + Send
   + Debug
+  + PartialEq
+  + Eq
   + Serialize
   + for<'a> Deserialize<'a>
   + From<UlidOrThing>
   + IntoResource<Option<Self::Model>>
-  + Send
   + 'static
 {
   /// The database table name for this id.

@@ -6,7 +6,7 @@ pub const PRIVATE_ARTIFACT_TABLE: &str = "private_artifact";
 pub const PUBLIC_ARTIFACT_TABLE: &str = "public_artifact";
 
 /// The record ID for a private artifact.
-#[derive(Clone, Debug, Deserialize, Serialize, Copy)]
+#[derive(Clone, Debug, Deserialize, Serialize, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct PrivateArtifactRecordId(pub ulid::Ulid);
 
@@ -21,7 +21,7 @@ pub struct PrivateArtifact {
 }
 
 /// The record ID for a public artifact.
-#[derive(Clone, Debug, Deserialize, Serialize, Copy)]
+#[derive(Clone, Debug, Deserialize, Serialize, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct PublicArtifactRecordId(pub ulid::Ulid);
 

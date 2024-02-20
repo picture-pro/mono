@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// The record ID for a photo.
-#[derive(Clone, Debug, Deserialize, Serialize, Copy)]
+#[derive(Clone, Debug, Deserialize, Serialize, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct PhotoRecordId(pub ulid::Ulid);
 
@@ -63,7 +63,7 @@ pub struct PrivateImageArtifact {
 }
 
 /// The record ID for a photo group.
-#[derive(Clone, Debug, Deserialize, Serialize, Copy)]
+#[derive(Clone, Debug, Deserialize, Serialize, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct PhotoGroupRecordId(pub ulid::Ulid);
 

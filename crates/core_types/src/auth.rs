@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 pub const USER_TABLE: &str = "user";
 
 /// The record ID for a user.
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "ssr", serde(from = "crate::ssr::UlidOrThing"))]
 pub struct UserRecordId(pub ulid::Ulid);
 
