@@ -67,6 +67,7 @@
 mod artifact;
 mod auth;
 mod photo;
+mod price;
 #[cfg(feature = "ssr")]
 pub(crate) mod ssr;
 
@@ -75,4 +76,4 @@ pub use ulid::Ulid;
 
 #[cfg(feature = "ssr")]
 pub use self::ssr::{CoreId, CoreModel};
-pub use self::{artifact::*, auth::*, photo::*};
+pub use self::{artifact::*, auth::*, photo::*, price::*};

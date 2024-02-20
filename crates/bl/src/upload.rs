@@ -3,7 +3,7 @@ use bytes::Bytes;
 use clients::surreal::SurrealRootClient;
 use color_eyre::eyre::Result;
 use core_types::{
-  Photo, PhotoArtifacts, PhotoGroup, PhotoGroupUploadMeta, PrivateArtifact,
+  Photo, PhotoArtifacts, PhotoGroup, PhotoGroupStatus, PrivateArtifact,
   PublicArtifact,
 };
 use serde::{Deserialize, Serialize};
@@ -33,7 +33,7 @@ fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
 pub async fn upload_single_photo(
   user_id: core_types::UserRecordId,
   original_bytes: Bytes,
-  group_meta: PhotoGroupUploadMeta,
+  status: PhotoGroupStatus,
 ) -> Result<PhotoGroup, PhotoUploadError> {
   // load the original and make sure it's valid
   let original_image =
@@ -111,11 +111,11 @@ pub async fn upload_single_photo(
 
   // create a photo group and upload it to surreal
   let group = PhotoGroup {
-    id:           core_types::PhotoGroupRecordId(ulid::Ulid::new()),
-    owner:        user_id,
+    id: core_types::PhotoGroupRecordId(ulid::Ulid::new()),
+    owner: user_id,
     photographer: user_id,
-    photos:       vec![photo.id],
-    public:       group_meta.public,
+    photos: vec![photo.id],
+    status,
   };
 
   group.create(&client).await.map_err(|e| {

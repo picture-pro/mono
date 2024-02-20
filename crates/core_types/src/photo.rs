@@ -78,15 +78,30 @@ pub struct PhotoGroup {
   pub owner:        UserRecordId,
   /// The photos in the group.
   pub photos:       Vec<PhotoRecordId>,
-  /// Whether the group is publicly visible.
-  pub public:       bool,
+  /// The status of the photo group.
+  pub status:       PhotoGroupStatus,
 }
 
-/// The metadata for uploading a photo group. Not a table.
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
-pub struct PhotoGroupUploadMeta {
-  /// Whether the group should be publicly visible.
-  pub public: bool,
+/// The status of a photo group. Not a table.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum PhotoGroupStatus {
+  /// The ownership of the photo group is for sale.
+  OwnershipForSale {
+    /// The price of the photo group.
+    digital_price: crate::Price,
+  },
+  /// The ownership of the photo group has been purchased, and it cannot be
+  /// sold again.
+  OwnershipPurchased {
+    /// The user who purchased the photo group.
+    owner: UserRecordId,
+  },
+  /// Usage rights to the photos in the group are for sale. Usage rights can be
+  /// sold repeatedly.
+  UsageRightsForSale {
+    /// The price of the photos in the group.
+    digital_price: Vec<(PhotoRecordId, crate::Price)>,
+  },
 }
 
 /// The display parameters for a photo thumbnail. Not a table.

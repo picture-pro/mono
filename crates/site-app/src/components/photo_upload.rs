@@ -64,7 +64,6 @@ pub async fn photo_upload(
     .ok_or_else(|| ServerFnError::new("Not logged in"))?;
 
   // to upload a photo, we need the Bytes of the photo and whether it's public
-  let mut public: Option<bool> = None;
   let mut photo: Option<bytes::Bytes> = None;
 
   // this only panics on the client
@@ -74,12 +73,6 @@ pub async fn photo_upload(
     ServerFnError::new(format!("Failed to parse form data: {}", e))
   })? {
     match field.name() {
-      Some("public") => {
-        let value = field.text().await.map_err(|e| {
-          ServerFnError::new(format!("Failed to read public field: {}", e))
-        })?;
-        public = Some(value == "on");
-      }
       Some("photo") => {
         let bytes = field.bytes().await.map_err(|e| {
           ServerFnError::new(format!("Failed to read photo field: {}", e))
@@ -92,14 +85,14 @@ pub async fn photo_upload(
     }
   }
 
-  let public =
-    public.ok_or_else(|| ServerFnError::new("Missing public field"))?;
   let photo = photo.ok_or_else(|| ServerFnError::new("Missing photo field"))?;
 
   let photo_group = bl::upload::upload_single_photo(
     user.id,
     photo,
-    core_types::PhotoGroupUploadMeta { public },
+    core_types::PhotoGroupStatus::OwnershipForSale {
+      digital_price: core_types::Price(1.0),
+    },
   )
   .await
   .map_err(|e| ServerFnError::new(format!("Failed to upload photo: {}", e)))?;
