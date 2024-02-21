@@ -11,6 +11,7 @@ use leptos_router::*;
 use crate::{
   components::navigation::navigate_to,
   error_template::{AppError, ErrorTemplate},
+  pages::Footer,
   utils::authenticated_user,
 };
 
@@ -42,6 +43,7 @@ pub fn App() -> impl IntoView {
           <Route path="/photo/:id" view=pages::purchase::PurchasePage/>
           <Route path="/photo" view=pages::purchase::error::PurchasePageNoId/>
         </Routes>
+        <Footer/>
       </div>
     </Router>
   }
