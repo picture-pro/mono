@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 bytes.workspace = true
 serde.workspace = true
+time.workspace = true
 ulid.workspace = true
 
 axum-login = { workspace = true, optional = true }

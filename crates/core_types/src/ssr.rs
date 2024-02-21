@@ -41,6 +41,8 @@ pub trait CoreModel:
 {
   /// The id type for this model.
   type Id: CoreId<Model = Self> + IntoResource<Option<Self>> + Send;
+
+  fn meta(&self) -> &crate::ObjectMeta;
 }
 
 /// A type that can be used as an id for a model.
@@ -100,6 +102,7 @@ macro_rules! impl_table {
 
     impl CoreModel for $model_type {
       type Id = $id_type;
+      fn meta(&self) -> &crate::ObjectMeta { &self.meta }
     }
   };
 }

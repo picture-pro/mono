@@ -71,9 +71,17 @@ mod price;
 #[cfg(feature = "ssr")]
 pub(crate) mod ssr;
 
+use serde::{Deserialize, Serialize};
 #[cfg(feature = "ssr")]
 pub use ulid::Ulid;
 
 #[cfg(feature = "ssr")]
 pub use self::ssr::{CoreId, CoreModel};
 pub use self::{artifact::*, auth::*, photo::*, price::*};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+/// The metadata for any object.
+pub struct ObjectMeta {
+  /// The time the object was created at.
+  pub created_at: time::OffsetDateTime,
+}

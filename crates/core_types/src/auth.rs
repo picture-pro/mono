@@ -25,6 +25,8 @@ pub struct User {
   pub email:   String,
   /// The user's password hash.
   pub pw_hash: String,
+  /// Object metadata.
+  pub meta:    crate::ObjectMeta,
 }
 
 /// A user, with the password hash removed.
@@ -40,6 +42,8 @@ pub struct PublicUser {
   pub name:  String,
   /// The user's email.
   pub email: String,
+  /// Object metadata.
+  pub meta:  crate::ObjectMeta,
 }
 
 #[cfg(feature = "ssr")]
@@ -49,6 +53,7 @@ impl From<User> for PublicUser {
       id:    u.id,
       name:  u.name,
       email: u.email,
+      meta:  u.meta,
     }
   }
 }
