@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -25,8 +27,18 @@ pub struct SignupParams {
   pub confirm:  String,
 }
 
-#[derive(Validate, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Validate, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LoginParams {
   pub email:    String,
   pub password: String,
+}
+
+impl Debug for LoginParams {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(
+      f,
+      "LoginParams {{ email: {}, password: [REDACTED] }}",
+      self.email
+    )
+  }
 }
