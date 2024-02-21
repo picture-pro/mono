@@ -95,7 +95,7 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
             "Owned by "<UserName id={group.owner} />
           </p>
           <p class="text-xs text-base-content/80">
-            "Photographed by "<UserName id={group.photographer} />
+            "Photographed by "<UserName id={group.photographer} />", "<crate::components::basic::TimeAgo time={group.meta.created_at} />
           </p>
         </div>
       </div>

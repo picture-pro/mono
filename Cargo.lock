@@ -4572,6 +4572,7 @@ dependencies = [
  "bl",
  "bytes",
  "cfg-if",
+ "chrono",
  "core_types",
  "http 1.0.0",
  "leptos",
@@ -4581,6 +4582,7 @@ dependencies = [
  "serde",
  "server_fn",
  "thiserror",
+ "timeago",
  "tracing",
  "validation",
  "validator",
@@ -5090,6 +5092,15 @@ checksum = "7ba3a3ef41e6672a2f0f001392bb5dcd3ff0a9992d618ca761a11c3121547774"
 dependencies = [
  "num-conv",
  "time-core",
+]
+
+[[package]]
+name = "timeago"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1710e589de0a76aaf295cd47a6699f6405737dbfd3cf2b75c92d000b548d0e6"
+dependencies = [
+ "chrono",
 ]
 
 [[package]]

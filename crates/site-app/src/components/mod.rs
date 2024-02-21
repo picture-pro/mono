@@ -33,4 +33,14 @@ pub mod basic {
       </a>
     }
   }
+
+  #[component]
+  pub fn TimeAgo(time: chrono::DateTime<chrono::Utc>) -> impl IntoView {
+    let formatter = timeago::Formatter::new();
+    let formatted = formatter.convert_chrono(time, chrono::Utc::now());
+
+    view! {
+      <span>{ formatted }</span>
+    }
+  }
 }
