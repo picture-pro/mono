@@ -79,6 +79,12 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
     .into_view(),
   };
 
+  let share_url = format!(
+    "{}/photo/{}",
+    std::env::var("APP_BASE_URL").expect("APP_BASE_URL not set"),
+    group.id.0
+  );
+
   view! {
     <div class="flex p-4 gap-4 bg-base-100 rounded-box shadow">
       { group.photos.into_iter().map(|photo_id| {
@@ -95,7 +101,9 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
             "Owned by "<UserName id={group.owner} />
           </p>
           <p class="text-xs text-base-content/80">
-            "Photographed by "<UserName id={group.photographer} />", "<crate::components::basic::TimeAgo time={group.meta.created_at} />
+            "Photographed by "<UserName id={group.photographer} />
+            ", "
+            <crate::components::basic::TimeAgo time={group.meta.created_at} />
           </p>
         </div>
       </div>
@@ -105,9 +113,12 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
           d-btn d-btn-ghost d-btn-circle d-btn-sm text-xl font-bold
           justify-center items-center text-center
         ">"⋮"</button>
-        <button class="d-btn d-btn-primary d-btn-sm text-lg font-semibold tracking-tight">
+        <a
+          class="d-btn d-btn-primary d-btn-sm text-lg font-semibold tracking-tight"
+          href={ share_url }
+        >
           "Share"
-        </button>
+        </a>
       </div>
     </div>
   }
