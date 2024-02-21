@@ -40,7 +40,7 @@ pub fn App() -> impl IntoView {
           <Route path="/login" view=pages::auth::login_page::LoginPage/>
           <Route path="/signup" view=pages::auth::signup_page::SignupPage/>
           <Route path="/photo/:id" view=pages::purchase::PurchasePage/>
-          <Route path="/photo" view=pages::purchase::PurchasePageNoId/>
+          <Route path="/photo" view=pages::purchase::error::PurchasePageNoId/>
         </Routes>
       </div>
     </Router>

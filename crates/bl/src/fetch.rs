@@ -36,6 +36,26 @@ pub async fn fetch_user_owned_photo_groups(
 }
 
 #[instrument]
+pub async fn fetch_photo_group(
+  photo_group_id: core_types::PhotoGroupRecordId,
+) -> Result<Option<core_types::PhotoGroup>> {
+  let client = SurrealRootClient::new()
+    .await
+    .wrap_err("Failed to create surreal client")?;
+  client
+    .use_ns("main")
+    .use_db("main")
+    .await
+    .wrap_err("Failed to use surreal namespace/database")?;
+
+  let group = core_types::PhotoGroup::fetch(photo_group_id, &client)
+    .await
+    .wrap_err("Failed to fetch photo group")?;
+
+  Ok(group)
+}
+
+#[instrument]
 pub async fn fetch_user(
   user_id: core_types::UserRecordId,
 ) -> Result<Option<core_types::PublicUser>> {
