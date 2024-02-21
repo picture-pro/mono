@@ -4573,7 +4573,6 @@ dependencies = [
  "cfg-if",
  "core_types",
  "http 1.0.0",
- "image",
  "leptos",
  "leptos_axum",
  "leptos_meta",
