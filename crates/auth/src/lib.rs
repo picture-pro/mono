@@ -70,11 +70,12 @@ impl Backend {
     let user: Option<core_types::User> = (*self.surreal_client)
       .query(
         "CREATE user SET name = $name, email = $email, pw_hash = \
-         crypto::argon2::generate($password), id = $id",
+         crypto::argon2::generate($password), meta = $meta, id = $id",
       )
       .bind(("name", &name))
       .bind(("email", &email))
       .bind(("password", &password))
+      .bind(("meta", core_types::ObjectMeta::default()))
       .bind((
         "id",
         core_types::UserRecordId(core_types::Ulid::new()).to_thing(),
