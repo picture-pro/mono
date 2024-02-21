@@ -66,36 +66,15 @@
 
 mod artifact;
 mod auth;
+mod meta;
 mod photo;
 mod price;
 #[cfg(feature = "ssr")]
 pub(crate) mod ssr;
 
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "ssr")]
 pub use ulid::Ulid;
 
 #[cfg(feature = "ssr")]
 pub use self::ssr::{CoreId, CoreModel};
-pub use self::{artifact::*, auth::*, photo::*, price::*};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-/// The metadata for any object.
-pub struct ObjectMeta {
-  /// The time the object was created at.
-  #[serde(with = "time::serde::timestamp")]
-  pub created_at: time::OffsetDateTime,
-}
-
-impl ObjectMeta {
-  /// Create a new object meta with the current time.
-  pub fn new() -> Self {
-    Self {
-      created_at: time::OffsetDateTime::now_utc(),
-    }
-  }
-}
-
-impl Default for ObjectMeta {
-  fn default() -> Self { Self::new() }
-}
+pub use self::{artifact::*, auth::*, meta::*, photo::*, price::*};
