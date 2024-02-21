@@ -83,6 +83,7 @@ pub use self::{artifact::*, auth::*, photo::*, price::*};
 /// The metadata for any object.
 pub struct ObjectMeta {
   /// The time the object was created at.
+  #[serde(with = "time::serde::timestamp")]
   pub created_at: time::OffsetDateTime,
 }
 
