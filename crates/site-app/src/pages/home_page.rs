@@ -8,7 +8,7 @@ pub fn HomePage() -> impl IntoView {
 
   view! {
     <super::SmallPageWrapper>
-      <div class="d-card-body gap-4 w-64">
+      <div class="d-card-body gap-4">
         <p class="text-2xl font-semibold tracking-tight">"Welcome to PicturePro!"</p>
         { match user {
           Some(user) => view! {
