@@ -31,6 +31,7 @@ serde = { version = "1", features = ["derive"] }
 simple_logger = "4.2.0"
 surrealdb = { version = "1" }
 thiserror = "1"
+chrono = { version = "0.4", features = [ "serde" ] }
 tokio = { version = "1", features = ["full"] }
 tower = { version = "0.4", features = ["full"] }
 tower-http = { version = "0.5", features = ["full"] }

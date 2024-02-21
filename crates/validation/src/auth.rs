@@ -1,7 +1,9 @@
+use std::fmt::Debug;
+
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Validate, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Validate, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SignupParams {
   #[validate(
     length(min = 3, message = "Name must be at least 3 characters long"),
@@ -25,8 +27,28 @@ pub struct SignupParams {
   pub confirm:  String,
 }
 
-#[derive(Validate, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+impl Debug for SignupParams {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SignupParams")
+      .field("name", &self.name)
+      .field("email", &self.email)
+      .field("password", &"[redacted]")
+      .field("confirm", &"[redacted]")
+      .finish()
+  }
+}
+
+#[derive(Validate, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LoginParams {
   pub email:    String,
   pub password: String,
+}
+
+impl Debug for LoginParams {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("LoginParams")
+      .field("email", &self.email)
+      .field("password", &"[redacted]")
+      .finish()
+  }
 }

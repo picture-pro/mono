@@ -23,6 +23,8 @@ pub struct Photo {
   pub group:     PhotoGroupRecordId,
   /// The photo's artifacts.
   pub artifacts: PhotoArtifacts,
+  /// Object metadata.
+  pub meta:      crate::ObjectMeta,
 }
 
 /// The artifacts for a photo. Not a table.
@@ -80,6 +82,8 @@ pub struct PhotoGroup {
   pub photos:       Vec<PhotoRecordId>,
   /// The status of the photo group.
   pub status:       PhotoGroupStatus,
+  /// Object metadata.
+  pub meta:         crate::ObjectMeta,
 }
 
 /// The status of a photo group. Not a table.

@@ -1,5 +1,3 @@
-#[cfg(feature = "ssr")]
-use leptos::logging::log;
 use leptos::*;
 use validation::{LoginParams, Validate};
 
@@ -110,7 +108,7 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
     .await
     .map_err(|e| ServerFnError::new(format!("Failed to log in: {e}")))?;
 
-  log!("logged in user: {} ({})", user.name, user.id.0);
+  tracing::info!("logged in user: {} ({})", user.name, user.id.0);
   leptos_axum::redirect("/");
 
   Ok(true)

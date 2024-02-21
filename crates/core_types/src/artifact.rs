@@ -15,6 +15,8 @@ pub struct PrivateArtifactRecordId(pub ulid::Ulid);
 pub struct PrivateArtifact {
   /// The record ID.
   pub id:       PrivateArtifactRecordId,
+  /// Object metadata.
+  pub meta:     crate::ObjectMeta,
   /// The contents of the artifact (skipped by serde)
   #[serde(skip)]
   pub contents: Option<bytes::Bytes>,
@@ -32,6 +34,8 @@ pub struct PublicArtifact {
   pub id:       PublicArtifactRecordId,
   /// The public URL to the artifact.
   pub url:      String,
+  /// Object metadata.
+  pub meta:     crate::ObjectMeta,
   #[serde(skip)]
   /// The contents of the artifact (skipped by serde)
   pub contents: Option<bytes::Bytes>,
