@@ -94,6 +94,7 @@ pub async fn upload_single_photo(
         size:        (thumbnail_image.width(), thumbnail_image.height()),
       },
     },
+    meta:      Default::default(),
   };
 
   let client = SurrealRootClient::new().await.map_err(|_| {
@@ -116,6 +117,7 @@ pub async fn upload_single_photo(
     photographer: user_id,
     photos: vec![photo.id],
     status,
+    meta: Default::default(),
   };
 
   group.create(&client).await.map_err(|e| {

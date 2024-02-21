@@ -89,15 +89,17 @@ impl Artifact for PublicArtifact {
     Self::new_with_id(id, contents)
   }
   fn new_with_id(id: Self::Id, contents: Option<bytes::Bytes>) -> Self {
+    let url = format!(
+      "https://s3.{}.amazonaws.com/{}/{}",
+      std::env::var("AWS_DEFAULT_REGION").unwrap(),
+      ARTIFACT_PUBLIC_LTS_BUCKET,
+      id.0
+    );
     Self {
       id,
+      url,
+      meta: Default::default(),
       contents,
-      url: format!(
-        "https://s3.{}.amazonaws.com/{}/{}",
-        std::env::var("AWS_DEFAULT_REGION").unwrap(),
-        ARTIFACT_PUBLIC_LTS_BUCKET,
-        id.0
-      ),
     }
   }
   async fn download(&mut self) -> Result<()> {
@@ -137,7 +139,11 @@ impl Artifact for PrivateArtifact {
     Self::new_with_id(id, contents)
   }
   fn new_with_id(id: Self::Id, contents: Option<bytes::Bytes>) -> Self {
-    Self { id, contents }
+    Self {
+      id,
+      meta: Default::default(),
+      contents,
+    }
   }
   async fn download(&mut self) -> Result<()> {
     let object_store = Box::new(Self::object_store);
