@@ -1,5 +1,3 @@
-#[cfg(feature = "ssr")]
-use leptos::logging::log;
 use leptos::*;
 use validation::{LoginParams, Validate};
 

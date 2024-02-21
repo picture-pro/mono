@@ -42,6 +42,7 @@ pub trait CoreModel:
   /// The id type for this model.
   type Id: CoreId<Model = Self> + IntoResource<Option<Self>> + Send;
 
+  /// Get the metadata for this model.
   fn meta(&self) -> &crate::ObjectMeta;
 }
 
