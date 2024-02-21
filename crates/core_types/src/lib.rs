@@ -85,3 +85,16 @@ pub struct ObjectMeta {
   /// The time the object was created at.
   pub created_at: time::OffsetDateTime,
 }
+
+impl ObjectMeta {
+  /// Create a new object meta with the current time.
+  pub fn new() -> Self {
+    Self {
+      created_at: time::OffsetDateTime::now_utc(),
+    }
+  }
+}
+
+impl Default for ObjectMeta {
+  fn default() -> Self { Self::new() }
+}
