@@ -7,6 +7,7 @@ module.exports = {
 			'sans': ['inter', 'ui-sans-serif', 'system-ui', 'sans-serif', "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"],
     },
     screens: {
+      'xs': '480px',
       'sm': '640px',
       'md': '768px',
       'lg': '1024px',
