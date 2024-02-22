@@ -64,31 +64,6 @@ pub fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
   .into_view();
 
   view! {
-    // <div class="flex flex-col items-stretch p-6 gap-4 bg-base-100 rounded-box shadow">
-    //   <div class="flex flex-row gap-4">
-    //     { photos_element }
-    //     <div class="flex-1">{ status_element }</div>
-    //     <crate::components::photo_group::EllipsisButton />
-    //   </div>
-    //   <div class="flex flex-row gap-4">
-    //     <div class="flex flex-col gap-1 flex-1">
-    //       <p class="text-xs text-base-content/80">
-    //         { owned_by_element }
-    //       </p>
-    //       <p class="text-xs text-base-content/80">
-    //         { uploaded_by_element }
-    //         ", "
-    //         { created_at_element }
-    //       </p>
-    //     </div>
-    //     <a
-    //       class="d-btn d-btn-primary d-btn-sm text-lg font-semibold tracking-tight"
-    //       href={ share_url }
-    //     >
-    //       "Share"
-    //     </a>
-    //   </div>
-    // </div>
     <div class="grid grid-cols-[auto_1fr] p-6 gap-4 bg-base-100 rounded-box shadow">
       <div class="col-start-1 col-span-1 row-start-1 row-span-1 sm:row-span-2">
         { photos_element }
