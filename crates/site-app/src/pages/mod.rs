@@ -18,14 +18,25 @@ pub fn SmallPageWrapper(children: Children) -> impl IntoView {
   }
 }
 
+/// A wrapper for all pages in the app.
+///
+/// It acts as a responsive container, and if `backed` is true, it will look
+/// like a card with a shadow, a background color, and a border radius.
 #[component]
 pub fn PageWrapper(
   children: Children,
-  #[prop(default = "bg-base-100")] bg_color: &'static str,
-  #[prop(default = "shadow")] shadow: &'static str,
+  /// Whether the wrapper should appear "backed" like a card.
+  #[prop(default = true)]
+  backed: bool,
 ) -> impl IntoView {
   view! {
-    <div class={format!("flex-1 flex flex-col gap-4 md:container md:mx-auto my-8 md:rounded-xl {shadow} p-4 md:px-6 {bg_color} overflow-x-auto")}>
+    <div class={format!(
+      "flex-1 flex flex-col gap-4 md:container md:mx-auto my-8 {rounded}
+      {shadow} p-4 md:px-6 {bg_color} overflow-x-auto",
+      rounded = if backed { "md:rounded-xl" } else { "" },
+      shadow = if backed { "shadow" } else { "" },
+      bg_color = if backed { "bg-base-100" } else { "" },
+    )}>
       {children()}
     </div>
   }

@@ -18,7 +18,7 @@ pub fn DashboardPage() -> impl IntoView {
   }
 
   view! {
-    <PageWrapper bg_color="" shadow="">
+    <PageWrapper backed=false>
       <p class="text-4xl font-semibold tracking-tight">"Marketplace Photos"</p>
       <div class="flex flex-row justify-between gap-4 items-start">
         <crate::components::gallery::Gallery />
