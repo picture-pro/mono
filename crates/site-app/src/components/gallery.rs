@@ -86,7 +86,7 @@ fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
   );
 
   view! {
-    <div class="flex p-4 gap-4 bg-base-100 rounded-box shadow">
+    <div class="flex p-6 gap-6 bg-base-100 rounded-box shadow">
       { group.photos.into_iter().map(|photo_id| {
         view! {
           <crate::components::photo::Photo photo_id=photo_id />
