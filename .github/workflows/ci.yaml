@@ -15,6 +15,8 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v3
+      - name: Install flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Check default package
         run: nix flake check
       - name: Deploy to Fly
