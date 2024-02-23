@@ -25,8 +25,7 @@ pub fn PurchasePage() -> impl IntoView {
   let photo_group_id = core_types::PhotoGroupRecordId(ulid);
 
   // create a resource for fetching the photo group
-  let photo_group =
-    create_resource(move || photo_group_id, move |id| fetch_photo_group(id));
+  let photo_group = create_resource(move || photo_group_id, fetch_photo_group);
 
   // render the page, using InnerPurchasePage if everything works
   view! {
