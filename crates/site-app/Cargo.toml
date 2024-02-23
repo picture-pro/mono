@@ -17,6 +17,8 @@ cfg-if.workspace = true
 thiserror.workspace = true
 serde.workspace = true
 bytes = { workspace = true, optional = true }
+chrono = { workspace = true }
+timeago = { workspace = true }
 tracing = { workspace = true, optional = true }
 
 validator = "0.16.1"

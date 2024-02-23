@@ -9,19 +9,27 @@ use site_app::App;
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
 
+use crate::AppState;
+
 pub async fn file_and_error_handler(
   uri: Uri,
-  State(options): State<LeptosOptions>,
+  auth_session: auth::AuthSession,
+  State(app_state): State<AppState>,
   req: Request<Body>,
 ) -> AxumResponse {
-  let root = options.site_root.clone();
+  let root = app_state.leptos_options.site_root.clone();
   let res = get_static_file(uri.clone(), &root).await.unwrap();
 
   if res.status() == StatusCode::OK {
     res.into_response()
   } else {
-    let handler = leptos_axum::render_app_to_stream(
-      options.to_owned(),
+    let handler = leptos_axum::render_app_to_stream_with_context(
+      app_state.leptos_options.to_owned(),
+      move || {
+        provide_context(core_types::LoggedInUser(
+          auth_session.user.clone().map(core_types::PublicUser::from),
+        ))
+      },
       move || view! { <App/> },
     );
     handler(req).await.into_response()

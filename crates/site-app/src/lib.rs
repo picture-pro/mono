@@ -9,8 +9,9 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::{
-  components::navigation::navigate_to,
+  components::navigation::reload,
   error_template::{AppError, ErrorTemplate},
+  pages::Footer,
   utils::authenticated_user,
 };
 
@@ -39,7 +40,10 @@ pub fn App() -> impl IntoView {
           <Route path="/dashboard" view=pages::dashboard::DashboardPage/>
           <Route path="/login" view=pages::auth::login_page::LoginPage/>
           <Route path="/signup" view=pages::auth::signup_page::SignupPage/>
+          <Route path="/photo/:id" view=pages::purchase::PurchasePage/>
+          <Route path="/photo" view=pages::purchase::error::PurchasePageNoId/>
         </Routes>
+        <Footer/>
       </div>
     </Router>
   }
@@ -88,7 +92,7 @@ pub fn LogoutButton(class: Option<String>) -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(logout_value(), Some(Ok(_))) {
-      navigate_to("/");
+      reload();
     }
   });
 

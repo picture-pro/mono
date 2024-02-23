@@ -72,7 +72,6 @@ mod price;
 #[cfg(feature = "ssr")]
 pub(crate) mod ssr;
 
-#[cfg(feature = "ssr")]
 pub use ulid::Ulid;
 
 #[cfg(feature = "ssr")]

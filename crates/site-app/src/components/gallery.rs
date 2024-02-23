@@ -1,6 +1,6 @@
 use leptos::*;
 
-use crate::components::user::UserName;
+use crate::components::photo_group::PhotoGroup;
 
 #[component]
 pub fn Gallery() -> impl IntoView {
@@ -47,7 +47,7 @@ fn PhotoGroupList(groups: Vec<core_types::PhotoGroup>) -> impl IntoView {
   }
 
   view! {
-    <div class="flex-1 flex flex-col gap-4 justify-stretch max-w-lg">
+    <div class="flex-1 flex flex-col gap-4 items-stretch lg:max-w-lg">
       { groups.into_iter().map(|group| {
         view! {
           <PhotoGroup group=group />
@@ -57,60 +57,6 @@ fn PhotoGroupList(groups: Vec<core_types::PhotoGroup>) -> impl IntoView {
     </div>
   }
   .into_view()
-}
-
-#[component]
-fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
-  let status_element = match group.status {
-    core_types::PhotoGroupStatus::OwnershipForSale { digital_price } => view! {
-      <p class="text-2xl tracking-tight text-base-content">
-        "For Sale: "
-        <span class="font-semibold">
-          { format!("${:.2}", digital_price.0) }
-        </span>
-      </p>
-    }
-    .into_view(),
-    _ => view! {
-      <p class="text-xl font-semibold tracking-tight text-base-content/80">
-        "Not For Sale"
-      </p>
-    }
-    .into_view(),
-  };
-
-  view! {
-    <div class="flex p-4 gap-4 bg-base-100 rounded-box shadow">
-      { group.photos.into_iter().map(|photo_id| {
-        view! {
-          <crate::components::photo::Photo photo_id=photo_id />
-        }
-        .into_view()
-      }).collect::<Vec<_>>() }
-      <div class="flex-1 flex flex-col gap-2">
-        { status_element }
-        <div class="flex-1" />
-        <div class="flex flex-col gap-1">
-          <p class="text-xs text-base-content/80">
-            "Owned by "<UserName id={group.owner} />
-          </p>
-          <p class="text-xs text-base-content/80">
-            "Photographed by "<UserName id={group.photographer} />
-          </p>
-        </div>
-      </div>
-      <div class="flex flex-col items-end justify-between">
-        // context menu ellipsis
-        <button class="
-          d-btn d-btn-ghost d-btn-circle d-btn-sm text-xl font-bold
-          justify-center items-center text-center
-        ">"⋮"</button>
-        <button class="d-btn d-btn-primary d-btn-sm text-lg font-semibold tracking-tight">
-          "Share"
-        </button>
-      </div>
-    </div>
-  }
 }
 
 #[cfg_attr(feature = "ssr", tracing::instrument)]
