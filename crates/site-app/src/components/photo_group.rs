@@ -13,7 +13,11 @@ pub fn EllipsisButton() -> impl IntoView {
 }
 
 #[component]
-pub fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
+pub fn PhotoGroup(
+  group: core_types::PhotoGroup,
+  #[prop(default = false)] read_only: bool,
+  #[prop(default = "")] extra_class: &'static str,
+) -> impl IntoView {
   let status_element = match group.status {
     core_types::PhotoGroupStatus::OwnershipForSale { digital_price } => view! {
       <p class="text-2xl tracking-tight text-base-content">
@@ -64,15 +68,23 @@ pub fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
   .into_view();
 
   view! {
-    <div class="grid grid-cols-[auto_1fr] p-6 gap-4 bg-base-100 rounded-box shadow">
-      <div class="col-start-1 col-span-1 row-start-1 row-span-1 sm:row-span-2">
+    <div class={format!(
+      "grid grid-cols-[auto_1fr] p-6 gap-4 bg-base-100 rounded-box shadow {extra_class}"
+    )}>
+      <div class={format!(
+        "col-start-1 col-span-1 row-start-1 flex flex-col justify-center xs:px-4 {adjusted_for_action}",
+        adjusted_for_action = if !read_only { "row-span-1 sm:row-span-2" } else { "row-span-2" },
+      )}>
         { photos_element }
       </div>
       <div class="col-start-2 col-span-1 row-start-1 row-span-1 flex flex-row justify-between gap-4">
         { status_element }
         <crate::components::photo_group::EllipsisButton />
       </div>
-      <div class="col-start-1 sm:col-start-2 col-span-2 sm:col-span-1 row-start-2 row-span-1 flex flex-row items-end justify-between gap-4">
+      <div class={format!(
+        "row-start-2 row-span-1 flex flex-row items-end justify-between gap-4 {adjusted_for_action}",
+        adjusted_for_action = if !read_only { "col-start-1 col-span-2 sm:col-start-2 sm:col-span-1" } else { "col-start-2 col-span-1" },
+      )}>
         <div class="flex flex-col gap-1">
           <p class="text-xs text-base-content/80">
             { owned_by_element }
@@ -83,12 +95,17 @@ pub fn PhotoGroup(group: core_types::PhotoGroup) -> impl IntoView {
             { created_at_element }
           </p>
         </div>
-        <a
-          class="d-btn d-btn-primary d-btn-sm text-lg font-semibold tracking-tight"
-          href={ share_url }
-        >
-          "Share"
-        </a>
+        { match read_only {
+          false => view! {
+            <a
+              class="d-btn d-btn-primary d-btn-sm text-lg font-semibold tracking-tight"
+              href={ share_url }
+            >
+              "Share"
+            </a>
+          }.into_view(),
+          true => ().into_view()
+        } }
       </div>
     </div>
   }
