@@ -9,7 +9,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::{
-  components::navigation::navigate_to,
+  components::navigation::reload,
   error_template::{AppError, ErrorTemplate},
   pages::Footer,
   utils::authenticated_user,
@@ -92,7 +92,7 @@ pub fn LogoutButton(class: Option<String>) -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(logout_value(), Some(Ok(_))) {
-      navigate_to("/");
+      reload();
     }
   });
 
