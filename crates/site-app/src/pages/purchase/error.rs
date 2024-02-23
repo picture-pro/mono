@@ -31,8 +31,6 @@ pub fn PurchasePageMissing() -> impl IntoView {
 
 #[component]
 pub fn PurchasePageInternalError(error: String) -> impl IntoView {
-  tracing::error!("Internal error: {}", error);
-
   view! {
     <PurchasePageError
       error="An internal error occurred while trying to fetch the photo you are trying to purchase. Please try again later.".to_string()
