@@ -87,8 +87,8 @@
         # all of that work (e.g. via cachix) when running in CI
         site-server-deps = craneLib.buildDepsOnly (common_args // {
           buildPhaseCargoCommand = ''
-            cargo build -p site-server --release --locked
-            cargo build -p site-frontend --release --locked
+            cargo build -p site-server --profile release --locked
+            cargo build -p site-frontend --target=wasm32-unknown-unknown --profile wasm-release --locked
           '';
         });
 
@@ -124,8 +124,6 @@
           cargoArtifacts = site-server-deps;
 
           SQLX_OFFLINE = "true";
-          LEPTOS_BIN_PROFILE_RELEASE = "release";
-          LEPTOS_LIB_PROFILE_RELEASE = "release-wasm-size";
           APP_ENVIRONMENT = "production";
         });
 
