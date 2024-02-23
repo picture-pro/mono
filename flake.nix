@@ -123,14 +123,13 @@
           doCheck = false;
           cargoArtifacts = site-server-deps;
 
-          SQLX_OFFLINE = "true";
           APP_ENVIRONMENT = "production";
         });
 
         site-server-container = pkgs.dockerTools.buildLayeredImage {
           name = "site-server";
           tag = "latest";
-          contents = [ site-server pkgs.cacert ];
+          contents = [ site-server pkgs.cacert pkgs.surrealdb ];
           config.Cmd = [ "${site-server}/bin/site-server" ];
         };
       
@@ -178,8 +177,9 @@
         };
 
         packages = {
-          inherit site-server site-server-container;
           default = site-server;
+          server = site-server;
+          container = site-server-container;
         };
         
         devShells.default = pkgs.mkShell {

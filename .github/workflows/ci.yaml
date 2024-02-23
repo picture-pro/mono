@@ -17,3 +17,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v3
       - name: Check default package
         run: nix flake check
+      - name: Deploy to Fly
+        run: nix build ".#container" -L && docker load < result && flyctl deploy --local-only -i picturepro-mono
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

@@ -1,0 +1,41 @@
+# fly.toml app configuration file generated for picturepro-mono on 2024-02-23T10:36:24-06:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "picturepro-mono"
+primary_region = "dfw"
+kill_signal = "SIGINT"
+kill_timeout = "5s"
+
+[http_service]
+  processes = ["app"]
+  internal_port = 3000
+  force_https = false
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/"
+
+[processes]
+  app = "site-server"
+  surreal = "surreal start --log=info --auth --bind 0.0.0.0:8000 file://data/srdb.db"
+
+[mounts]
+  source = "surreal_data"
+  destination = "/data"
+  processes = ["surreal"]
+  initial_size = "1gb"
+  auto_extend_size_threshold = 80
+  auto_extend_size_increment = "1gb"
+  auto_extend_size_limit = "5gb"
