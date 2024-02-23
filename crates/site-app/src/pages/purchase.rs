@@ -156,6 +156,16 @@ fn PhotoPurchaseOptions(group: core_types::PhotoGroup) -> impl IntoView {
   let user_id = user.as_ref().map(|u| u.id);
 
   let options = match group.status {
+    core_types::PhotoGroupStatus::OwnershipForSale { .. }
+      if Some(group.owner) == user_id =>
+    {
+      vec![PurchaseOption {
+        title: "You Own This",
+        desc:  "You own the digital rights to this photo at this moment, but \
+                it is still available for purchase.",
+        price: None,
+      }]
+    }
     core_types::PhotoGroupStatus::OwnershipForSale { digital_price } => {
       vec![
         PurchaseOption {
@@ -177,7 +187,8 @@ fn PhotoPurchaseOptions(group: core_types::PhotoGroup) -> impl IntoView {
     {
       vec![PurchaseOption {
         title: "You Own This",
-        desc:  "You own the digital rights to this photo",
+        desc:  "You own the digital rights to this photo, and it is no longer \
+                available for purchase.",
         price: None,
       }]
     }
@@ -197,7 +208,7 @@ fn PhotoPurchaseOptions(group: core_types::PhotoGroup) -> impl IntoView {
     <div class="grid sm:grid-flow-col sm:auto-cols-fr lg:max-w-lg gap-4">
       { options.into_iter().map(|option| {
         view! {
-          <div class="flex flex-col gap-2 p-4 bg-base-100 rounded-box shadow">
+          <div class="flex flex-col gap-4 p-6 bg-base-100 rounded-box shadow">
             <p class="text-2xl tracking-tight">
               { option.title }
               { option.price.map(|p| view! {
