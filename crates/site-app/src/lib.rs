@@ -17,6 +17,7 @@ use crate::{
 
 #[component]
 pub fn App() -> impl IntoView {
+  // dummy change
   // Provides context that manages stylesheets, titles, meta tags, etc.
   provide_meta_context();
 
