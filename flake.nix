@@ -182,7 +182,7 @@
           default = site-server;
         };
         
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           nativeBuildInputs = (with pkgs; [
             toolchain # cargo and such
             dive # docker images
