@@ -38,3 +38,14 @@ kill_timeout = "5s"
     grace_period = "10s"
     method = "GET"
     path = "/"
+
+[checks]
+  [checks.surreal_check]
+    processes = ["surreal"]
+    grace_period = "30s"
+    interval = "15s"
+    method = "get"
+    path = "/status"
+    port = 8000
+    timeout = "10s"
+    type = "http"
