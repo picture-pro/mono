@@ -18,7 +18,8 @@ pub fn object_store_from_env(
   Ok(Box::new(object_store))
 }
 
-fn cache_path(id: &str) -> std::path::PathBuf { std::env::temp_dir().join(id) }
+fn cache_dir() -> std::path::PathBuf { std::env::temp_dir() }
+fn cache_path(id: &str) -> std::path::PathBuf { cache_dir().join(id) }
 
 #[instrument(skip(object_store))]
 pub async fn download_artifact(
@@ -35,6 +36,12 @@ pub async fn download_artifact(
 
   let object_store = object_store()?;
   let contents = inner_download_artifact(&*object_store, id).await?;
+
+  if !cache_dir().exists() {
+    tokio::fs::create_dir_all(cache_dir())
+      .await
+      .wrap_err("Failed to create cache directory")?;
+  }
   tokio::fs::write(&cache_path, &contents)
     .await
     .wrap_err("Failed to write cached artifact")?;
