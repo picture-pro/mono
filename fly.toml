@@ -10,7 +10,7 @@ kill_timeout = "5s"
 
 [processes]
   app = "site-server"
-  surreal = "surreal start --log=info --auth --bind '[::]':8000 file://data/srdb.db"
+  surreal = "surreal start --log=info --auth --bind '[::]':8000 file:/data/srdb.db"
 
 [[mounts]]
   source = "surreal_data"
