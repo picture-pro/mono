@@ -130,7 +130,10 @@
           name = "site-server";
           tag = "latest";
           contents = [ site-server pkgs.cacert pkgs.surrealdb ];
-          config.Cmd = [ "${site-server}/bin/site-server" ];
+          config = {
+            Cmd = [ "site-server" ];
+            WorkingDir = "${site-server}/bin";
+          };
         };
       
       in {
