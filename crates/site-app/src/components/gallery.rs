@@ -47,7 +47,7 @@ fn PhotoGroupList(groups: Vec<core_types::PhotoGroup>) -> impl IntoView {
   }
 
   view! {
-    <div class="flex-1 flex flex-col gap-4 items-stretch lg:max-w-lg">
+    <div class="flex-1 flex flex-col gap-4 items-stretch lg:max-w-xl">
       { groups.into_iter().map(|group| {
         view! {
           <PhotoGroup group=group />

@@ -2,6 +2,7 @@ pub mod auth;
 pub mod dashboard;
 pub mod home_page;
 pub mod purchase;
+pub mod qr_code;
 
 use leptos::*;
 
