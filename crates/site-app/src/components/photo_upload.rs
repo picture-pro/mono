@@ -95,7 +95,11 @@ pub async fn photo_upload(
     },
   )
   .await
-  .map_err(|e| ServerFnError::new(format!("Failed to upload photo: {}", e)))?;
+  .map_err(|e| {
+    let error = format!("Failed to upload photo: {:?}", e);
+    tracing::error!("{error}");
+    ServerFnError::new(error)
+  })?;
 
   Ok(photo_group.id)
 }
