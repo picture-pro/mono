@@ -19,8 +19,8 @@ impl SurrealRootClient {
   /// Creates a new client.
   pub async fn new() -> Result<Self> {
     let client = Surreal::new::<Ws>(
-      std::env::var("SURREALDB_WS_URL")
-        .wrap_err("Could not find env var \"SURREALDB_WS_URL\"")?,
+      std::env::var("SURREAL_WS_URL")
+        .wrap_err("Could not find env var \"SURREAL_WS_URL\"")?,
     )
     .await
     .wrap_err_with(|| {
@@ -28,7 +28,7 @@ impl SurrealRootClient {
         "Could not connect to SurrealDB endpoint: `{}`\n\tNB: don't include \
          the ws:// or wss:// prefix, e.g. `example.com:8080` instead of \
          `wss://example.com:8080`",
-        std::env::var("SURREALDB_WS_URL").unwrap()
+        std::env::var("SURREAL_WS_URL").unwrap()
       )
     })?;
 
@@ -43,10 +43,10 @@ impl SurrealRootClient {
     self
       .client
       .signin(Root {
-        username: &std::env::var("SURREALDB_ROOT_USER")
-          .wrap_err("Could not find env var \"SURREALDB_ROOT_USER\"")?,
-        password: &std::env::var("SURREALDB_ROOT_PASS")
-          .wrap_err("Could not find env var \"SURREALDB_ROOT_PASS\"")?,
+        username: &std::env::var("SURREAL_USER")
+          .wrap_err("Could not find env var \"SURREAL_USER\"")?,
+        password: &std::env::var("SURREAL_PASS")
+          .wrap_err("Could not find env var \"SURREAL_PASS\"")?,
       })
       .await
       .wrap_err("Could not sign in to SurrealDB as root")
