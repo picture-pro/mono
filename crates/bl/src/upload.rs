@@ -7,6 +7,7 @@ use core_types::{
   PublicArtifact,
 };
 use serde::{Deserialize, Serialize};
+use surrealdb::opt::PatchOp;
 use tracing::instrument;
 
 use crate::model_ext::ModelExt;
@@ -126,16 +127,13 @@ pub async fn upload_single_photo(
     ))
   })?;
 
-  let photo = Photo {
-    group: group.id,
-    ..photo
-  };
-
-  photo.update(&client).await.map_err(|e| {
-    PhotoUploadError::DBError(format!(
-      "Failed to update photo with group in surreal: {e}"
-    ))
-  })?;
+  Photo::patch(photo.id, &client, PatchOp::replace("group", group.id))
+    .await
+    .map_err(|e| {
+      PhotoUploadError::DBError(format!(
+        "Failed to update photo with group in surreal: {e}"
+      ))
+    })?;
 
   Ok(group.clone())
 }
