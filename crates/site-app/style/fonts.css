@@ -2,4 +2,6 @@
   font-family: 'inter';
   src: url('/fonts/inter.ttf');
   font-display: swap;
+  font-weight: 100 900;
+  font-style: normal;
 }
