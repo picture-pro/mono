@@ -1,0 +1,24 @@
+
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v3
+      - name: Build server package
+        run: nix build
+      - name: Install flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Containerize & Deploy to Fly
+        run: nix build ".#container" -L && docker load < result && flyctl deploy --local-only -i site-server
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
