@@ -37,11 +37,20 @@ impl From<UlidOrThing> for ulid::Ulid {
 /// This trait is mainly meant for bounds and to be extended, hence it has no
 /// methods.
 pub trait CoreModel:
-  Clone + Debug + Serialize + for<'a> Deserialize<'a> + Sized + Send + 'static
+  Clone
+  + Debug
+  + Serialize
+  + for<'a> Deserialize<'a>
+  + Sized
+  + Send
+  + Sync
+  + 'static
 {
   /// The id type for this model.
   type Id: CoreId<Model = Self> + IntoResource<Option<Self>> + Send;
 
+  /// Get the ID for this model.
+  fn id(&self) -> Self::Id;
   /// Get the metadata for this model.
   fn meta(&self) -> &crate::ObjectMeta;
 }
@@ -103,6 +112,7 @@ macro_rules! impl_table {
 
     impl CoreModel for $model_type {
       type Id = $id_type;
+      fn id(&self) -> $id_type { self.id }
       fn meta(&self) -> &crate::ObjectMeta { &self.meta }
     }
   };
