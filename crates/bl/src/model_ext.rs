@@ -38,14 +38,9 @@ pub trait ModelExt: core_types::CoreModel {
     let model = self.clone();
 
     async move {
-      let result: Vec<Self> = client
-        .update(<<Self as CoreModel>::Id as CoreId>::TABLE)
-        .content(model)
-        .await?;
-      result
-        .into_iter()
-        .next()
-        .ok_or_eyre("Failed to update model")
+      let result: Option<Self> =
+        client.update(self.id()).content(model).await?;
+      result.ok_or_eyre("Failed to update model")
     }
   }
 }
