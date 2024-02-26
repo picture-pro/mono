@@ -580,7 +580,6 @@ dependencies = [
  "surrealdb",
  "thiserror",
  "tracing",
- "ulid",
 ]
 
 [[package]]
