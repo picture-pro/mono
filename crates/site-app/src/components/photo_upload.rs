@@ -36,7 +36,10 @@ pub fn PhotoUpload() -> impl IntoView {
             </label>
           </div>
           <div class="d-form-control">
-            <input type="file" class="d-file-input d-file-input-bordered w-full" name="photo" />
+            <input
+              type="file" class="d-file-input d-file-input-bordered w-full"
+              name="photo" accept="image/*" required=true
+            />
           </div>
           <div class="mt-6"></div>
           <div class="d-form-control">
