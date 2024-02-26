@@ -574,6 +574,7 @@ dependencies = [
  "color-eyre",
  "core_types",
  "image",
+ "leptos",
  "qrcode",
  "serde",
  "surrealdb",

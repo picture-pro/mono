@@ -30,6 +30,7 @@ fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
   }
 }
 
+#[cfg(feature = "ssr")]
 #[instrument(skip(original_bytes))]
 pub async fn upload_single_photo(
   user_id: core_types::UserRecordId,

@@ -5,7 +5,7 @@ use crate::components::basic::Link;
 
 #[component]
 pub fn UserName(id: UserRecordId) -> impl IntoView {
-  let user = create_resource(move || id, crate::server_fns::user::fetch_user);
+  let user = create_resource(move || id, bl::fetch::fetch_user);
 
   view! {
     <Suspense>
