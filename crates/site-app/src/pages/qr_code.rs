@@ -1,15 +1,14 @@
 use leptos::*;
 use leptos_router::use_params_map;
 
-use crate::{components::basic::Link, pages::SmallPageWrapper};
+use crate::pages::SmallPageWrapper;
 
 #[component]
 pub fn QrCodePage() -> impl IntoView {
   let params = use_params_map();
   let id = params().get("id").cloned();
 
-  // routing makes sure that the ID param exists, but we won't check if it's
-  // valid
+  // routing makes sure that the ID param exists
   let id = id.unwrap();
   let url = format!(
     "{}/photo/{id}",
@@ -18,13 +17,14 @@ pub fn QrCodePage() -> impl IntoView {
 
   view! {
     <SmallPageWrapper>
-      <div class="d-card-body">
-        <div class="flex flex-row gap-4 items-center">
-          <p class="text-2xl font-semibold tracking-tight">"QR Code"</p>
+      <div class="d-card-body gap-4">
+        <p class="text-2xl font-semibold tracking-tight">"QR Code"</p>
+        <QrCode data=url class="rounded-box border shadow" />
+        <div class="flex flex-row items-center gap-4">
+          <a href="/" class="d-btn d-btn-primary d-btn-sm">"Back to Dashboard"</a>
           <div class="flex-1" />
-          <Link href=url.clone()>"Purchase Page"</Link>
+          <a href={format!("/photo/{}", id)} class="d-btn d-btn-sm">"View Photo"</a>
         </div>
-        <QrCode data=url class="rounded-box border" />
       </div>
     </SmallPageWrapper>
   }
