@@ -3978,6 +3978,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rmp-sfn"
+version = "0.1.0"
+dependencies = [
+ "http 1.0.0",
+ "rmp-serde",
+ "serde",
+ "server_fn",
+]
+
+[[package]]
 name = "roaring"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
