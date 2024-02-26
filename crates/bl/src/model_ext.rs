@@ -31,21 +31,14 @@ pub trait ModelExt: core_types::CoreModel {
     }
   }
 
-  fn update(
-    &self,
+  fn patch(
+    id: <Self as core_types::CoreModel>::Id,
     client: &SurrealRootClient,
+    patch: surrealdb::opt::PatchOp,
   ) -> impl std::future::Future<Output = Result<Self>> + Send {
-    let model = self.clone();
-
     async move {
-      let result: Vec<Self> = client
-        .update(<<Self as CoreModel>::Id as CoreId>::TABLE)
-        .content(model)
-        .await?;
-      result
-        .into_iter()
-        .next()
-        .ok_or_eyre("Failed to update model")
+      let result: Option<Self> = client.update(id).patch(patch).await?;
+      result.ok_or_eyre("Failed to patch model")
     }
   }
 }

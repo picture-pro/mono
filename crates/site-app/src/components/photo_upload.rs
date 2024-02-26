@@ -11,11 +11,12 @@ pub fn PhotoUpload() -> impl IntoView {
   });
   let pending = upload_action.pending();
   let value = upload_action.value();
-  let successful = move || matches!(value(), Some(Ok(_)));
 
   create_effect(move |_| {
-    if successful() {
-      crate::components::navigation::reload();
+    if let Some(Ok(id)) = value() {
+      // redirect to the qr code page
+      let url = format!("/qr/{}", id.0);
+      crate::components::navigation::navigate_to(&url);
     }
   });
 
@@ -36,7 +37,10 @@ pub fn PhotoUpload() -> impl IntoView {
             </label>
           </div>
           <div class="d-form-control">
-            <input type="file" class="d-file-input d-file-input-bordered w-full" name="photo" />
+            <input
+              type="file" class="d-file-input d-file-input-bordered w-full"
+              name="photo" accept="image/*" required=true
+            />
           </div>
           <div class="mt-6"></div>
           <div class="d-form-control">

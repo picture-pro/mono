@@ -8,4 +8,4 @@ surreal:
 wipe-surreal:
 	rm -rf /tmp/surreal_data
 apply-surreal:
-	cd migrations && surrealdb-migrations apply --username $SURREALDB_ROOT_USER --password $SURREALDB_ROOT_PASS --ns main --db main
+	cd migrations && surrealdb-migrations apply --username $SURREAL_USER --password $SURREAL_PASS --ns main --db main

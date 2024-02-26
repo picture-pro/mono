@@ -36,11 +36,8 @@ pub fn PhotoGroup(
     .into_view(),
   };
 
-  let share_url = format!(
-    "{}/photo/{}",
-    std::env::var("APP_BASE_URL").expect("APP_BASE_URL not set"),
-    group.id.0
-  );
+  let purchase_url = format!("/photo/{}", group.id.0);
+  let qr_code_url = format!("/qr/{}", group.id.0);
 
   let photos_element = view! {
       { group.photos.clone().into_iter().map(|photo_id| {
@@ -97,12 +94,10 @@ pub fn PhotoGroup(
         </div>
         { match read_only {
           false => view! {
-            <a
-              class="d-btn d-btn-primary d-btn-sm text-lg font-semibold tracking-tight"
-              href={ share_url }
-            >
-              "Share"
-            </a>
+            <div class="flex flex-col gap-4">
+              <a class="d-btn d-btn-sm" href={ purchase_url }>"Purchase Page"</a>
+              <a class="d-btn d-btn-primary d-btn-sm" href={ qr_code_url }>"QR Code"</a>
+            </div>
           }.into_view(),
           true => ().into_view()
         } }
