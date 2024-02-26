@@ -4,7 +4,7 @@ use clients::surreal::SurrealRootClient;
 use color_eyre::eyre::Result;
 use core_types::{
   Photo, PhotoArtifacts, PhotoGroup, PhotoGroupStatus, PrivateArtifact,
-  PublicArtifact,
+  PublicArtifact, Ulid,
 };
 use serde::{Deserialize, Serialize};
 use surrealdb::opt::PatchOp;
@@ -30,6 +30,7 @@ fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
   }
 }
 
+#[cfg(feature = "ssr")]
 #[instrument(skip(original_bytes))]
 pub async fn upload_single_photo(
   user_id: core_types::UserRecordId,
@@ -82,9 +83,9 @@ pub async fn upload_single_photo(
 
   // create a photo and upload it to surreal
   let photo = Photo {
-    id:        core_types::PhotoRecordId(ulid::Ulid::new()),
+    id:        core_types::PhotoRecordId(Ulid::new()),
     // this is set to nil because we don't have a group yet
-    group:     core_types::PhotoGroupRecordId(ulid::Ulid::nil()),
+    group:     core_types::PhotoGroupRecordId(Ulid::nil()),
     artifacts: PhotoArtifacts {
       original:  core_types::PrivateImageArtifact {
         artifact_id: original_artifact.id,
@@ -113,7 +114,7 @@ pub async fn upload_single_photo(
 
   // create a photo group and upload it to surreal
   let group = PhotoGroup {
-    id: core_types::PhotoGroupRecordId(ulid::Ulid::new()),
+    id: core_types::PhotoGroupRecordId(Ulid::new()),
     owner: user_id,
     photographer: user_id,
     photos: vec![photo.id],

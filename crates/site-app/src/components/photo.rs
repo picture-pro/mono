@@ -41,19 +41,27 @@ pub fn Photo(
   #[prop(default = "rounded-box")] rounded: &'static str,
   #[prop(default = "")] extra_class: &'static str,
 ) -> impl IntoView {
-  let photo =
-    create_resource(move || (), move |_| fetch_photo_thumbnail(photo_id));
+  let photo = create_resource(
+    move || (),
+    move |_| bl::fetch::fetch_photo_thumbnail(photo_id),
+  );
 
   view! {
     <Suspense fallback=|| view!{ }>
       { move || match photo() {
-        Some(Ok(photo)) => {
+        Some(Ok(Some(photo))) => {
           Some(view! {
             <img
               src={format!("data:image/png;base64,{}", photo.data)} alt={photo.alt}
               width={size.physical(photo.size).0} height={size.physical(photo.size).1}
               class={format!("{rounded} {extra_class}")}
             />
+          }
+          .into_view())
+        }
+        Some(Ok(None)) => {
+          Some(view! {
+            <p>{ "Photo not found" }</p>
           }
           .into_view())
         }
@@ -67,18 +75,4 @@ pub fn Photo(
       } }
     </Suspense>
   }
-}
-
-#[cfg_attr(feature = "ssr", tracing::instrument)]
-#[server]
-pub async fn fetch_photo_thumbnail(
-  photo_id: core_types::PhotoRecordId,
-) -> Result<core_types::PhotoThumbnailDisplayParams, ServerFnError> {
-  bl::fetch::fetch_photo_thumbnail(photo_id)
-    .await
-    .map_err(|e| {
-      let error = format!("Failed to fetch photo thumbnail: {:?}", e);
-      tracing::error!("{error}");
-      ServerFnError::new(error)
-    })
 }

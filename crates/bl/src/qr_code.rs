@@ -1,10 +1,11 @@
-use color_eyre::eyre::{Result, WrapErr};
-use qrcode::QrCode;
-use tracing::instrument;
+use leptos::{server, ServerFnError};
 
 /// Generate a QR code from the given data. Returns base64 encoded PNG data.
-#[instrument]
-pub fn generate_qr_code(data: &str) -> Result<String> {
+#[cfg(feature = "ssr")]
+pub fn generate_qr_code_inner(data: &str) -> color_eyre::eyre::Result<String> {
+  use color_eyre::eyre::WrapErr;
+  use qrcode::QrCode;
+
   let code =
     QrCode::new(data.as_bytes()).wrap_err("Failed to create QR code")?;
   let image = code.render::<image::Luma<u8>>().build();
@@ -18,4 +19,14 @@ pub fn generate_qr_code(data: &str) -> Result<String> {
   let data = BASE64_STANDARD.encode(&png_bytes);
 
   Ok(data)
+}
+
+#[server]
+#[cfg_attr(feature = "ssr", tracing::instrument)]
+pub async fn generate_qr_code(data: String) -> Result<String, ServerFnError> {
+  generate_qr_code_inner(&data).map_err(|e| {
+    let error = e.to_string();
+    tracing::error!("Failed to generate QR code: {}", error);
+    ServerFnError::new(error)
+  })
 }

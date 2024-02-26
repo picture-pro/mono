@@ -3,10 +3,7 @@ pub mod error;
 use leptos::*;
 use leptos_router::use_params_map;
 
-use crate::{
-  components::photo_group::PhotoGroup, pages::PageWrapper,
-  server_fns::photo_group::fetch_photo_group,
-};
+use crate::{components::photo_group::PhotoGroup, pages::PageWrapper};
 
 #[component]
 pub fn PurchasePage() -> impl IntoView {
@@ -25,7 +22,8 @@ pub fn PurchasePage() -> impl IntoView {
   let photo_group_id = core_types::PhotoGroupRecordId(ulid);
 
   // create a resource for fetching the photo group
-  let photo_group = create_resource(move || photo_group_id, fetch_photo_group);
+  let photo_group =
+    create_resource(move || photo_group_id, bl::fetch::fetch_photo_group);
 
   // render the page, using InnerPurchasePage if everything works
   view! {
@@ -55,10 +53,7 @@ pub fn PurchasePage() -> impl IntoView {
 
 #[component]
 fn AboutThePhotographer(user_id: core_types::UserRecordId) -> impl IntoView {
-  let user = create_resource(
-    move || (),
-    move |_| crate::server_fns::user::fetch_user(user_id),
-  );
+  let user = create_resource(move || user_id, bl::fetch::fetch_user);
 
   view! {
     <Suspense fallback=|| view!{ }>

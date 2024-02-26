@@ -25,16 +25,16 @@ validator = "0.16.1"
 web-sys = { version = "0.3", features = [ "Window", "EventTarget" ] }
 
 core_types = { path = "../core_types" }
+bl = { path = "../bl" }
 validation = { path = "../validation" }
 
 auth = { path = "../auth", optional = true }
-bl = { path = "../bl", optional = true }
 
 [features]
 default = []
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
+hydrate = ["bl/hydrate", "leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
-  "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr", "dep:leptos_axum",
-  "auth", "bl", "bytes", "tracing"
+  "bl/ssr", "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
+  "dep:leptos_axum", "dep:auth", "dep:bytes", "dep:tracing"
 ]
 

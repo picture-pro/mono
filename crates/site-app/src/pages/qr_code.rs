@@ -35,7 +35,8 @@ pub fn QrCode(
   data: String,
   #[prop(default = "")] class: &'static str,
 ) -> impl IntoView {
-  let qr_code = create_resource(move || data.clone(), generate_qr_code);
+  let qr_code =
+    create_resource(move || data.clone(), bl::qr_code::generate_qr_code);
 
   view! {
     <Suspense fallback=|| view!{}>
@@ -54,13 +55,4 @@ pub fn QrCode(
       })}
     </Suspense>
   }
-}
-
-#[server]
-pub async fn generate_qr_code(data: String) -> Result<String, ServerFnError> {
-  bl::qr_code::generate_qr_code(&data).map_err(|e| {
-    let error = e.to_string();
-    logging::error!("Failed to generate QR code: {}", error);
-    ServerFnError::new(error)
-  })
 }

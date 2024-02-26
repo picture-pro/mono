@@ -11,8 +11,7 @@ pub fn Gallery() -> impl IntoView {
     .into_view();
   };
 
-  let photo_groups =
-    create_resource(move || (), move |_| fetch_user_photo_groups(user.id));
+  let photo_groups = create_resource(move || user.id, fetch_user_photo_groups);
 
   view! {
     <Suspense fallback=|| view!{ }>
