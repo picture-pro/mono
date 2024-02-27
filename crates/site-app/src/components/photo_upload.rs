@@ -1,14 +1,65 @@
+use core_types::PhotoUploadParams;
 use leptos::*;
-use server_fn::codec::{MultipartData, MultipartFormData};
-use web_sys::{wasm_bindgen::JsCast, FormData, HtmlFormElement, SubmitEvent};
+use web_sys::{wasm_bindgen::JsCast, Event, HtmlInputElement};
+
+const MIN_PRICE: f32 = 0.1;
+const MAX_PRICE: f32 = 100.0;
+const DEFAULT_PRICE: f32 = 1.0;
+
+/// Rounds a number to a given scale.
+fn round_with_scale(input: f32, scale: f32) -> f32 {
+  (input / scale).round() * scale
+}
+
+/// Converts a price to a reasonable multiple.
+#[allow(illegal_floating_point_literal_pattern)]
+fn sensible_price(input: f32) -> f32 {
+  match input {
+    0.0..=1.0 => round_with_scale(input, 0.05),
+    1.0..=5.0 => round_with_scale(input, 0.1),
+    5.0..=50.0 => round_with_scale(input, 0.25),
+    _ => round_with_scale(input, 1.0),
+  }
+}
 
 #[island]
 pub fn PhotoUpload() -> impl IntoView {
-  let upload_action = create_action(|data: &FormData| {
-    let data = data.clone();
-    // `MultipartData` implements `From<FormData>`
-    photo_upload(data.into())
-  });
+  let (logarithmic_price, set_logarithmic_price) =
+    create_signal(DEFAULT_PRICE.log10());
+  let price = move || sensible_price((10.0_f32).powf(logarithmic_price()));
+
+  let (files, set_files) = create_signal(None::<web_sys::FileList>);
+
+  let upload_action =
+    create_action(move |(file_list, price): &(web_sys::FileList, f32)| {
+      let file_list = file_list.clone();
+      let price = *price;
+
+      async move {
+        let images = (0..file_list.length())
+          .map(|i| file_list.item(i).unwrap())
+          .map(move |file| async move {
+            let bytes = gloo_file::futures::read_as_bytes(&file.into())
+              .await
+              .unwrap();
+            PhotoUploadParams { original: bytes }
+          })
+          .collect::<Vec<_>>();
+
+        // await all the image futures
+        let images = futures::future::join_all(images).await;
+
+        let upload_params = core_types::PhotoGroupUploadParams {
+          photos: images,
+          status: core_types::PhotoGroupStatus::OwnershipForSale {
+            digital_price: core_types::Price(price),
+          },
+        };
+
+        bl::upload::upload_photo_group(upload_params).await
+      }
+    });
+
   let pending = upload_action.pending();
   let value = upload_action.value();
 
@@ -22,88 +73,47 @@ pub fn PhotoUpload() -> impl IntoView {
 
   view! {
     <div class="d-card bg-base-100 shadow max-w-sm">
-      <div class="d-card-body">
+      <div class="d-card-body gap-4">
         <p class="text-2xl font-semibold tracking-tight">"Upload Photo"</p>
-        <form on:submit=move |ev: SubmitEvent| {
-          ev.prevent_default();
-          let target = ev.target().unwrap().unchecked_into::<HtmlFormElement>();
-          let form_data = FormData::new_with_form(&target).unwrap();
-          upload_action.dispatch(form_data);
-        }>
-          <div class="d-form-control">
-            <label class="d-label cursor-pointer">
-              <span class="d-label-text">Public</span>
-              <input type="checkbox" checked="checked" name="public" class="d-checkbox" />
-            </label>
-          </div>
-          <div class="d-form-control">
-            <input
-              type="file" class="d-file-input d-file-input-bordered w-full"
-              name="photo" accept="image/*" required=true
-            />
-          </div>
-          <div class="mt-6"></div>
-          <div class="d-form-control">
-            <button
-              type="submit" class="d-btn d-btn-primary w-full"
-              disabled=pending
-            >
-              { move || if pending() { view!{ <span class="d-loading d-loading-spinner" /> }.into_view() } else { view! {}.into_view() } }
-              "Upload"
-            </button>
-          </div>
-        </form>
+
+        // price input
+        <div class="flex flex-row gap-4 items-center">
+          <label for="price">"Price"</label>
+          <input
+            type="range" class="d-range" id="price" name="price"
+            min={MIN_PRICE.log10()} max={MAX_PRICE.log10()} step=0.01
+            on:input=move |e: Event| {
+              set_logarithmic_price(event_target_value(&e).parse::<f32>().unwrap());
+            }
+            value={DEFAULT_PRICE.log10()}
+            prop:value=move || logarithmic_price()
+          />
+          <p class="min-w-[4rem] text-right">{move || format!("${:.2}", price())}</p>
+        </div>
+
+        // file input
+        <input
+          type="file" class="d-file-input d-file-input-bordered w-full"
+          name="photo" accept="image/*" required=true multiple="multiple"
+          on:input=move |e: Event| {
+            let target = e.target().unwrap().dyn_into::<HtmlInputElement>().unwrap();
+            set_files(target.files());
+          }
+        />
+
+        // upload button
+        <div class="d-form-control mt-6">
+          <button
+            class="d-btn d-btn-primary w-full"
+            disabled=move || pending() || files().is_none()
+            on:click=move |_| upload_action.dispatch((files().unwrap(), price()))
+          >
+            { move || if pending() { view!{ <span class="d-loading d-loading-spinner" /> }.into_view() } else { view! {}.into_view() } }
+            "Upload"
+          </button>
+        </div>
+
       </div>
     </div>
   }
-}
-
-#[cfg_attr(feature = "ssr", tracing::instrument(skip(data)))]
-#[server(input = MultipartFormData)]
-pub async fn photo_upload(
-  data: MultipartData,
-) -> Result<core_types::PhotoGroupRecordId, ServerFnError> {
-  // get the user, and abort if not logged in
-  let user = crate::authenticated_user()
-    .ok_or_else(|| ServerFnError::new("Not logged in"))?;
-
-  // to upload a photo, we need the Bytes of the photo and whether it's public
-  let mut photo: Option<bytes::Bytes> = None;
-
-  // this only panics on the client
-  let mut data = data.into_inner().unwrap();
-
-  while let Some(field) = data.next_field().await.map_err(|e| {
-    ServerFnError::new(format!("Failed to parse form data: {}", e))
-  })? {
-    match field.name() {
-      Some("photo") => {
-        let bytes = field.bytes().await.map_err(|e| {
-          ServerFnError::new(format!("Failed to read photo field: {}", e))
-        })?;
-        photo = Some(bytes);
-      }
-      _ => {
-        // ignore other fields
-      }
-    }
-  }
-
-  let photo = photo.ok_or_else(|| ServerFnError::new("Missing photo field"))?;
-
-  let photo_group = bl::upload::upload_single_photo(
-    user.id,
-    photo,
-    core_types::PhotoGroupStatus::OwnershipForSale {
-      digital_price: core_types::Price(1.0),
-    },
-  )
-  .await
-  .map_err(|e| {
-    let error = format!("Failed to upload photo: {:?}", e);
-    tracing::error!("{error}");
-    ServerFnError::new(error)
-  })?;
-
-  Ok(photo_group.id)
 }

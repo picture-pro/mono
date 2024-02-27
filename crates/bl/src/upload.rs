@@ -1,26 +1,10 @@
-use artifact::Artifact;
-use bytes::Bytes;
-use clients::surreal::SurrealRootClient;
+use std::collections::HashMap;
+
+#[cfg(feature = "ssr")]
 use color_eyre::eyre::Result;
-use core_types::{
-  Photo, PhotoArtifacts, PhotoGroup, PhotoGroupStatus, PrivateArtifact,
-  PublicArtifact, Ulid,
-};
-use serde::{Deserialize, Serialize};
-use surrealdb::opt::PatchOp;
-use tracing::instrument;
-
-use crate::model_ext::ModelExt;
-
-#[derive(Clone, Debug, Deserialize, Serialize, thiserror::Error)]
-pub enum PhotoUploadError {
-  #[error("Failed to load original image: {0}")]
-  InvalidImage(String),
-  #[error("Failed to create artifact: {0}")]
-  ArtifactCreationError(String),
-  #[error("Surreal error: {0}")]
-  DBError(String),
-}
+use core_types::{PhotoGroupRecordId, PhotoGroupUploadParams, PhotoRecordId};
+use leptos::{server, ServerFnError};
+use strum::{Display, EnumString};
 
 fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
   if aspect_ratio > 1.0 {
@@ -30,66 +14,196 @@ fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
   }
 }
 
-#[cfg(feature = "ssr")]
-#[instrument(skip(original_bytes))]
-pub async fn upload_single_photo(
-  user_id: core_types::UserRecordId,
-  original_bytes: Bytes,
-  status: PhotoGroupStatus,
-) -> Result<PhotoGroup, PhotoUploadError> {
-  // load the original and make sure it's valid
-  let original_image =
-    image::load_from_memory(&original_bytes).map_err(|e| {
-      PhotoUploadError::InvalidImage(format!(
-        "Failed to parse original image: {e:?}"
-      ))
+#[derive(Clone, Debug, EnumString, Display)]
+pub enum PhotoUploadError {
+  InvalidImage,
+  Unauthenticated,
+  InternalError(String),
+}
+
+#[server]
+#[cfg_attr(feature = "ssr", tracing::instrument)]
+pub async fn upload_photo_group(
+  params: PhotoGroupUploadParams,
+) -> Result<PhotoGroupRecordId, ServerFnError<PhotoUploadError>> {
+  use rayon::prelude::*;
+  use tokio::sync::mpsc;
+
+  use crate::model_ext::ModelExt;
+
+  let Some(user) =
+    leptos::use_context::<core_types::LoggedInUser>().and_then(|u| u.0)
+  else {
+    return Err(PhotoUploadError::Unauthenticated.into());
+  };
+
+  let (tx, mut rx) = mpsc::channel(params.photos.len());
+
+  let image_count = params.photos.len();
+  let images = params
+    .photos
+    .into_iter()
+    // mark with indices
+    .enumerate()
+    .par_bridge()
+    // load original images
+    .map(|(i, p)| image::load_from_memory(&p.original).map(|img| (i, img)))
+    // collect into a hashmap & short circuit on error
+    .collect::<Result<HashMap<_, _>, _>>()
+    .map_err(|e| {
+      tracing::error!("Failed to load original image: {:?}", e);
+      PhotoUploadError::InvalidImage
     })?;
 
-  // upload the original as an artifact
-  let original_artifact = PrivateArtifact::new(Some(original_bytes));
-  original_artifact.upload_and_push().await.map_err(|e| {
-    PhotoUploadError::ArtifactCreationError(format!(
-      "Failed to create original artifact: {e:?}"
+  // spawn tasks for each image
+  for (i, img) in images {
+    let tx = tx.clone();
+    tokio::spawn(async move {
+      let result = create_photo(img).await;
+      tx.send((i, result)).await.unwrap();
+    });
+  }
+  drop(tx);
+
+  // collect results
+  let mut photo_ids = Vec::with_capacity(image_count);
+  while let Some((i, result)) = rx.recv().await {
+    let photo_id = result.map_err(|e| {
+      let error = e.to_string();
+      tracing::error!("Failed to upload photo: {}", error);
+      PhotoUploadError::InternalError(error)
+    })?;
+    photo_ids.push((i, photo_id));
+  }
+
+  // sort photo ids by original order
+  photo_ids.sort_by_key(|(i, _)| *i);
+  let photo_ids: Vec<_> = photo_ids.into_iter().map(|(_, id)| id).collect();
+
+  // create photo group
+  let group = core_types::PhotoGroup {
+    id:           core_types::PhotoGroupRecordId(core_types::Ulid::new()),
+    owner:        user.id,
+    photographer: user.id,
+    photos:       photo_ids,
+    status:       params.status,
+    meta:         Default::default(),
+  };
+
+  // open a surreal client
+  let client =
+    clients::surreal::SurrealRootClient::new()
+      .await
+      .map_err(|_| {
+        PhotoUploadError::InternalError(
+          "Failed to create surreal client".to_string(),
+        )
+      })?;
+  client.use_ns("main").use_db("main").await.map_err(|e| {
+    PhotoUploadError::InternalError(format!(
+      "Failed to use surreal namespace/database: {}",
+      e
     ))
   })?;
 
-  // create a thumbnail image
-  let aspect_ratio =
-    original_image.width() as f32 / original_image.height() as f32;
+  // create photo group
+  group.create(&client).await.map_err(|e| {
+    let error = e.to_string();
+    tracing::error!("Failed to create photo group: {}", error);
+    PhotoUploadError::InternalError(error)
+  })?;
+
+  // patch photos with the group id
+  for photo_id in group.photos.iter() {
+    core_types::Photo::patch(
+      *photo_id,
+      &client,
+      surrealdb::opt::PatchOp::replace("group", group.id),
+    )
+    .await
+    .map_err(|e| {
+      let error = e.to_string();
+      tracing::error!("Failed to update photo with group: {}", error);
+      PhotoUploadError::InternalError(error)
+    })?;
+  }
+
+  Ok(group.id)
+}
+
+#[cfg(feature = "ssr")]
+async fn create_photo(img: image::DynamicImage) -> Result<PhotoRecordId> {
+  use artifact::Artifact;
+  use color_eyre::eyre::WrapErr;
+
+  use crate::model_ext::ModelExt;
+
+  // encode original image as jpeg
+  let mut original_jpeg_bytes = Vec::new();
+  let encoder = image::codecs::jpeg::JpegEncoder::new(&mut original_jpeg_bytes);
+  img
+    .write_with_encoder(encoder)
+    .wrap_err("Failed to encode original image")?;
+
+  // start a task for uploading the original image
+  let original_artifact =
+    core_types::PrivateArtifact::new(Some(original_jpeg_bytes.into()));
+  let original_upload_task = tokio::spawn({
+    let original_artifact = original_artifact.clone();
+    async move {
+      original_artifact
+        .upload_and_push()
+        .await
+        .wrap_err("Failed to create original artifact")
+    }
+  });
+
+  // calculate thumbnail size
+  let aspect_ratio = img.width() as f32 / img.height() as f32;
   let thumbnail_size = thumbnail_size(aspect_ratio);
 
-  let thumbnail_image = original_image.resize_exact(
+  // create thumbnail
+  let thumbnail_image = img.resize_exact(
     thumbnail_size.0,
     thumbnail_size.1,
     image::imageops::FilterType::Lanczos3,
   );
 
-  // encode as jpeg to bytes
+  // encode thumbnail image as jpeg
   let mut thumbnail_bytes = Vec::new();
   let encoder = image::codecs::jpeg::JpegEncoder::new(&mut thumbnail_bytes);
-  thumbnail_image.write_with_encoder(encoder).map_err(|e| {
-    PhotoUploadError::InvalidImage(format!(
-      "Failed to encode thumbnail image: {e:?}"
-    ))
-  })?;
+  thumbnail_image
+    .write_with_encoder(encoder)
+    .wrap_err("Failed to encode thumbnail image")?;
 
-  let thumbnail_bytes: Bytes = thumbnail_bytes.into();
-  let thumbnail_artifact = PublicArtifact::new(Some(thumbnail_bytes));
-  thumbnail_artifact.upload_and_push().await.map_err(|e| {
-    PhotoUploadError::ArtifactCreationError(format!(
-      "Failed to create thumbnail artifact: {e:?}"
-    ))
-  })?;
+  // start a task for uploading the thumbnail image
+  let thumbnail_artifact =
+    core_types::PublicArtifact::new(Some(thumbnail_bytes.into()));
+  let thumbnail_upload_task = tokio::spawn({
+    let thumbnail_artifact = thumbnail_artifact.clone();
+    async move {
+      thumbnail_artifact
+        .upload_and_push()
+        .await
+        .wrap_err("Failed to create thumbnail artifact")
+    }
+  });
+
+  // wait for both uploads to finish
+  let (original_artifact_result, thumbnail_artifact_result) =
+    tokio::try_join!(original_upload_task, thumbnail_upload_task)
+      .wrap_err("Failed to upload artifacts")?;
+  original_artifact_result.wrap_err("Failed to upload original artifact")?;
+  thumbnail_artifact_result.wrap_err("Failed to upload thumbnail artifact")?;
 
   // create a photo and upload it to surreal
-  let photo = Photo {
-    id:        core_types::PhotoRecordId(Ulid::new()),
-    // this is set to nil because we don't have a group yet
-    group:     core_types::PhotoGroupRecordId(Ulid::nil()),
-    artifacts: PhotoArtifacts {
+  let photo = core_types::Photo {
+    id:        core_types::PhotoRecordId(core_types::Ulid::new()),
+    group:     core_types::PhotoGroupRecordId(core_types::Ulid::nil()),
+    artifacts: core_types::PhotoArtifacts {
       original:  core_types::PrivateImageArtifact {
         artifact_id: original_artifact.id,
-        size:        (original_image.width(), original_image.height()),
+        size:        (img.width(), img.height()),
       },
       thumbnail: core_types::PublicImageArtifact {
         artifact_id: thumbnail_artifact.id,
@@ -99,42 +213,19 @@ pub async fn upload_single_photo(
     meta:      Default::default(),
   };
 
-  let client = SurrealRootClient::new().await.map_err(|_| {
-    PhotoUploadError::DBError("Failed to create surreal client".to_string())
-  })?;
-  client.use_ns("main").use_db("main").await.map_err(|e| {
-    PhotoUploadError::DBError(format!(
-      "Failed to use surreal namespace/database: {e}"
-    ))
-  })?;
-
-  photo.create(&client).await.map_err(|e| {
-    PhotoUploadError::DBError(format!("Failed to create photo in surreal: {e}"))
-  })?;
-
-  // create a photo group and upload it to surreal
-  let group = PhotoGroup {
-    id: core_types::PhotoGroupRecordId(Ulid::new()),
-    owner: user_id,
-    photographer: user_id,
-    photos: vec![photo.id],
-    status,
-    meta: Default::default(),
-  };
-
-  group.create(&client).await.map_err(|e| {
-    PhotoUploadError::DBError(format!(
-      "Failed to create photo group in surreal: {e}"
-    ))
-  })?;
-
-  Photo::patch(photo.id, &client, PatchOp::replace("group", group.id))
+  let client = clients::surreal::SurrealRootClient::new()
     .await
-    .map_err(|e| {
-      PhotoUploadError::DBError(format!(
-        "Failed to update photo with group in surreal: {e}"
-      ))
-    })?;
+    .wrap_err("Failed to create surreal client")?;
+  client
+    .use_ns("main")
+    .use_db("main")
+    .await
+    .wrap_err("Failed to use surreal namespace/database")?;
 
-  Ok(group.clone())
+  photo
+    .create(&client)
+    .await
+    .wrap_err("Failed to create photo in surreal")?;
+
+  Ok(photo.id)
 }

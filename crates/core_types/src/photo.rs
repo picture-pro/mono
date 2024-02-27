@@ -118,3 +118,19 @@ pub struct PhotoThumbnailDisplayParams {
   /// The image size.
   pub size: (u32, u32),
 }
+
+/// The upload parameters for a photo group. Not a table.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PhotoGroupUploadParams {
+  /// The photos to upload.
+  pub photos: Vec<PhotoUploadParams>,
+  /// The status of the photo group.
+  pub status: PhotoGroupStatus,
+}
+
+/// The upload parameters for a photo. Not a table.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PhotoUploadParams {
+  /// The original image data.
+  pub original: Vec<u8>,
+}
