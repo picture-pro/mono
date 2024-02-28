@@ -4,7 +4,10 @@ use leptos_router::use_params_map;
 use crate::pages::SmallPageWrapper;
 
 #[component]
-pub fn QrCodePage() -> impl IntoView {
+pub fn InnerQrCodePage(
+  #[prop(default = "")] class: &'static str,
+  #[prop(default = None)] theme_override: Option<&'static str>,
+) -> impl IntoView {
   let params = use_params_map();
   let id = params().get("id").cloned();
 
@@ -16,7 +19,7 @@ pub fn QrCodePage() -> impl IntoView {
   );
 
   view! {
-    <SmallPageWrapper>
+    <SmallPageWrapper extra_class=class theme_override=theme_override>
       <div class="d-card-body gap-4">
         <p class="text-2xl font-semibold tracking-tight">"QR Code"</p>
         <QrCode data=url class="rounded-box border shadow" />
@@ -27,6 +30,14 @@ pub fn QrCodePage() -> impl IntoView {
         </div>
       </div>
     </SmallPageWrapper>
+  }
+}
+
+#[component]
+pub fn QrCodePage() -> impl IntoView {
+  view! {
+    <InnerQrCodePage class="md:hidden" theme_override=Some("black") />
+    <InnerQrCodePage class="max-md:hidden" />
   }
 }
 
