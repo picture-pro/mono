@@ -24,7 +24,7 @@ pub fn InnerQrCodePage(
         <p class="text-2xl font-semibold tracking-tight">"QR Code"</p>
         <QrCode data=url class="rounded-box border shadow" />
         <div class="flex flex-row items-center gap-4">
-          <a href="/" class="d-btn d-btn-primary d-btn-sm">"Back to Dashboard"</a>
+          <a href="/dashboard" class="d-btn d-btn-primary d-btn-sm">"Back to Dashboard"</a>
           <div class="flex-1" />
           <a href={format!("/photo/{}", id)} class="d-btn d-btn-sm">"View Photo"</a>
         </div>
