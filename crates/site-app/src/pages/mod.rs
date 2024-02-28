@@ -12,9 +12,13 @@ use crate::components::basic::Link;
 pub fn SmallPageWrapper(
   children: Children,
   #[prop(default = "")] extra_class: &'static str,
+  #[prop(default = None)] theme_override: Option<&'static str>,
 ) -> impl IntoView {
   view! {
-    <div class={format!("flex-1 flex flex-col justify-center items-center h-full {extra_class}")}>
+    <div
+      class={format!("flex-1 flex flex-col justify-center items-center h-full {extra_class}")}
+      data-theme=theme_override
+    >
       <div class="d-card w-full max-w-sm bg-base-100 rounded-lg shadow-xl">
         {children()}
       </div>
@@ -33,6 +37,7 @@ pub fn PageWrapper(
   #[prop(default = true)]
   backed: bool,
   #[prop(default = "")] extra_class: &'static str,
+  #[prop(default = None)] theme_override: Option<&'static str>,
 ) -> impl IntoView {
   view! {
     <div class={format!(
@@ -41,7 +46,7 @@ pub fn PageWrapper(
       rounded = if backed { "md:rounded-xl" } else { "" },
       shadow = if backed { "shadow" } else { "" },
       bg_color = if backed { "bg-base-100" } else { "" },
-    )}>
+    )} data-theme=theme_override>
       {children()}
     </div>
   }
