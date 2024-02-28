@@ -15,7 +15,7 @@ kill_timeout = "5s"
 [env]
   SURREAL_WS_URL = "picturepro-mono.internal:8000"
   # these are fine in plain text because surreal is not exposed
-  SURREAL_USER = "user"
+  SURREAL_USER = "root"
   SURREAL_PASS = "pass"
 
   # these MUST be set with secrets
