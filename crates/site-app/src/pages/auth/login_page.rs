@@ -2,7 +2,7 @@ use leptos::*;
 use validation::{LoginParams, Validate};
 
 use crate::{
-  components::{form::FormElement, navigation::navigate_to},
+  components::{form::ActiveFormElement, navigation::navigate_to},
   pages::SmallPageWrapper,
 };
 
@@ -47,8 +47,8 @@ pub fn LoginPageInner() -> impl IntoView {
           params: params(),
         });
       }>
-        { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
-        { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
+        { ActiveFormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
+        { ActiveFormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
 
         // error message
         { move || value().map(|v| match v {

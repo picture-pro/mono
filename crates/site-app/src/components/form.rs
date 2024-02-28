@@ -1,7 +1,7 @@
 use leptos::*;
 use validation::{FieldValidate, Validate};
 
-pub struct FormElement<
+pub struct ActiveFormElement<
   P: Validate,
   S: Fn() -> P + 'static,
   R: Fn() -> String + 'static,
@@ -20,7 +20,7 @@ impl<
     S: Fn() -> P + 'static,
     R: Fn() -> String + 'static,
     W: Fn(String) + 'static,
-  > FormElement<P, S, R, W>
+  > ActiveFormElement<P, S, R, W>
 {
   pub fn new(
     params: S,
@@ -30,7 +30,7 @@ impl<
     field_name: &'static str,
     input_type: Option<&'static str>,
   ) -> Self {
-    FormElement {
+    ActiveFormElement {
       params,
       field_read_signal,
       field_write_signal,
@@ -46,10 +46,10 @@ impl<
     S: Fn() -> P + Copy + 'static,
     R: Fn() -> String + Copy + 'static,
     W: Fn(String) + Copy + 'static,
-  > IntoView for FormElement<P, S, R, W>
+  > IntoView for ActiveFormElement<P, S, R, W>
 {
   fn into_view(self) -> View {
-    let FormElement {
+    let ActiveFormElement {
       params,
       field_read_signal,
       field_write_signal,
