@@ -16,7 +16,6 @@ use crate::{
 
 #[component]
 pub fn App() -> impl IntoView {
-  // dummy change
   // Provides context that manages stylesheets, titles, meta tags, etc.
   provide_meta_context();
 
@@ -24,8 +23,14 @@ pub fn App() -> impl IntoView {
     <Style>{include_str!("../style/fonts.css")}</Style>
     <Stylesheet id="leptos" href="/pkg/site.css"/>
 
-    // sets the document title
-    <Title text="Welcome to Leptos"/>
+    <Html lang="en" attr:data-theme="wireframe" />
+
+    // set the metadata
+    <Title text="PicturePro"/>
+    <Meta charset="utf-8"/>
+    <Meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <Meta name="description" content="Lorem ipsum dolor sit amet, consectetur adipiscing elit."/>
+    <Meta name="keywords" content="photo, image, share, sell"/>
 
     // content for this welcome page
     <Router fallback=|| {
@@ -33,7 +38,7 @@ pub fn App() -> impl IntoView {
       outside_errors.insert_with_default_key(AppError::NotFound);
       view! { <ErrorTemplate outside_errors/> }.into_view()
     }>
-      <div data-theme="wireframe" class="w-full min-h-screen flex flex-col items-stretch justify-stretch bg-base-200">
+      <div class="w-full min-h-screen flex flex-col items-stretch justify-stretch bg-base-200">
         <Navbar/>
         <Routes>
           <Route path="" view=pages::home_page::HomePage/>
