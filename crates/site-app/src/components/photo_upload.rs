@@ -86,7 +86,7 @@ pub fn PhotoUpload() -> impl IntoView {
               set_logarithmic_price(event_target_value(&e).parse::<f32>().unwrap());
             }
             value={DEFAULT_PRICE.log10()}
-            prop:value=move || logarithmic_price()
+            prop:value=logarithmic_price
           />
           <p class="min-w-[4rem] text-right">{move || format!("${:.2}", price())}</p>
         </div>
