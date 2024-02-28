@@ -12,6 +12,29 @@ kill_timeout = "5s"
   app = "site-server"
   surreal = "surreal start --log=info --auth --bind '[::]':8000 file:/data/srdb.db"
 
+[env]
+  SURREAL_WS_URL = "picturepro-mono.internal:8000"
+  # these are fine in plain text because surreal is not exposed
+  SURREAL_USER = "user"
+  SURREAL_PASS = "pass"
+
+  # these MUST be set with secrets
+  # AWS_ACCESS_KEY_ID =
+  # AWS_SECRET_ACCESS_KEY =
+  # AWS_DEFAULT_REGION =
+
+  APP_BASE_URL = "https://picturepro-mono.fly.dev"
+
+  LEPTOS_OUTPUT_NAME = "site"
+  LEPTOS_SITE_ROOT = "site"
+  LEPTOS_SITE_PKG_DIR = "pkg"
+  LEPTOS_SITE_ADDR = "0.0.0.0:3000"
+  LEPTOS_RELOAD_PORT = "3001"
+  LEPTOS_ENV = "PROD"
+
+  # `/tmp` can't be writte to in fly, reason unknown.
+  TMPDIR = "/"
+
 [[mounts]]
   source = "surreal_data"
   destination = "/data"
