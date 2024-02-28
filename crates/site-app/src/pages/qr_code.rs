@@ -54,7 +54,7 @@ pub fn QrCode(
       { qr_code.map(|r| {
         match r {
           Ok(qr_code) => view! {
-            <img src={format!("data:image/png;base64,{}", qr_code)} class=class />
+            <img src={format!("data:image/png;base64,{}", qr_code)} alt="A QR code" class=class />
           }.into_view(),
           Err(e) => view! {
             <div>
