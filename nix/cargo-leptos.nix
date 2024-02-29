@@ -6,7 +6,7 @@
 
     src = cargo-leptos;
 
-    cargoSha256 = "sha256-qkOFVEuSy0/npTocheqqZImDf3Cey4VHZ9O2pJ6WomM=";
+    cargoSha256 = "sha256-jy1bWIXOjVwUhT5GAkIvTw/lPrvw6szAQflnfmhfgow=";
     # cargoSha256 = "";
 
     nativeBuildInputs = [pkgs.pkg-config pkgs.openssl];
