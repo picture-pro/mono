@@ -3089,7 +3089,6 @@ dependencies = [
  "kinded",
  "proc-macro2",
  "quote",
- "regex",
  "syn 2.0.51",
 ]
 
@@ -5790,9 +5789,7 @@ dependencies = [
 name = "validation"
 version = "0.1.0"
 dependencies = [
- "lazy_static",
  "nutype",
- "regex",
  "serde",
 ]
 
