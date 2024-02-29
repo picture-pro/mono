@@ -1,3 +1,4 @@
+use std::any::type_name;
 use leptos::*;
 use validation::{NewType, NewTypeError};
 use web_sys::Event;
@@ -35,8 +36,14 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
     } = self;
 
     let write_callback = move |ev: Event| {
+      // attempt to parse the input value to the inner validation type
       let Ok(value) = event_target_value(&ev).parse() else {
-        panic!("failed to parse input value for {display_name}");
+        panic!(
+          "Failed to parse input value to inner validation type `{}` for \
+           field `{}`",
+          type_name::<<P as NewType>::Inner>(),
+          display_name
+        );
       };
       field_write_signal(value)
     };
