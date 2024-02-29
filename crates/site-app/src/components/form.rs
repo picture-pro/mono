@@ -1,13 +1,15 @@
 use std::any::type_name;
+
 use leptos::*;
 use validation::{NewType, NewTypeError};
 use web_sys::Event;
 
 pub struct ActiveFormElement<P: NewType> {
-  field_read_signal:    ReadSignal<P::Inner>,
-  field_write_signal:   WriteSignal<P::Inner>,
-  display_name:         &'static str,
-  html_form_input_type: Option<&'static str>,
+  field_read_signal:      ReadSignal<P::Inner>,
+  field_write_signal:     WriteSignal<P::Inner>,
+  display_name:           &'static str,
+  html_form_input_type:   Option<&'static str>,
+  skip_validate_on_empty: bool,
 }
 
 impl<P: NewType> ActiveFormElement<P> {
@@ -33,6 +35,7 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
       field_write_signal,
       display_name,
       html_form_input_type,
+      skip_validate_on_empty,
     } = self;
 
     let write_callback = move |ev: Event| {
@@ -51,6 +54,9 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
     let validate_callback = move || {
       leptos::logging::log!("validating {display_name}");
       let value = field_read_signal();
+      if skip_validate_on_empty && value.to_string().is_empty() {
+        return None;
+      }
       let result = P::new(value);
       match result {
         Ok(_) => None,
