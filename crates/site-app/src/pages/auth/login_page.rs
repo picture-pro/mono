@@ -1,5 +1,5 @@
 use leptos::*;
-use validation::{Email, LoginParams, NewType, Password};
+use validation::{Email, LoginParams, Password};
 
 use crate::{
   components::{form::ActiveFormElement, navigation::navigate_to},
@@ -67,14 +67,10 @@ pub fn LoginPageInner() -> impl IntoView {
       <div class="mt-6"></div>
       <div class="d-form-control">
         <button
-          class="d-btn d-btn-primary" type="submit"
-          disabled=disabled
-          on:click=submit_callback
+          class="d-btn d-btn-primary"
+          disabled=disabled on:click=submit_callback
         >
-          { move || match pending() {
-            true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
-            false => None,
-          } }
+          { move || pending().then(|| view! { <span class="d-loading d-loading-spinner" /> })}
           "Login"
         </button>
       </div>
@@ -87,6 +83,7 @@ pub fn LoginPageInner() -> impl IntoView {
 pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   // we don't validate any creds on ingress here because `nutype` keeps us from
   // deserializing invalid ones
+  // see `nutype` crate for more details
 
   let creds = auth::Credentials {
     email:    params.email.into_inner(),
