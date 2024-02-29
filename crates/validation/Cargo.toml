@@ -9,4 +9,4 @@ publish = false
 [dependencies]
 serde.workspace = true
 
-validator = { version = "0.16.1", features = [ "derive" ] }
+nutype = { version = "0.4", features = [ "serde" ] }

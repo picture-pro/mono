@@ -1,8 +1,8 @@
 use leptos::*;
-use validation::{LoginParams, Validate};
+use validation::{Email, LoginParams, Password};
 
 use crate::{
-  components::{form::FormElement, navigation::navigate_to},
+  components::{form::ActiveFormElement, navigation::navigate_to},
   pages::SmallPageWrapper,
 };
 
@@ -17,22 +17,76 @@ pub fn LoginPage() -> impl IntoView {
 
 #[island]
 pub fn LoginPageInner() -> impl IntoView {
+  // create the signals
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
 
-  let params = create_memo(move |_| {
-    with!(|email, password| LoginParams {
-      email:    email.clone(),
-      password: password.clone(),
+  // create the params, aborting if validation fails
+  let params: Memo<LoginParams> = create_memo(move |_| {
+    with!(|email, password| {
+      LoginParams {
+        email:    email.to_string(),
+        password: password.to_string(),
+      }
     })
   });
+  let disabled =
+    move || with!(|email, password| email.is_empty() || password.is_empty());
 
+  // create the form elements
+  let email_element = ActiveFormElement::<Email> {
+    field_read_signal:      email,
+    field_write_signal:     set_email,
+    display_name:           "Email",
+    html_form_input_type:   Some("email"),
+    skip_validate:          true,
+    skip_validate_on_empty: false,
+  };
+  let password_element = ActiveFormElement::<Password> {
+    field_read_signal:      password,
+    field_write_signal:     set_password,
+    display_name:           "Password",
+    html_form_input_type:   Some("password"),
+    skip_validate:          true,
+    skip_validate_on_empty: false,
+  };
+
+  // create the login action
   let login_action = create_server_action::<Login>();
   let value = login_action.value();
   let pending = login_action.pending();
 
+  let submit_callback = move |_| {
+    login_action.dispatch(Login { params: params() });
+  };
+
+  let result_message = move || {
+    value().map(|v| match v {
+      Ok(true) => view! {
+        <p class="text-success">"Logged in!"</p>
+      }
+      .into_view(),
+      Ok(false) => {
+        view! { <p class="text-error">"Incorrect email or password"</p> }
+          .into_view()
+      }
+      Err(e) => {
+        let message = match e {
+          ServerFnError::ServerError(e) => e,
+          _ => e.to_string(),
+        };
+        view! {
+          <p class="text-error">
+            {format!("Error: {message}")}
+          </p>
+        }
+        .into_view()
+      }
+    })
+  };
+
   create_effect(move |_| {
-    if matches!(value(), Some(Ok(_))) {
+    if matches!(value(), Some(Ok(true))) {
       navigate_to("/dashboard");
     }
   });
@@ -41,41 +95,22 @@ pub fn LoginPageInner() -> impl IntoView {
     <div class="d-card-body">
       <p class="d-card-title text-2xl">"Login to PicturePro"</p>
 
-      <form on:submit=move |ev| {
-        ev.prevent_default();
-        login_action.dispatch(Login {
-          params: params(),
-        });
-      }>
-        { FormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
-        { FormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
+      { email_element.into_view() }
+      { password_element.into_view() }
 
-        // error message
-        { move || value().map(|v| match v {
-          Ok(true) => view! {
-            <p class="text-success">"Logged in!"</p>
-          }.into_view(),
-          Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
-          Err(e) => view! {<p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
-        })}
+      { result_message }
 
-        // submit button
-        <div class="mt-6"></div>
-        <div class="d-form-control">
-          <button
-            class="d-btn d-btn-primary" type="submit"
-            disabled={move || with!(|params, pending| {
-              *pending || params.validate().is_err()
-            })}
-          >
-            { move || match pending() {
-              true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
-              false => None,
-            } }
-            "Login"
-          </button>
-        </div>
-      </form>
+      // submit button
+      <div class="mt-6"></div>
+      <div class="d-form-control">
+        <button
+          class="d-btn d-btn-primary"
+          disabled=disabled on:click=submit_callback
+        >
+          { move || pending().then(|| view! { <span class="d-loading d-loading-spinner" /> })}
+          "Login"
+        </button>
+      </div>
     </div>
   }
 }
@@ -83,10 +118,11 @@ pub fn LoginPageInner() -> impl IntoView {
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server(Login)]
 pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
-  params.validate().map_err(|e| {
-    logging::error!("Invalid signup params: {:?}", e);
-    ServerFnError::new(format!("Invalid login params: {}", e))
-  })?;
+  // construct the nutype wrappers and fail if validation fails
+  let _ = Email::new(params.email.clone())
+    .map_err(|e| ServerFnError::new(format!("Invalid email: {e}")))?;
+  let _ = Password::new(params.password.clone())
+    .map_err(|e| ServerFnError::new(format!("Invalid password: {e}")))?;
 
   let creds = auth::Credentials {
     email:    params.email,
