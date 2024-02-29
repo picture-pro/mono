@@ -1,7 +1,7 @@
 use leptos::*;
 #[cfg(feature = "ssr")]
 use validation::LoginParams;
-use validation::{SignupParams, Validate};
+use validation::{Email, Name, Password, SignupParams};
 
 use crate::{
   components::{form::ActiveFormElement, navigation::navigate_to},
@@ -24,18 +24,87 @@ pub fn SignupPageInner() -> impl IntoView {
   let (password, set_password) = create_signal(String::new());
   let (confirm, set_confirm) = create_signal(String::new());
 
-  let params = create_memo(move |_| {
-    with!(|name, email, password, confirm| SignupParams {
-      name:     name.clone(),
-      email:    email.clone(),
-      password: password.clone(),
-      confirm:  confirm.clone(),
+  let params: Memo<Option<SignupParams>> = create_memo(move |_| {
+    with!(|name, email, password, confirm| {
+      let _ = Name::new(name.clone()).ok()?;
+      let _ = Email::new(email.clone()).ok()?;
+      let _ = Password::new(password.clone()).ok()?;
+      if password != confirm {
+        return None;
+      }
+      Some(SignupParams {
+        name:     name.clone(),
+        email:    email.clone(),
+        password: password.clone(),
+      })
     })
   });
+  let disabled = move || with!(|params| params.is_none());
+
+  // create the form elements
+  let name_element = ActiveFormElement::<Name> {
+    field_read_signal:      name,
+    field_write_signal:     set_name,
+    display_name:           "Name",
+    html_form_input_type:   None,
+    skip_validate:          false,
+    skip_validate_on_empty: true,
+  };
+  let email_element = ActiveFormElement::<Email> {
+    field_read_signal:      email,
+    field_write_signal:     set_email,
+    display_name:           "Email",
+    html_form_input_type:   Some("email"),
+    skip_validate:          false,
+    skip_validate_on_empty: true,
+  };
+  let password_element = ActiveFormElement::<Password> {
+    field_read_signal:      password,
+    field_write_signal:     set_password,
+    display_name:           "Password",
+    html_form_input_type:   Some("password"),
+    skip_validate:          false,
+    skip_validate_on_empty: true,
+  };
+  let confirm_element = ActiveFormElement::<Password> {
+    field_read_signal:      confirm,
+    field_write_signal:     set_confirm,
+    display_name:           "Confirm Password",
+    html_form_input_type:   Some("password"),
+    skip_validate:          true,
+    skip_validate_on_empty: true,
+  };
 
   let signup_action = create_server_action::<Signup>();
   let value = signup_action.value();
   let pending = signup_action.pending();
+
+  let submit_callback = move |_| {
+    signup_action.dispatch(Signup {
+      params: params().unwrap(),
+    });
+  };
+
+  let result_message = move || {
+    value().map(|v| match v {
+      Ok(_) => view! {
+        <p class="text-success">"Signed up!"</p>
+      }
+      .into_view(),
+      Err(e) => {
+        let message = match e {
+          ServerFnError::ServerError(e) => e,
+          _ => e.to_string(),
+        };
+        view! {
+          <p class="text-error">
+            {format!("Error: {message}")}
+          </p>
+        }
+        .into_view()
+      }
+    })
+  };
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(_))) {
@@ -47,41 +116,24 @@ pub fn SignupPageInner() -> impl IntoView {
     <div class="d-card-body">
       <p class="d-card-title text-2xl">"Sign Up to PicturePro"</p>
 
-      <form on:submit=move |ev| {
-        ev.prevent_default();
-        signup_action.dispatch(Signup {
-          params: params(),
-        });
-      }>
-        { ActiveFormElement::new(params, name, set_name, "Name", "name", None).into_view() }
-        { ActiveFormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
-        { ActiveFormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
-        { ActiveFormElement::new(params, confirm, set_confirm, "Confirm Password", "confirm", Some("password")).into_view() }
+      { name_element.into_view() }
+      { email_element.into_view() }
+      { password_element.into_view() }
+      { confirm_element.into_view() }
 
-        { move || value().map(|v| match v {
-          Ok(_) => view! {
-            <p class="text-success">"Signed up!"</p>
-          }.into_view(),
-          Err(e) => view! {<p class="text-error">{ e.to_string() }</p> }.into_view(),
-        })}
+      { result_message }
 
-        // submit button
-        <div class="mt-6"></div>
-        <div class="d-form-control">
-          <button
-            class="d-btn d-btn-primary" type="submit"
-            disabled={move || with!(|params, pending| {
-              *pending || params.validate().is_err()
-            })}
-          >
-            { move || match pending() {
-              true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
-              false => None,
-            } }
-            "Sign Up"
-          </button>
-        </div>
-      </form>
+      // submit button
+      <div class="mt-6"></div>
+      <div class="d-form-control">
+        <button
+          class="d-btn d-btn-primary"
+          disabled=disabled on:click=submit_callback
+        >
+          { move || pending().then(|| view! { <span class="d-loading d-loading-spinner" /> })}
+          "Sign Up"
+        </button>
+      </div>
     </div>
   }
 }
@@ -89,16 +141,18 @@ pub fn SignupPageInner() -> impl IntoView {
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server(Signup)]
 pub async fn login(params: SignupParams) -> Result<(), ServerFnError> {
-  params.validate().map_err(|e| {
-    logging::error!("Invalid signup params: {:?}", e);
-    ServerFnError::new(format!("Invalid signup params: {e}"))
-  })?;
+  // construct the nutype wrappers and fail if validation fails
+  let _ = Name::new(params.name.clone())
+    .map_err(|e| ServerFnError::new(format!("Invalid name: {e}")))?;
+  let _ = Email::new(params.email.clone())
+    .map_err(|e| ServerFnError::new(format!("Invalid email: {e}")))?;
+  let _ = Password::new(params.password.clone())
+    .map_err(|e| ServerFnError::new(format!("Invalid password: {e}")))?;
 
   let SignupParams {
     name,
     email,
     password,
-    ..
   } = params;
 
   let auth_session = use_context::<auth::AuthSession>()
