@@ -1,5 +1,5 @@
 use leptos::*;
-use validation::{LoginParams, Validate};
+use validation::{Email, LoginParams, NewType, Password};
 
 use crate::{
   components::{form::ActiveFormElement, navigation::navigate_to},
@@ -20,16 +20,26 @@ pub fn LoginPageInner() -> impl IntoView {
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
 
-  let params = create_memo(move |_| {
-    with!(|email, password| LoginParams {
-      email:    email.clone(),
-      password: password.clone(),
+  // create the params, aborting if validation fails
+  let params: Memo<Option<LoginParams>> = create_memo(move |_| {
+    with!(|email, password| {
+      Some(LoginParams {
+        email:    Email::new(email).ok()?,
+        password: Password::new(password).ok()?,
+      })
     })
   });
+  let disabled = move || params().is_none();
 
   let login_action = create_server_action::<Login>();
   let value = login_action.value();
   let pending = login_action.pending();
+
+  let submit_callback = move |_| {
+    login_action.dispatch(Login {
+      params: params().unwrap(),
+    });
+  };
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(_))) {
@@ -41,41 +51,33 @@ pub fn LoginPageInner() -> impl IntoView {
     <div class="d-card-body">
       <p class="d-card-title text-2xl">"Login to PicturePro"</p>
 
-      <form on:submit=move |ev| {
-        ev.prevent_default();
-        login_action.dispatch(Login {
-          params: params(),
-        });
-      }>
-        { ActiveFormElement::new(params, email, set_email, "Email", "email", Some("email")).into_view() }
-        { ActiveFormElement::new(params, password, set_password, "Password", "password", Some("password")).into_view() }
+      { ActiveFormElement::<Email>::new(email, set_email, "Email", Some("email")).into_view() }
+      { ActiveFormElement::<Password>::new(password, set_password, "Password", Some("password")).into_view() }
 
-        // error message
-        { move || value().map(|v| match v {
-          Ok(true) => view! {
-            <p class="text-success">"Logged in!"</p>
-          }.into_view(),
-          Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
-          Err(e) => view! {<p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
-        })}
+      // result message
+      { move || value().map(|v| match v {
+        Ok(true) => view! {
+          <p class="text-success">"Logged in!"</p>
+        }.into_view(),
+        Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
+        Err(e) => view! {<p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
+      })}
 
-        // submit button
-        <div class="mt-6"></div>
-        <div class="d-form-control">
-          <button
-            class="d-btn d-btn-primary" type="submit"
-            disabled={move || with!(|params, pending| {
-              *pending || params.validate().is_err()
-            })}
-          >
-            { move || match pending() {
-              true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
-              false => None,
-            } }
-            "Login"
-          </button>
-        </div>
-      </form>
+      // submit button
+      <div class="mt-6"></div>
+      <div class="d-form-control">
+        <button
+          class="d-btn d-btn-primary" type="submit"
+          disabled=disabled
+          on:click=submit_callback
+        >
+          { move || match pending() {
+            true => Some(view! { <span class="d-loading d-loading-spinner" /> }),
+            false => None,
+          } }
+          "Login"
+        </button>
+      </div>
     </div>
   }
 }
@@ -83,14 +85,12 @@ pub fn LoginPageInner() -> impl IntoView {
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server(Login)]
 pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
-  params.validate().map_err(|e| {
-    logging::error!("Invalid signup params: {:?}", e);
-    ServerFnError::new(format!("Invalid login params: {}", e))
-  })?;
+  // we don't validate any creds on ingress here because `nutype` keeps us from
+  // deserializing invalid ones
 
   let creds = auth::Credentials {
-    email:    params.email,
-    password: params.password,
+    email:    params.email.into_inner(),
+    password: params.password.into_inner(),
   };
   let mut auth_session = use_context::<auth::AuthSession>()
     .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
