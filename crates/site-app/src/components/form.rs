@@ -12,21 +12,23 @@ pub struct ActiveFormElement<P: NewType> {
   skip_validate_on_empty: bool,
 }
 
-impl<P: NewType> ActiveFormElement<P> {
-  pub fn new(
-    field_read_signal: ReadSignal<<P as NewType>::Inner>,
-    field_write_signal: WriteSignal<<P as NewType>::Inner>,
-    display_name: &'static str,
-    html_form_input_type: Option<&'static str>,
-  ) -> Self {
-    ActiveFormElement {
-      field_read_signal,
-      field_write_signal,
-      display_name,
-      html_form_input_type,
-    }
-  }
-}
+// impl<P: NewType> ActiveFormElement<P> {
+//   pub fn new(
+//     field_read_signal: ReadSignal<<P as NewType>::Inner>,
+//     field_write_signal: WriteSignal<<P as NewType>::Inner>,
+//     display_name: &'static str,
+//     html_form_input_type: Option<&'static str>,
+//     skip_validate_on_empty: bool,
+//   ) -> Self {
+//     ActiveFormElement {
+//       field_read_signal,
+//       field_write_signal,
+//       display_name,
+//       html_form_input_type,
+//       skip_validate_on_empty,
+//     }
+//   }
+// }
 
 impl<P: NewType> IntoView for ActiveFormElement<P> {
   fn into_view(self) -> View {
@@ -52,7 +54,6 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
     };
     let read_callback = move || field_read_signal().to_string();
     let validate_callback = move || {
-      leptos::logging::log!("validating {display_name}");
       let value = field_read_signal();
       if skip_validate_on_empty && value.to_string().is_empty() {
         return None;
