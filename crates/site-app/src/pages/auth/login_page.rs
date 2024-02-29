@@ -42,7 +42,7 @@ pub fn LoginPageInner() -> impl IntoView {
   };
 
   create_effect(move |_| {
-    if matches!(value(), Some(Ok(_))) {
+    if matches!(value(), Some(Ok(true))) {
       navigate_to("/dashboard");
     }
   });
