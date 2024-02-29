@@ -74,7 +74,7 @@ impl_newtype!(Password, PasswordError);
 
 impl Debug for Password {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_str("[redacted]")
+    f.write_str("Password([redacted])")
   }
 }
 
@@ -95,18 +95,18 @@ impl NewTypeError for PasswordError {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct SignupParams {
   /// The user's name.
-  pub name:     Name,
+  pub name:     String,
   /// The user's email.
-  pub email:    Email,
+  pub email:    String,
   /// The user's password.
-  pub password: Password,
+  pub password: String,
 }
 
 /// Parameters for logging in.
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct LoginParams {
   /// The user's email.
-  pub email:    Email,
+  pub email:    String,
   /// The user's password.
-  pub password: Password,
+  pub password: String,
 }

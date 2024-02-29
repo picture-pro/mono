@@ -22,15 +22,16 @@ pub fn LoginPageInner() -> impl IntoView {
   let (password, set_password) = create_signal(String::new());
 
   // create the params, aborting if validation fails
-  let params: Memo<Option<LoginParams>> = create_memo(move |_| {
+  let params: Memo<LoginParams> = create_memo(move |_| {
     with!(|email, password| {
-      Some(LoginParams {
-        email:    Email::new(email).ok()?,
-        password: Password::new(password).ok()?,
-      })
+      LoginParams {
+        email:    email.to_string(),
+        password: password.to_string(),
+      }
     })
   });
-  let disabled = move || params().is_none();
+  let disabled =
+    move || with!(|email, password| email.is_empty() || password.is_empty());
 
   // create the form elements
   let email_element = ActiveFormElement::<Email> {
@@ -56,9 +57,32 @@ pub fn LoginPageInner() -> impl IntoView {
   let pending = login_action.pending();
 
   let submit_callback = move |_| {
-    login_action.dispatch(Login {
-      params: params().unwrap(),
-    });
+    login_action.dispatch(Login { params: params() });
+  };
+
+  let result_message = move || {
+    value().map(|v| match v {
+      Ok(true) => view! {
+        <p class="text-success">"Logged in!"</p>
+      }
+      .into_view(),
+      Ok(false) => {
+        view! { <p class="text-error">"Incorrect email or password"</p> }
+          .into_view()
+      }
+      Err(e) => {
+        let message = match e {
+          ServerFnError::ServerError(e) => e,
+          _ => e.to_string(),
+        };
+        view! {
+          <p class="text-error">
+            {format!("Error: {message}")}
+          </p>
+        }
+        .into_view()
+      }
+    })
   };
 
   create_effect(move |_| {
@@ -74,14 +98,7 @@ pub fn LoginPageInner() -> impl IntoView {
       { email_element.into_view() }
       { password_element.into_view() }
 
-      // result message
-      { move || value().map(|v| match v {
-        Ok(true) => view! {
-          <p class="text-success">"Logged in!"</p>
-        }.into_view(),
-        Ok(false) => view! { <p class="text-error">"Incorrect email or password"</p> }.into_view(),
-        Err(e) => view! {<p class="text-error">{format!("Error: {}", e)}</p> }.into_view(),
-      })}
+      { result_message }
 
       // submit button
       <div class="mt-6"></div>
@@ -101,13 +118,15 @@ pub fn LoginPageInner() -> impl IntoView {
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 #[server(Login)]
 pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
-  // we don't validate any creds on ingress here because `nutype` keeps us from
-  // deserializing invalid ones
-  // see `nutype` crate for more details
+  // construct the nutype wrappers and fail if validation fails
+  let _ = Email::new(params.email.clone())
+    .map_err(|e| ServerFnError::new(format!("Invalid email: {e}")))?;
+  let _ = Password::new(params.password.clone())
+    .map_err(|e| ServerFnError::new(format!("Invalid password: {e}")))?;
 
   let creds = auth::Credentials {
-    email:    params.email.into_inner(),
-    password: params.password.into_inner(),
+    email:    params.email,
+    password: params.password,
   };
   let mut auth_session = use_context::<auth::AuthSession>()
     .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
