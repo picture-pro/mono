@@ -17,6 +17,7 @@ pub fn LoginPage() -> impl IntoView {
 
 #[island]
 pub fn LoginPageInner() -> impl IntoView {
+  // create the signals
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
 
@@ -31,6 +32,23 @@ pub fn LoginPageInner() -> impl IntoView {
   });
   let disabled = move || params().is_none();
 
+  // create the form elements
+  let email_element = ActiveFormElement::<Email> {
+    field_read_signal:      email,
+    field_write_signal:     set_email,
+    display_name:           "Email",
+    html_form_input_type:   Some("email"),
+    skip_validate_on_empty: false,
+  };
+  let password_element = ActiveFormElement::<Password> {
+    field_read_signal:      password,
+    field_write_signal:     set_password,
+    display_name:           "Password",
+    html_form_input_type:   Some("password"),
+    skip_validate_on_empty: false,
+  };
+
+  // create the login action
   let login_action = create_server_action::<Login>();
   let value = login_action.value();
   let pending = login_action.pending();
@@ -51,8 +69,8 @@ pub fn LoginPageInner() -> impl IntoView {
     <div class="d-card-body">
       <p class="d-card-title text-2xl">"Login to PicturePro"</p>
 
-      { ActiveFormElement::<Email>::new(email, set_email, "Email", Some("email")).into_view() }
-      { ActiveFormElement::<Password>::new(password, set_password, "Password", Some("password")).into_view() }
+      { email_element.into_view() }
+      { password_element.into_view() }
 
       // result message
       { move || value().map(|v| match v {
