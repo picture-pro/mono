@@ -45,10 +45,7 @@ impl NewTypeError for NameError {
 /// An email address.
 #[nutype(
   sanitize(trim),
-  validate(
-    // regex = r#"/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/"#,
-    len_char_max = 256
-  ),
+  validate(len_char_max = 256),
   derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)
 )]
 pub struct Email(String);
@@ -58,9 +55,6 @@ impl_newtype!(Email, EmailError);
 impl NewTypeError for EmailError {
   fn to_string(&self) -> String {
     match self {
-      // __nutype_private_Email__::EmailError::RegexViolated => {
-      //   "Invalid email address".to_owned()
-      // }
       __nutype_private_Email__::EmailError::LenCharMaxViolated => {
         "Email must be at most 256 characters long".to_owned()
       }
