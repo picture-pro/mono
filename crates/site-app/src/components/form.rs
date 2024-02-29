@@ -9,6 +9,7 @@ pub struct ActiveFormElement<P: NewType> {
   pub field_write_signal:     WriteSignal<P::Inner>,
   pub display_name:           &'static str,
   pub html_form_input_type:   Option<&'static str>,
+  pub skip_validate:          bool,
   pub skip_validate_on_empty: bool,
 }
 
@@ -19,6 +20,7 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
       field_write_signal,
       display_name,
       html_form_input_type,
+      skip_validate,
       skip_validate_on_empty,
     } = self;
 
@@ -37,7 +39,9 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
     let read_callback = move || field_read_signal().to_string();
     let validate_callback = move || {
       let value = field_read_signal();
-      if skip_validate_on_empty && value.to_string().is_empty() {
+      if skip_validate
+        || (skip_validate_on_empty && value.to_string().is_empty())
+      {
         return None;
       }
       let result = P::new(value);
@@ -55,7 +59,7 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
           placeholder={ display_name } type=html_form_input_type.unwrap_or("text")
           on:input=write_callback value=read_callback
         />
-        <p class="text-error">
+        <p class="text-error/80 text-sm py-1">
           { validate_callback }
         </p>
       </div>

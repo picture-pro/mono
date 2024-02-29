@@ -38,6 +38,7 @@ pub fn LoginPageInner() -> impl IntoView {
     field_write_signal:     set_email,
     display_name:           "Email",
     html_form_input_type:   Some("email"),
+    skip_validate:          true,
     skip_validate_on_empty: false,
   };
   let password_element = ActiveFormElement::<Password> {
@@ -45,6 +46,7 @@ pub fn LoginPageInner() -> impl IntoView {
     field_write_signal:     set_password,
     display_name:           "Password",
     html_form_input_type:   Some("password"),
+    skip_validate:          true,
     skip_validate_on_empty: false,
   };
 
