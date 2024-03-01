@@ -1,22 +1,18 @@
-#![warn(missing_docs)]
-
-//! A library for using [MessagePack](https://msgpack.org/) with [server_fn](https://crates.io/crates/server_fn).
-
 use http::Method;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use server_fn::{
+use leptos::server_fn::{
   codec::{Encoding, FromReq, FromRes, IntoReq, IntoRes},
   request::{ClientReq, Req},
   response::{ClientRes, Res},
   ServerFnError,
 };
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 /// A codec for MessagePack.
 pub struct MessagePack;
 
 /// A wrapper for a type that can be encoded to MessagePack.
 #[derive(Serialize, Deserialize)]
-pub struct RmpEncoded<T>(T);
+pub struct RmpEncoded<T>(pub T);
 
 impl Encoding for MessagePack {
   const CONTENT_TYPE: &'static str = "application/msgpack";
@@ -50,8 +46,8 @@ where
   T: DeserializeOwned,
 {
   async fn from_req(req: Request) -> Result<Self, ServerFnError<Err>> {
-    let string_data = req.try_into_string().await?;
-    rmp_serde::from_slice::<T>(string_data.as_bytes())
+    let data = req.try_into_bytes().await?;
+    rmp_serde::from_slice::<T>(&data)
       .map(RmpEncoded)
       .map_err(|e| ServerFnError::Args(e.to_string()))
   }
@@ -75,8 +71,8 @@ where
   T: DeserializeOwned,
 {
   async fn from_res(res: Response) -> Result<Self, ServerFnError<Err>> {
-    let data = res.try_into_string().await?;
-    rmp_serde::from_slice(data.as_bytes())
+    let data = res.try_into_bytes().await?;
+    rmp_serde::from_slice(&data)
       .map(RmpEncoded)
       .map_err(|e| ServerFnError::Deserialization(e.to_string()))
   }
