@@ -1,4 +1,4 @@
-use leptos::{server, ServerFnError};
+use leptos::{server, server_fn::codec::Json, ServerFnError};
 
 /// Generate a QR code from the given data. Returns base64 encoded PNG data.
 #[cfg(feature = "ssr")]
@@ -21,7 +21,10 @@ pub fn generate_qr_code_inner(data: &str) -> color_eyre::eyre::Result<String> {
   Ok(data)
 }
 
-#[server]
+#[server(
+  input = Json,
+  output = Json,
+)]
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 pub async fn generate_qr_code(data: String) -> Result<String, ServerFnError> {
   generate_qr_code_inner(&data).map_err(|e| {

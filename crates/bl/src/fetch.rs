@@ -1,7 +1,10 @@
 use core_types::{PhotoGroup, PhotoThumbnailDisplayParams};
-use leptos::{server, ServerFnError};
+use leptos::{server, server_fn::codec::Json, ServerFnError};
 
-#[server]
+#[server(
+  input = Json,
+  output = Json,
+)]
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 pub async fn fetch_user_owned_photo_groups(
   user_id: core_types::UserRecordId,
@@ -43,7 +46,10 @@ pub async fn fetch_user_owned_photo_groups(
   })
 }
 
-#[server]
+#[server(
+  input = Json,
+  output = Json,
+)]
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 pub async fn fetch_photo_group(
   photo_group_id: core_types::PhotoGroupRecordId,
@@ -77,7 +83,10 @@ pub async fn fetch_photo_group(
   })
 }
 
-#[server]
+#[server(
+  input = Json,
+  output = Json,
+)]
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 pub async fn fetch_user(
   user_id: core_types::UserRecordId,
@@ -110,7 +119,10 @@ pub async fn fetch_user(
   })
 }
 
-#[server]
+#[server(
+  input = Json,
+  output = Json,
+)]
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 pub async fn fetch_photo_thumbnail(
   photo_id: core_types::PhotoRecordId,
