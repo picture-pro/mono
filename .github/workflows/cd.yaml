@@ -17,6 +17,6 @@ jobs:
       - name: Install flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Containerize & Deploy to Fly
-        run: nix build ".#container" -L && docker load < result && flyctl deploy --local-only -i site-server
+        run: nix build ".#container" -L && docker load < result && flyctl deploy --local-only --detach -i site-server
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
