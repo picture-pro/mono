@@ -3,7 +3,7 @@ use std::collections::HashMap;
 #[cfg(feature = "ssr")]
 use color_eyre::eyre::Result;
 use core_types::{PhotoGroupRecordId, PhotoGroupUploadParams, PhotoRecordId};
-use leptos::{server, ServerFnError};
+use leptos::{server, server_fn::codec::Json, ServerFnError};
 use strum::{Display, EnumString};
 
 fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
@@ -21,7 +21,10 @@ pub enum PhotoUploadError {
   InternalError(String),
 }
 
-#[server]
+#[server(
+  input = Json,
+  output = Json,
+)]
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 pub async fn upload_photo_group(
   params: PhotoGroupUploadParams,
