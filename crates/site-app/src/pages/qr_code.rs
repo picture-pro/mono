@@ -92,7 +92,10 @@ pub fn PhotoDeckWrapper(
         match r {
           Ok(Some(photo_group)) => view! {
             <div class="flex flex-row justify-center">
-              <crate::components::photo_deck::PhotoDeck ids={photo_group.photos.clone()} />
+              <crate::components::photo_deck::PhotoDeck
+                ids={photo_group.photos.clone()}
+                display_mode={crate::components::photo_deck::PhotoDeckDisplayMode::Flat}
+              />
             </div>
           }.into_view(),
           Ok(None) => view! {
