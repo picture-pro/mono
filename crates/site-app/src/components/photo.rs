@@ -40,6 +40,10 @@ pub fn Photo(
   #[prop(default = PhotoSize::Regular)] size: PhotoSize,
   #[prop(default = "rounded-box")] rounded: &'static str,
   #[prop(default = "")] extra_class: &'static str,
+  #[prop(optional)] rotation: Option<f32>,
+  #[prop(optional)] scale: Option<f32>,
+  #[prop(optional)] z_index: Option<i32>,
+  #[prop(optional)] opacity: Option<f32>,
 ) -> impl IntoView {
   let photo = create_resource(
     move || (),
@@ -59,6 +63,15 @@ pub fn Photo(
               src={format!("data:image/png;base64,{}", photo.data)} alt={photo.alt}
               width={size.physical(photo.size).0} height={size.physical(photo.size).1}
               class={format!("{rounded} {extra_class}")}
+              style:transform={
+                format!(
+                  "rotate({}deg) scale({})",
+                  rotation.map(|r| r.to_string()).unwrap_or_default(),
+                  scale.map(|s| s.to_string()).unwrap_or_default()
+                )
+              }
+              style:z-index={z_index.map(|z| z.to_string())}
+              style:opacity={opacity.map(|o| o.to_string())}
             />
           }
           .into_view())
