@@ -45,10 +45,8 @@ pub fn Photo(
   #[prop(optional)] z_index: Option<i32>,
   #[prop(optional)] opacity: Option<f32>,
 ) -> impl IntoView {
-  let photo = create_resource(
-    move || (),
-    move |_| bl::fetch::fetch_photo_thumbnail(photo_id),
-  );
+  let photo =
+    create_resource(move || photo_id, bl::fetch::fetch_photo_thumbnail);
 
   view! {
     <Suspense fallback={move || view!{
