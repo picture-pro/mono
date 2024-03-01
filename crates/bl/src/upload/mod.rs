@@ -1,3 +1,5 @@
+mod watermark;
+
 use std::collections::HashMap;
 
 #[cfg(feature = "ssr")]
