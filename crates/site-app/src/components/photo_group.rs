@@ -39,16 +39,6 @@ pub fn PhotoGroup(
   let purchase_url = format!("/photo/{}", group.id.0);
   let qr_code_url = format!("/qr/{}", group.id.0);
 
-  let photos_element = view! {
-      { group.photos.clone().into_iter().map(|photo_id| {
-        view! {
-          <crate::components::photo::Photo photo_id=photo_id />
-        }
-        .into_view()
-      }).collect::<Vec<_>>() }
-  }
-  .into_view();
-
   let owned_by_element = view! {
     "Owned by "<UserName id={group.owner} />
   }
@@ -72,7 +62,7 @@ pub fn PhotoGroup(
         "col-start-1 col-span-1 row-start-1 flex flex-col justify-center xs:px-4 {adjusted_for_action}",
         adjusted_for_action = if !read_only { "row-span-1 sm:row-span-2" } else { "row-span-2" },
       )}>
-        { photos_element }
+        <crate::components::photo_deck::PhotoDeck ids={group.photos.clone()} />
       </div>
       <div class="col-start-2 col-span-1 row-start-1 row-span-1 flex flex-row justify-between gap-4">
         { status_element }
