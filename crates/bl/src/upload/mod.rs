@@ -1,3 +1,4 @@
+#[cfg(feature = "ssr")]
 mod watermark;
 
 use std::collections::HashMap;
@@ -171,11 +172,13 @@ async fn create_photo(img: image::DynamicImage) -> Result<PhotoRecordId> {
   let thumbnail_size = thumbnail_size(aspect_ratio);
 
   // create thumbnail
-  let thumbnail_image = img.resize_exact(
+  let mut thumbnail_image = img.resize_exact(
     thumbnail_size.0,
     thumbnail_size.1,
     image::imageops::FilterType::Lanczos3,
   );
+  // apply watermark
+  watermark::apply_watermark(&mut thumbnail_image);
 
   // encode thumbnail image as jpeg
   let mut thumbnail_bytes = Vec::new();
