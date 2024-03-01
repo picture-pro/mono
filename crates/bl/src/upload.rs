@@ -6,6 +6,8 @@ use core_types::{PhotoGroupRecordId, PhotoGroupUploadParams, PhotoRecordId};
 use leptos::{server, server_fn::codec::Json, ServerFnError};
 use strum::{Display, EnumString};
 
+use crate::rmp_sfn::{MessagePack, RmpEncoded};
+
 fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
   if aspect_ratio > 1.0 {
     (200, (200.0 / aspect_ratio) as u32)
@@ -22,7 +24,8 @@ pub enum PhotoUploadError {
 }
 
 #[server(
-  input = Json,
+  input = MessagePack,
+  custom = RmpEncoded,
   output = Json,
 )]
 #[cfg_attr(feature = "ssr", tracing::instrument)]

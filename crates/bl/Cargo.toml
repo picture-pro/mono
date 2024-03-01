@@ -11,9 +11,12 @@ leptos.workspace = true
 bytes.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+http.workspace = true
 
 clients = { path = "../clients", optional = true }
 artifact = { path = "../artifact", optional = true }
+
+rmp-serde = "1.1.2"
 
 base64 = { workspace = true, optional = true }
 color-eyre = { workspace = true, optional = true }
