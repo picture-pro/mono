@@ -1,4 +1,4 @@
-use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
+use image::{DynamicImage, GenericImage, GenericImageView};
 
 fn create_watermark(width: u32, height: u32) -> image::RgbaImage {
   // load the watermark image from bytes which is a transparent 200x200 pixels
@@ -6,14 +6,22 @@ fn create_watermark(width: u32, height: u32) -> image::RgbaImage {
   let watermark_bytes = include_bytes!("../../assets/watermark.png");
   let watermark = image::load_from_memory(watermark_bytes).unwrap();
 
-  // center the watermark inside an image of the correct size
-  let mut watermark_image = image::RgbaImage::new(width, height);
-  let (watermark_width, watermark_height) = watermark.dimensions();
-  let x = (width - watermark_width) / 2;
-  let y = (height - watermark_height) / 2;
-  watermark_image.copy_from(&watermark, x, y).unwrap();
+  // center the watermark inside an image of the correct size, or if it's too
+  // large, scale it down
+  let (w, h) = watermark.dimensions();
+  let (w, h) = if w > width || h > height {
+    let scale = (width as f32 / w as f32).min(height as f32 / h as f32);
+    (w as f32 * scale, h as f32 * scale)
+  } else {
+    (w as f32, h as f32)
+  };
+  let watermark = watermark.resize_exact(
+    w as u32,
+    h as u32,
+    image::imageops::FilterType::Lanczos3,
+  );
 
-  watermark_image
+  watermark.into()
 }
 
 pub fn apply_watermark(target: &mut DynamicImage) {
