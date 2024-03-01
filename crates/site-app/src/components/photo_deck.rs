@@ -14,11 +14,6 @@ pub fn PhotoDeck(
   ids: Vec<core_types::PhotoRecordId>,
   #[prop(optional)] display_mode: PhotoDeckDisplayMode,
 ) -> impl IntoView {
-  logging::log!(
-    "Rendering PhotoDeck with {} photos in {:?}",
-    ids.len(),
-    display_mode
-  );
   match display_mode {
     PhotoDeckDisplayMode::Flat => view! {
       <div class="flex flex-wrap gap-2 items-center">
