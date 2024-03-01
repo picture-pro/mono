@@ -47,7 +47,11 @@ pub fn Photo(
   );
 
   view! {
-    <Suspense fallback=|| view!{ }>
+    <Suspense fallback={move || view!{
+      <div class="flex justify-center items-center w-24 h-24">
+        <span class="d-loading d-loading-spinner" />
+      </div>
+    }}>
       { move || match photo() {
         Some(Ok(Some(photo))) => {
           Some(view! {
