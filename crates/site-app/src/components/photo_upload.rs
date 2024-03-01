@@ -94,11 +94,12 @@ pub fn PhotoUpload() -> impl IntoView {
         // file input
         <input
           type="file" class="d-file-input d-file-input-bordered w-full"
-          name="photo" accept="image/*" required=true multiple="multiple"
-          on:input=move |e: Event| {
+          name="photo" accept="image/*" capture="camera" multiple="multiple"
+          required=true on:input=move |e: Event| {
             let target = e.target().unwrap().dyn_into::<HtmlInputElement>().unwrap();
             set_files(target.files());
           }
+          value=files().map(|f| f.length().to_string())
         />
 
         // upload button
