@@ -111,7 +111,7 @@ pub enum PhotoGroupStatus {
 /// The display parameters for a photo thumbnail. Not a table.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PhotoThumbnailDisplayParams {
-  /// The base64-encoded image data.
+  /// The base64-encoded image data, with the `data:image...` prefix.
   pub data: String,
   /// The alt text for the image.
   pub alt:  String,

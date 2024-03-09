@@ -12,6 +12,10 @@ kill_timeout = "5s"
   app = "site-server"
   surreal = "surreal start --log=info --auth --bind '[::]':8000 file:/data/srdb.db"
 
+[[vm]]
+  memory = "1GB"
+  processes = ["app"]
+
 [env]
   SURREAL_WS_URL = "picturepro-mono.internal:8000"
   # these are fine in plain text because surreal is not exposed

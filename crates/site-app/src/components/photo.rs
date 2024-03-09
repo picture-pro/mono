@@ -41,10 +41,8 @@ pub fn Photo(
   #[prop(default = "rounded-box")] rounded: &'static str,
   #[prop(default = "")] extra_class: &'static str,
 ) -> impl IntoView {
-  let photo = create_resource(
-    move || (),
-    move |_| bl::fetch::fetch_photo_thumbnail(photo_id),
-  );
+  let photo =
+    create_resource(move || photo_id, bl::fetch::fetch_photo_thumbnail);
 
   view! {
     <Suspense fallback=|| view!{ }>
@@ -52,7 +50,7 @@ pub fn Photo(
         Some(Ok(Some(photo))) => {
           Some(view! {
             <img
-              src={format!("data:image/png;base64,{}", photo.data)} alt={photo.alt}
+              src={photo.data} alt={photo.alt}
               width={size.physical(photo.size).0} height={size.physical(photo.size).1}
               class={format!("{rounded} {extra_class}")}
             />
