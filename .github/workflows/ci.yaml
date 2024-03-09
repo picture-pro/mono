@@ -27,7 +27,7 @@ jobs:
       - name: Check flake inputs
         uses: DeterminateSystems/flake-checker-action@main
       - name: Run flake checks
-        run: nix flake check
+        run: nix flake check -L
 
   fly-check:
     runs-on: ubuntu-22.04
