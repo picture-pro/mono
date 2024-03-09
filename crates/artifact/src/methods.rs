@@ -104,11 +104,7 @@ where
   Id: core_types::CoreId,
   T: serde::Serialize + for<'a> serde::Deserialize<'a> + Clone,
 {
-  let client = clients::surreal::SurrealRootClient::new()
-    .await
-    .wrap_err("Failed to create surreal client")?;
-
-  client.use_ns("main").use_db("main").await?;
+  let client = clients::surreal::SurrealRootClient::new().await?;
 
   let pushed_artifact: Vec<T> = client
     .create(Id::TABLE)
@@ -129,11 +125,8 @@ where
   Id: core_types::CoreId<Model = T>,
   T: serde::Serialize + for<'a> serde::Deserialize<'a> + Clone,
 {
-  let client = clients::surreal::SurrealRootClient::new()
-    .await
-    .wrap_err("Failed to create surreal client")?;
+  let client = clients::surreal::SurrealRootClient::new().await?;
 
-  client.use_ns("main").use_db("main").await?;
   let artifact: Option<T> = client
     .select(id)
     .await

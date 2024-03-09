@@ -144,14 +144,9 @@ pub async fn build_auth_layer() -> Result<
     tower_sessions_surrealdb_store::SurrealSessionStore<Client>,
   >,
 > {
-  let session_store_surreal_client =
-    clients::surreal::SurrealRootClient::new().await?;
-  session_store_surreal_client
-    .use_ns("main")
-    .use_db("main")
-    .await?;
+  let surreal_client = clients::surreal::SurrealRootClient::new().await?;
   let session_store = tower_sessions_surrealdb_store::SurrealSessionStore::new(
-    session_store_surreal_client.into_inner(),
+    surreal_client.into_inner(),
     "user_session".to_string(),
   );
   let session_manager_layer =

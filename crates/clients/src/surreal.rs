@@ -34,6 +34,7 @@ impl SurrealRootClient {
 
     let client = Self { client };
     client.sign_in_as_root().await?;
+    client.use_main().await?;
 
     Ok(client)
   }
@@ -55,6 +56,16 @@ impl SurrealRootClient {
 
   /// Consumes the client and returns the inner client.
   pub fn into_inner(self) -> surrealdb::Surreal<Client> { self.client }
+
+  /// Uses the main namespace and database.
+  pub async fn use_main(&self) -> Result<()> {
+    self
+      .client
+      .use_ns("main")
+      .use_db("main")
+      .await
+      .wrap_err("Failed to use main namespace/database")
+  }
 }
 
 impl Deref for SurrealRootClient {
