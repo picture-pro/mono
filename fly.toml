@@ -31,6 +31,7 @@ kill_timeout = "5s"
   LEPTOS_SITE_ADDR = "0.0.0.0:3000"
   LEPTOS_RELOAD_PORT = "3001"
   LEPTOS_ENV = "PROD"
+  LEPTOS_HASH_FILES = true
 
   # `/tmp` can't be writte to in fly, reason unknown.
   TMPDIR = "/"
