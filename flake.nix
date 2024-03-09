@@ -117,6 +117,7 @@
           installPhaseCommand = ''
             mkdir -p $out/bin
             cp target/release/site-server $out/bin/
+            cp target/release/hash.txt $out/bin/
             cp -r target/site $out/bin/
           '';
           # Prevent cargo test and nextest from duplicating tests
