@@ -16,7 +16,7 @@ jobs:
       - name: Build server package
         run: nix build -L
 
-  check:
+  flake-check:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -28,3 +28,12 @@ jobs:
         uses: DeterminateSystems/flake-checker-action@main
       - name: Run flake checks
         run: nix flake check
+
+  fly-check:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Validate fly.io config
+        run: fly config validate
