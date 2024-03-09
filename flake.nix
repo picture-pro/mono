@@ -86,9 +86,13 @@
         # Build *just* the cargo dependencies, so we can reuse
         # all of that work (e.g. via cachix) when running in CI
         site-server-deps = craneLib.buildDepsOnly (common_args // {
+          # if work is duplicated by the `server-site` package, update these
+          # commands from the logs of `cargo leptos build --release -vvv`
           buildPhaseCargoCommand = ''
-            cargo build -p site-server --profile release --locked
-            cargo build -p site-frontend --target=wasm32-unknown-unknown --profile wasm-release --locked
+            # build the server dependencies
+            cargo build --package=site-server --no-default-features --release
+            # build the frontend dependencies
+            cargo build --package=site-frontend --lib --target-dir=/build/source/target/front --target=wasm32-unknown-unknown --no-default-features --profile=wasm-release
           '';
         });
 
@@ -117,6 +121,7 @@
           installPhaseCommand = ''
             mkdir -p $out/bin
             cp target/release/site-server $out/bin/
+            cp target/release/hash.txt $out/bin/
             cp -r target/site $out/bin/
           '';
           # Prevent cargo test and nextest from duplicating tests
