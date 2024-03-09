@@ -1,29 +1,10 @@
-{pkgs, cargo-leptos}: 
-	pkgs.rustPlatform.buildRustPackage rec {
-    pname = "cargo-leptos";
-    version = "0.2.7";
-    buildFeatures = ["no_downloads"]; # cargo-leptos will try to download Ruby and other things without this feature
+{pkgs, craneLib, cargo-leptos}: 
+  craneLib.buildPackage {
+    src = craneLib.cleanCargoSource cargo-leptos;
+    strictDeps = true;
 
-    src = cargo-leptos;
+    buildInputs = [ pkgs.pkg-config pkgs.openssl ];
+    cargoExtraArgs = "--no-default-features --features no_downloads";
 
-    cargoSha256 = "sha256-qkOFVEuSy0/npTocheqqZImDf3Cey4VHZ9O2pJ6WomM=";
-    # cargoSha256 = "";
-
-    nativeBuildInputs = [pkgs.pkg-config pkgs.openssl];
-
-    buildInputs = with pkgs;
-      [openssl pkg-config]
-      ++ lib.optionals stdenv.isDarwin [
-      darwin.Security darwin.apple_sdk.frameworks.CoreServices darwin.apple_sdk.frameworks.SystemConfiguration
-    ];
-
-    doCheck = false; # integration tests depend on changing cargo config
-
-    meta = with pkgs.lib; {
-      description = "A build tool for the Leptos web framework";
-      homepage = "https://github.com/leptos-rs/cargo-leptos";
-      changelog = "https://github.com/leptos-rs/cargo-leptos/blob/v${version}/CHANGELOG.md";
-      license = with licenses; [mit];
-      maintainers = with maintainers; [benwis];
-    };
+    doCheck = false;
   }

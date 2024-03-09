@@ -1,9 +1,9 @@
 {
   inputs = {
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.555002.tar.gz";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.556557.tar.gz";
     rust-overlay.url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1271.tar.gz";
     crane.url = "https://flakehub.com/f/ipetkov/crane/0.16.1.tar.gz";
-    cargo-leptos-src = { url = "github:benwis/cargo-leptos"; flake = false; };
+    cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos"; flake = false; };
   };
 
   outputs = { self, nixpkgs, rust-overlay, crane, cargo-leptos-src, flake-utils }:
@@ -43,7 +43,7 @@
         };
 
         cargo-leptos = (import ./nix/cargo-leptos.nix) {
-          inherit pkgs;
+          inherit pkgs craneLib;
           cargo-leptos = cargo-leptos-src;
         };
 
