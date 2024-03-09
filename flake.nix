@@ -43,7 +43,7 @@
         };
 
         cargo-leptos = (import ./nix/cargo-leptos.nix) {
-          inherit pkgs;
+          inherit pkgs craneLib;
           cargo-leptos = cargo-leptos-src;
         };
 
