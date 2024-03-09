@@ -52,7 +52,7 @@ pub fn Photo(
         Some(Ok(Some(photo))) => {
           Some(view! {
             <img
-              src={format!("data:image/png;base64,{}", photo.data)} alt={photo.alt}
+              src={photo.data} alt={photo.alt}
               width={size.physical(photo.size).0} height={size.physical(photo.size).1}
               class={format!("{rounded} {extra_class}")}
             />

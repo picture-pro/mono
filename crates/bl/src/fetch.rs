@@ -141,7 +141,10 @@ pub async fn fetch_photo_thumbnail(
       .ok_or_eyre("Thumbnail artifact is missing contents")?;
 
     use base64::prelude::*;
-    let data = BASE64_STANDARD.encode(&thumbnail_artifact_content);
+    let data = format!(
+      "data:image/png;base64,{}",
+      BASE64_STANDARD.encode(&thumbnail_artifact_content)
+    );
 
     Ok(Some(PhotoThumbnailDisplayParams {
       data,
