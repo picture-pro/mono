@@ -36,4 +36,4 @@ jobs:
       - name: Install flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Validate fly.io config
-        run: fly config validate
+        run: flyctl config validate
