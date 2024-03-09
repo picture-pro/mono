@@ -14,14 +14,7 @@ pub async fn fetch_user_owned_photo_groups(
   use core_types::CoreId;
 
   async move {
-    let client = SurrealRootClient::new()
-      .await
-      .wrap_err("Failed to create surreal client")?;
-    client
-      .use_ns("main")
-      .use_db("main")
-      .await
-      .wrap_err("Failed to use surreal namespace/database")?;
+    let client = SurrealRootClient::new().await?;
 
     let mut result = client
       .query(format!(
@@ -60,14 +53,7 @@ pub async fn fetch_photo_group(
   use crate::model_ext::ModelExt;
 
   async move {
-    let client = SurrealRootClient::new()
-      .await
-      .wrap_err("Failed to create surreal client")?;
-    client
-      .use_ns("main")
-      .use_db("main")
-      .await
-      .wrap_err("Failed to use surreal namespace/database")?;
+    let client = SurrealRootClient::new().await?;
 
     let group = core_types::PhotoGroup::fetch(photo_group_id, &client)
       .await
@@ -97,14 +83,7 @@ pub async fn fetch_user(
   use crate::model_ext::ModelExt;
 
   async move {
-    let client = SurrealRootClient::new()
-      .await
-      .wrap_err("Failed to create surreal client")?;
-    client
-      .use_ns("main")
-      .use_db("main")
-      .await
-      .wrap_err("Failed to use surreal namespace/database")?;
+    let client = SurrealRootClient::new().await?;
 
     core_types::User::fetch(user_id, &client)
       .await
@@ -136,11 +115,6 @@ pub async fn fetch_photo_thumbnail(
   async move {
     // prep the surreal client
     let client = SurrealRootClient::new().await?;
-    client
-      .use_ns("main")
-      .use_db("main")
-      .await
-      .wrap_err("Failed to start surreal client")?;
 
     let photo = core_types::Photo::fetch(photo_id, &client)
       .await

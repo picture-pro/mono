@@ -43,7 +43,7 @@ pub async fn upload_photo_group(
   let Some(user) =
     leptos::use_context::<core_types::LoggedInUser>().and_then(|u| u.0)
   else {
-    return Err(PhotoUploadError::Unauthenticated.into());
+    Err(PhotoUploadError::Unauthenticated)?
   };
 
   let (tx, mut rx) = mpsc::channel(params.photos.len());
@@ -103,17 +103,11 @@ pub async fn upload_photo_group(
   let client =
     clients::surreal::SurrealRootClient::new()
       .await
-      .map_err(|_| {
-        PhotoUploadError::InternalError(
-          "Failed to create surreal client".to_string(),
-        )
+      .map_err(|e| {
+        let error = e.to_string();
+        tracing::error!("Failed to create surreal client: {}", error);
+        PhotoUploadError::InternalError(error)
       })?;
-  client.use_ns("main").use_db("main").await.map_err(|e| {
-    PhotoUploadError::InternalError(format!(
-      "Failed to use surreal namespace/database: {}",
-      e
-    ))
-  })?;
 
   // create photo group
   group.create(&client).await.map_err(|e| {
@@ -224,14 +218,7 @@ async fn create_photo(img: image::DynamicImage) -> Result<PhotoRecordId> {
     meta:      Default::default(),
   };
 
-  let client = clients::surreal::SurrealRootClient::new()
-    .await
-    .wrap_err("Failed to create surreal client")?;
-  client
-    .use_ns("main")
-    .use_db("main")
-    .await
-    .wrap_err("Failed to use surreal namespace/database")?;
+  let client = clients::surreal::SurrealRootClient::new().await?;
 
   photo
     .create(&client)
