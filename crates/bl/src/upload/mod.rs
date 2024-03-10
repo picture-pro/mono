@@ -56,7 +56,13 @@ pub async fn upload_photo_group(
     .enumerate()
     .par_bridge()
     // load original images
-    .map(|(i, p)| image::load_from_memory(&p.original).map(|img| (i, img)))
+    .map(|(i, p)| {
+      let exif_reader = exif::Reader::new();
+      let meta = exif_reader
+        .read_from_container(&mut std::io::Cursor::new(&p.original))
+        .ok();
+      image::load_from_memory(&p.original).map(|img| (i, (img, meta)))
+    })
     // collect into a hashmap & short circuit on error
     .collect::<Result<HashMap<_, _>, _>>()
     .map_err(|e| {
@@ -65,10 +71,10 @@ pub async fn upload_photo_group(
     })?;
 
   // spawn tasks for each image
-  for (i, img) in images {
+  for (i, (img, meta)) in images {
     let tx = tx.clone();
     tokio::spawn(async move {
-      let result = create_photo(img).await;
+      let result = create_photo(img, meta).await;
       tx.send((i, result)).await.unwrap();
     });
   }
@@ -135,11 +141,88 @@ pub async fn upload_photo_group(
 }
 
 #[cfg(feature = "ssr")]
-async fn create_photo(img: image::DynamicImage) -> Result<PhotoRecordId> {
+fn photo_meta_from_exif(input: Option<exif::Exif>) -> core_types::PhotoMeta {
+  let mut meta = core_types::PhotoMeta::default();
+
+  let Some(exif) = input else {
+    return meta;
+  };
+
+  // extract datetime
+  if let Some(field) = exif.get_field(exif::Tag::DateTime, exif::In::PRIMARY) {
+    match field.value {
+      exif::Value::Ascii(ref vec) if !vec.is_empty() => {
+        if let Ok(datetime) = exif::DateTime::from_ascii(&vec[0]) {
+          meta.date_time = chrono::NaiveDate::from_ymd_opt(
+            datetime.year.into(),
+            datetime.month.into(),
+            datetime.day.into(),
+          )
+          .and_then(|date| {
+            chrono::NaiveTime::from_hms_opt(
+              datetime.hour.into(),
+              datetime.minute.into(),
+              datetime.second.into(),
+            )
+            .map(|time| date.and_time(time))
+          });
+        }
+      }
+      _ => {}
+    }
+  }
+
+  // extract gps
+  // this isn't implemented yet
+
+  meta
+}
+
+#[cfg(feature = "ssr")]
+fn rotate_image_from_exif(
+  img: &mut image::DynamicImage,
+  orientation: Option<&exif::Exif>,
+) {
+  let Some(exif) = orientation else {
+    return;
+  };
+
+  let Some(orientation) =
+    exif.get_field(exif::Tag::Orientation, exif::In::PRIMARY)
+  else {
+    return;
+  };
+
+  let Some(value) = orientation.value.as_uint().ok().and_then(|v| v.get(0))
+  else {
+    return;
+  };
+
+  *img = match value {
+    1 => img.clone(),
+    2 => img.fliph(),
+    3 => img.rotate180(),
+    4 => img.flipv(),
+    5 => img.rotate90().fliph(),
+    6 => img.rotate90(),
+    7 => img.rotate270().fliph(),
+    8 => img.rotate270(),
+    _ => img.clone(),
+  };
+}
+
+#[cfg(feature = "ssr")]
+async fn create_photo(
+  mut img: image::DynamicImage,
+  meta: Option<exif::Exif>,
+) -> Result<PhotoRecordId> {
   use artifact::Artifact;
   use color_eyre::eyre::WrapErr;
 
   use crate::model_ext::ModelExt;
+
+  // rotate image based on exif orientation
+  rotate_image_from_exif(&mut img, meta.as_ref());
 
   // encode original image as jpeg
   let mut original_jpeg_bytes = Vec::new();
@@ -203,9 +286,9 @@ async fn create_photo(img: image::DynamicImage) -> Result<PhotoRecordId> {
 
   // create a photo and upload it to surreal
   let photo = core_types::Photo {
-    id:        core_types::PhotoRecordId(core_types::Ulid::new()),
-    group:     core_types::PhotoGroupRecordId(core_types::Ulid::nil()),
-    artifacts: core_types::PhotoArtifacts {
+    id:         core_types::PhotoRecordId(core_types::Ulid::new()),
+    group:      core_types::PhotoGroupRecordId(core_types::Ulid::nil()),
+    artifacts:  core_types::PhotoArtifacts {
       original:  core_types::PrivateImageArtifact {
         artifact_id: original_artifact.id,
         size:        (img.width(), img.height()),
@@ -215,7 +298,8 @@ async fn create_photo(img: image::DynamicImage) -> Result<PhotoRecordId> {
         size:        (thumbnail_image.width(), thumbnail_image.height()),
       },
     },
-    meta:      Default::default(),
+    photo_meta: photo_meta_from_exif(meta),
+    meta:       Default::default(),
   };
 
   let client = clients::surreal::SurrealRootClient::new().await?;
