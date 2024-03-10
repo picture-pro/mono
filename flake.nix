@@ -29,6 +29,7 @@
             ./Cargo.toml
             ./Cargo.lock
             ./crates
+            (nix-filter.lib.matchExt "toml")
           ];
         };
 
