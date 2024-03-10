@@ -32,10 +32,10 @@ pub struct Photo {
 }
 
 /// Photo metadata derived from EXIF data.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct PhotoMeta {
   /// The date and time the photo was taken.
-  pub date_time: Option<chrono::DateTime<chrono::Utc>>,
+  pub date_time: Option<chrono::NaiveDateTime>,
   /// The GPS coordinates where the photo was taken.
   pub gps:       Option<(f64, f64)>,
   /// Extra EXIF data.
