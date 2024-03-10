@@ -13,7 +13,8 @@ kill_timeout = "5s"
   surreal = "surreal start --log=info --auth --bind '[::]':8000 file:/data/srdb.db"
 
 [[vm]]
-  memory = "1GB"
+  size = "shared-cpu-2x"
+  memory = "256MB"
   processes = ["app"]
 
 [env]
