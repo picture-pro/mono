@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 /// The table name for the photo table.
@@ -18,13 +20,26 @@ pub struct PhotoRecordId(pub ulid::Ulid);
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Photo {
   /// The record ID.
-  pub id:        PhotoRecordId,
+  pub id:         PhotoRecordId,
   /// The photo group that contains this photo.
-  pub group:     PhotoGroupRecordId,
+  pub group:      PhotoGroupRecordId,
   /// The photo's artifacts.
-  pub artifacts: PhotoArtifacts,
+  pub artifacts:  PhotoArtifacts,
+  /// Data derived from the photo's EXIF data.
+  pub photo_meta: PhotoMeta,
   /// Object metadata.
-  pub meta:      crate::ObjectMeta,
+  pub meta:       crate::ObjectMeta,
+}
+
+/// Photo metadata derived from EXIF data.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PhotoMeta {
+  /// The date and time the photo was taken.
+  pub date_time: Option<chrono::DateTime<chrono::Utc>>,
+  /// The GPS coordinates where the photo was taken.
+  pub gps:       Option<(f64, f64)>,
+  /// Extra EXIF data.
+  pub extra:     HashMap<String, String>,
 }
 
 /// The artifacts for a photo. Not a table.
