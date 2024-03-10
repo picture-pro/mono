@@ -4,9 +4,10 @@
     rust-overlay.url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1271.tar.gz";
     crane.url = "https://flakehub.com/f/ipetkov/crane/0.16.1.tar.gz";
     cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos"; flake = false; };
+    nix-filter.url = "github:numtide/nix-filter";
   };
 
-  outputs = { self, nixpkgs, rust-overlay, crane, cargo-leptos-src, flake-utils }:
+  outputs = { self, nixpkgs, rust-overlay, crane, cargo-leptos-src, nix-filter, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
@@ -22,24 +23,14 @@
         
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
-        filterGenerator = pattern: path: _type: builtins.match pattern path != null;
-        protoOrCargo = path: type:
-          (craneLib.filterCargoSources path type)
-            || (filterGenerator ".*css$" path type)
-            || (filterGenerator ".*js$" path type)
-            || (filterGenerator ".*json$" path type)
-            || (filterGenerator ".*lock$" path type)
-            || (filterGenerator ".*ttf$" path type)
-            || (filterGenerator ".*woff2$" path type)
-            || (filterGenerator ".*webp$" path type)
-            || (filterGenerator ".*jpeg$" path type)
-            || (filterGenerator ".*png$" path type)
-            || (filterGenerator ".*ico$" path type);
-
-        # Include more types of files in our bundle
-        src = pkgs.lib.cleanSourceWith {
-          src = ./.; # The original, unfiltered source
-          filter = protoOrCargo;
+        src = nix-filter {
+          root = ./.;
+          include = [
+            ./Cargo.toml
+            ./Cargo.lock
+            ./crates
+            (nix-filter.lib.matchExt "toml")
+          ];
         };
 
         cargo-leptos = (import ./nix/cargo-leptos.nix) {
