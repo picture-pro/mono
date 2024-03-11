@@ -106,7 +106,7 @@ impl NewType for RememberMe {
 }
 
 /// Parameters for signing up.
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct SignupParams {
   /// The user's name.
   pub name:     String,
@@ -118,8 +118,19 @@ pub struct SignupParams {
   pub remember: bool,
 }
 
+impl Debug for SignupParams {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SignupParams")
+      .field("name", &self.name)
+      .field("email", &self.email)
+      .field("password", &"[redacted]")
+      .field("remember", &self.remember)
+      .finish()
+  }
+}
+
 /// Parameters for logging in.
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct LoginParams {
   /// The user's email.
   pub email:    String,
@@ -127,4 +138,14 @@ pub struct LoginParams {
   pub password: String,
   /// The user's remember me preference.
   pub remember: bool,
+}
+
+impl Debug for LoginParams {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("LoginParams")
+      .field("email", &self.email)
+      .field("password", &"[redacted]")
+      .field("remember", &self.remember)
+      .finish()
+  }
 }
