@@ -32,6 +32,9 @@ pub fn photo_meta_from_exif(input: Option<Exif>) -> core_types::PhotoMeta {
     }
   }
 
+  // extract orientation
+  meta.orientation = orientation_from_exif(Some(&exif));
+
   // extract gps
   // this isn't implemented yet
 
