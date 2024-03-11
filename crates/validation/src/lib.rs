@@ -17,3 +17,11 @@ pub trait NewType: Sized + Clone {
 pub trait NewTypeError: 'static + Sized + Clone {
   fn to_string(&self) -> String;
 }
+
+impl NewTypeError for String {
+  fn to_string(&self) -> String { self.clone() }
+}
+
+impl NewTypeError for std::convert::Infallible {
+  fn to_string(&self) -> String { match *self {} }
+}
