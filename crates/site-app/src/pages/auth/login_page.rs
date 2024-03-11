@@ -127,7 +127,7 @@ pub fn LoginPageInner() -> impl IntoView {
 }
 
 #[cfg_attr(feature = "ssr", tracing::instrument)]
-#[server(Login)]
+#[server]
 pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   // construct the nutype wrappers and fail if validation fails
   let _ = Email::new(params.email.clone())
@@ -142,7 +142,7 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   };
   let mut auth_session = use_context::<auth::AuthSession>()
     .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
-  let mut session = use_context::<tower_sessions::Session>()
+  let session = use_context::<tower_sessions::Session>()
     .ok_or_else(|| ServerFnError::new("Failed to get session"))?;
 
   let user = match auth_session.authenticate(creds.clone()).await {
