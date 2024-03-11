@@ -22,6 +22,8 @@ pub struct Credentials {
   pub email:    String,
   /// The password of the user.
   pub password: String,
+  /// The remember-me flag.
+  pub remember: bool,
 }
 
 /// The backend type for the authentication layer.

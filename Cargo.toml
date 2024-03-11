@@ -35,6 +35,7 @@ strum = { version = "0.26", features = ["derive"] }
 surrealdb = { version = "1" }
 thiserror = "1"
 chrono = { version = "0.4", features = [ "serde" ] }
+time = { version = "0.3" }
 timeago = { version = "0.4", default-features = false, features = [ "chrono" ] }
 tokio = { version = "1", features = ["full"] }
 tower = { version = "0.4", features = ["full"] }

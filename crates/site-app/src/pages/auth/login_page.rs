@@ -1,5 +1,5 @@
 use leptos::*;
-use validation::{Email, LoginParams, Password};
+use validation::{Email, LoginParams, Password, RememberMe};
 
 use crate::{
   components::{form::ActiveFormElement, navigation::navigate_to},
@@ -20,13 +20,15 @@ pub fn LoginPageInner() -> impl IntoView {
   // create the signals
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
+  let (remember, set_remember) = create_signal(false);
 
   // create the params, aborting if validation fails
   let params: Memo<LoginParams> = create_memo(move |_| {
-    with!(|email, password| {
+    with!(|email, password, remember| {
       LoginParams {
         email:    email.to_string(),
         password: password.to_string(),
+        remember: *remember,
       }
     })
   });
@@ -47,6 +49,14 @@ pub fn LoginPageInner() -> impl IntoView {
     field_write_signal:     set_password,
     display_name:           "Password",
     html_form_input_type:   Some("password"),
+    skip_validate:          true,
+    skip_validate_on_empty: false,
+  };
+  let remember_element = ActiveFormElement::<RememberMe> {
+    field_read_signal:      remember,
+    field_write_signal:     set_remember,
+    display_name:           "Remember me",
+    html_form_input_type:   Some("checkbox"),
     skip_validate:          true,
     skip_validate_on_empty: false,
   };
@@ -97,6 +107,7 @@ pub fn LoginPageInner() -> impl IntoView {
 
       { email_element.into_view() }
       { password_element.into_view() }
+      { remember_element.into_view() }
 
       { result_message }
 
@@ -127,6 +138,7 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   let creds = auth::Credentials {
     email:    params.email,
     password: params.password,
+    remember: params.remember,
   };
   let mut auth_session = use_context::<auth::AuthSession>()
     .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
@@ -145,6 +157,12 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
     .login(&user)
     .await
     .map_err(|e| ServerFnError::new(format!("Failed to log in: {e}")))?;
+
+  if creds.remember {
+    session.set_expiry(Some(tower_sessions::Expiry::AtDateTime(
+      time::OffsetDateTime::now_utc() + time::Duration::days(30),
+    )));
+  }
 
   tracing::info!("logged in user: {} ({})", user.name, user.id.0);
   leptos_axum::redirect("/");

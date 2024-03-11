@@ -17,6 +17,7 @@ cfg-if.workspace = true
 thiserror.workspace = true
 serde.workspace = true
 bytes = { workspace = true, optional = true }
+time = { workspace = true, optional = true }
 chrono = { workspace = true }
 timeago = { workspace = true }
 tower-sessions = { workspace = true, optional = true }
@@ -37,6 +38,7 @@ default = []
 hydrate = ["bl/hydrate", "leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
   "bl/ssr", "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
-  "dep:leptos_axum", "dep:auth", "dep:bytes", "dep:tracing", "dep:tower-sessions"
+  "dep:leptos_axum", "dep:auth", "dep:bytes", "dep:tracing", "dep:tower-sessions",
+  "dep:time",
 ]
 
