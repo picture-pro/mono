@@ -1,7 +1,7 @@
 use leptos::*;
 #[cfg(feature = "ssr")]
 use validation::LoginParams;
-use validation::{Email, Name, Password, SignupParams};
+use validation::{Email, Name, Password, RememberMe, SignupParams};
 
 use crate::{
   components::{form::ActiveFormElement, navigation::navigate_to},
@@ -23,9 +23,10 @@ pub fn SignupPageInner() -> impl IntoView {
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
   let (confirm, set_confirm) = create_signal(String::new());
+  let (remember, set_remember) = create_signal(false);
 
   let params: Memo<Option<SignupParams>> = create_memo(move |_| {
-    with!(|name, email, password, confirm| {
+    with!(|name, email, password, confirm, remember| {
       let _ = Name::new(name.clone()).ok()?;
       let _ = Email::new(email.clone()).ok()?;
       let _ = Password::new(password.clone()).ok()?;
@@ -36,6 +37,7 @@ pub fn SignupPageInner() -> impl IntoView {
         name:     name.clone(),
         email:    email.clone(),
         password: password.clone(),
+        remember: remember.into_inner(),
       })
     })
   });
@@ -71,6 +73,14 @@ pub fn SignupPageInner() -> impl IntoView {
     field_write_signal:     set_confirm,
     display_name:           "Confirm Password",
     html_form_input_type:   Some("password"),
+    skip_validate:          true,
+    skip_validate_on_empty: true,
+  };
+  let remember_element = ActiveFormElement::<RememberMe> {
+    field_read_signal:      remember,
+    field_write_signal:     set_remember,
+    display_name:           "Remember Me",
+    html_form_input_type:   Some("checkbox"),
     skip_validate:          true,
     skip_validate_on_empty: true,
   };
@@ -120,6 +130,7 @@ pub fn SignupPageInner() -> impl IntoView {
       { email_element.into_view() }
       { password_element.into_view() }
       { confirm_element.into_view() }
+      { remember_element.into_view() }
 
       { result_message }
 
@@ -153,6 +164,7 @@ pub async fn signup(params: SignupParams) -> Result<(), ServerFnError> {
     name,
     email,
     password,
+    remember,
   } = params;
 
   let auth_session = use_context::<auth::AuthSession>()
@@ -168,8 +180,9 @@ pub async fn signup(params: SignupParams) -> Result<(), ServerFnError> {
     })?;
 
   let _login_result = crate::pages::auth::login_page::login(LoginParams {
-    email:    email.clone(),
+    email: email.clone(),
     password: password.clone(),
+    remember,
   })
   .await
   .map_err(|e| ServerFnError::new(format!("Failed to log in: {e}")))?;

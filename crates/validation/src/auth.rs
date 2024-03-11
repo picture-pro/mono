@@ -114,6 +114,8 @@ pub struct SignupParams {
   pub email:    String,
   /// The user's password.
   pub password: String,
+  /// The user's remember me preference.
+  pub remember: bool,
 }
 
 /// Parameters for logging in.
