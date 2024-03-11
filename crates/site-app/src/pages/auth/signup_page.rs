@@ -4,7 +4,10 @@ use validation::LoginParams;
 use validation::{Email, Name, Password, RememberMe, SignupParams};
 
 use crate::{
-  components::{form::ActiveFormElement, navigation::navigate_to},
+  components::{
+    form::{ActiveFormCheckboxElement, ActiveFormElement},
+    navigation::navigate_to,
+  },
   pages::SmallPageWrapper,
 };
 
@@ -76,13 +79,10 @@ pub fn SignupPageInner() -> impl IntoView {
     skip_validate:          true,
     skip_validate_on_empty: true,
   };
-  let remember_element = ActiveFormElement::<RememberMe> {
-    field_read_signal:      remember,
-    field_write_signal:     set_remember,
-    display_name:           "Remember Me",
-    html_form_input_type:   Some("checkbox"),
-    skip_validate:          true,
-    skip_validate_on_empty: true,
+  let remember_element = ActiveFormCheckboxElement {
+    field_read_signal:  remember,
+    field_write_signal: set_remember,
+    display_name:       "Remember Me",
   };
 
   let signup_action = create_server_action::<Signup>();
@@ -126,11 +126,11 @@ pub fn SignupPageInner() -> impl IntoView {
     <div class="d-card-body">
       <p class="d-card-title text-2xl">"Sign Up to PicturePro"</p>
 
-      { name_element.into_view() }
-      { email_element.into_view() }
-      { password_element.into_view() }
-      { confirm_element.into_view() }
-      { remember_element.into_view() }
+      { name_element }
+      { email_element }
+      { password_element }
+      { confirm_element }
+      { remember_element }
 
       { result_message }
 

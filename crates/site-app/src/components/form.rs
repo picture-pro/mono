@@ -24,6 +24,11 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
       skip_validate_on_empty,
     } = self;
 
+    let class = match html_form_input_type {
+      Some("checkbox") => "d-checkbox w-full max-w-xs",
+      _ => "d-input d-input-bordered w-full max-w-xs",
+    };
+
     let write_callback = move |ev: Event| {
       // attempt to parse the input value to the inner validation type
       let Ok(value) = event_target_value(&ev).parse() else {
@@ -55,13 +60,49 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
       <div class="d-form-control">
         <label class="d-label">{ display_name }</label>
         <input
-          class="d-input d-input-bordered w-full max-w-xs"
+          class=class
           placeholder={ display_name } type=html_form_input_type.unwrap_or("text")
           on:input=write_callback value=read_callback
         />
         <p class="text-error/80 text-sm py-1">
           { validate_callback }
         </p>
+      </div>
+    }
+    .into_view()
+  }
+}
+
+/// A form element for a checkbox
+///
+/// This one is separate because no validation is needed and the value property
+/// works differently for checkboxes.
+pub struct ActiveFormCheckboxElement {
+  pub field_read_signal:  ReadSignal<bool>,
+  pub field_write_signal: WriteSignal<bool>,
+  pub display_name:       &'static str,
+}
+
+impl IntoView for ActiveFormCheckboxElement {
+  fn into_view(self) -> View {
+    let ActiveFormCheckboxElement {
+      field_read_signal,
+      field_write_signal,
+      display_name,
+    } = self;
+
+    let write_callback = move |ev: Event| {
+      field_write_signal(event_target_checked(&ev));
+    };
+
+    view! {
+      <div class="flex flex-row justify-between items-center">
+        <label class="d-label">{ display_name }</label>
+        <input
+          class="d-checkbox"
+          type="checkbox"
+          on:input=write_callback
+        />
       </div>
     }
     .into_view()
