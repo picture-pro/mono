@@ -91,6 +91,20 @@ impl NewTypeError for PasswordError {
   }
 }
 
+/// Remember me preference.
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+pub struct RememberMe(bool);
+
+impl NewType for RememberMe {
+  type Inner = bool;
+  type Error = std::convert::Infallible;
+
+  fn new(inner: Self::Inner) -> Result<Self, Self::Error> {
+    Ok(RememberMe(inner))
+  }
+  fn into_inner(self) -> Self::Inner { self.0 }
+}
+
 /// Parameters for signing up.
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct SignupParams {
@@ -109,4 +123,6 @@ pub struct LoginParams {
   pub email:    String,
   /// The user's password.
   pub password: String,
+  /// The user's remember me preference.
+  pub remember: bool,
 }
