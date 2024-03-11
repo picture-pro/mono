@@ -130,6 +130,8 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   };
   let mut auth_session = use_context::<auth::AuthSession>()
     .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
+  let mut session = use_context::<tower_sessions::Session>()
+    .ok_or_else(|| ServerFnError::new("Failed to get session"))?;
 
   let user = match auth_session.authenticate(creds.clone()).await {
     Ok(Some(user)) => user,
