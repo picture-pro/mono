@@ -37,7 +37,7 @@ pub fn SignupPageInner() -> impl IntoView {
         name:     name.clone(),
         email:    email.clone(),
         password: password.clone(),
-        remember: remember.into_inner(),
+        remember: *remember,
       })
     })
   });
