@@ -4679,6 +4679,7 @@ dependencies = [
  "tokio",
  "tower",
  "tower-http",
+ "tower-sessions",
  "tracing-chrome",
  "tracing-subscriber",
 ]
