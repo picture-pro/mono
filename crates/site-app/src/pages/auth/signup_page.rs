@@ -139,8 +139,8 @@ pub fn SignupPageInner() -> impl IntoView {
 }
 
 #[cfg_attr(feature = "ssr", tracing::instrument)]
-#[server(Signup)]
-pub async fn login(params: SignupParams) -> Result<(), ServerFnError> {
+#[server]
+pub async fn signup(params: SignupParams) -> Result<(), ServerFnError> {
   // construct the nutype wrappers and fail if validation fails
   let _ = Name::new(params.name.clone())
     .map_err(|e| ServerFnError::new(format!("Invalid name: {e}")))?;
