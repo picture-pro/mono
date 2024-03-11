@@ -99,7 +99,6 @@ pub fn PhotoUpload() -> impl IntoView {
             let target = e.target().unwrap().dyn_into::<HtmlInputElement>().unwrap();
             set_files(target.files());
           }
-          value=files().map(|f| f.length().to_string())
         />
 
         // upload button
