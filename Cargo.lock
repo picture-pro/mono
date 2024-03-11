@@ -333,6 +333,7 @@ dependencies = [
  "serde",
  "surrealdb",
  "thiserror",
+ "tokio",
  "tower-sessions",
  "tower-sessions-surrealdb-store",
  "tracing",

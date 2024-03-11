@@ -15,6 +15,7 @@ serde.workspace = true
 color-eyre.workspace = true
 thiserror.workspace = true
 tower-sessions.workspace = true
+tokio.workspace = true
 tracing.workspace = true
 surrealdb.workspace = true
 
