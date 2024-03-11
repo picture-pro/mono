@@ -1,4 +1,6 @@
 #[cfg(feature = "ssr")]
+mod exif_ops;
+#[cfg(feature = "ssr")]
 mod watermark;
 
 use std::collections::HashMap;
@@ -141,77 +143,6 @@ pub async fn upload_photo_group(
 }
 
 #[cfg(feature = "ssr")]
-fn photo_meta_from_exif(input: Option<exif::Exif>) -> core_types::PhotoMeta {
-  let mut meta = core_types::PhotoMeta::default();
-
-  let Some(exif) = input else {
-    return meta;
-  };
-
-  // extract datetime
-  if let Some(field) = exif.get_field(exif::Tag::DateTime, exif::In::PRIMARY) {
-    match field.value {
-      exif::Value::Ascii(ref vec) if !vec.is_empty() => {
-        if let Ok(datetime) = exif::DateTime::from_ascii(&vec[0]) {
-          meta.date_time = chrono::NaiveDate::from_ymd_opt(
-            datetime.year.into(),
-            datetime.month.into(),
-            datetime.day.into(),
-          )
-          .and_then(|date| {
-            chrono::NaiveTime::from_hms_opt(
-              datetime.hour.into(),
-              datetime.minute.into(),
-              datetime.second.into(),
-            )
-            .map(|time| date.and_time(time))
-          });
-        }
-      }
-      _ => {}
-    }
-  }
-
-  // extract gps
-  // this isn't implemented yet
-
-  meta
-}
-
-#[cfg(feature = "ssr")]
-fn rotate_image_from_exif(
-  img: &mut image::DynamicImage,
-  orientation: Option<&exif::Exif>,
-) {
-  let Some(exif) = orientation else {
-    return;
-  };
-
-  let Some(orientation) =
-    exif.get_field(exif::Tag::Orientation, exif::In::PRIMARY)
-  else {
-    return;
-  };
-
-  let Some(value) = orientation.value.as_uint().ok().and_then(|v| v.get(0))
-  else {
-    return;
-  };
-
-  *img = match value {
-    1 => img.clone(),
-    2 => img.fliph(),
-    3 => img.rotate180(),
-    4 => img.flipv(),
-    5 => img.rotate90().fliph(),
-    6 => img.rotate90(),
-    7 => img.rotate270().fliph(),
-    8 => img.rotate270(),
-    _ => img.clone(),
-  };
-}
-
-#[cfg(feature = "ssr")]
 async fn create_photo(
   mut img: image::DynamicImage,
   meta: Option<exif::Exif>,
@@ -222,7 +153,7 @@ async fn create_photo(
   use crate::model_ext::ModelExt;
 
   // rotate image based on exif orientation
-  rotate_image_from_exif(&mut img, meta.as_ref());
+  exif_ops::rotate_image_from_exif(&mut img, meta.as_ref());
 
   // encode original image as jpeg
   let mut original_jpeg_bytes = Vec::new();
@@ -298,7 +229,7 @@ async fn create_photo(
         size:        (thumbnail_image.width(), thumbnail_image.height()),
       },
     },
-    photo_meta: photo_meta_from_exif(meta),
+    photo_meta: exif_ops::photo_meta_from_exif(meta),
     meta:       Default::default(),
   };
 

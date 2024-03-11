@@ -35,11 +35,13 @@ pub struct Photo {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct PhotoMeta {
   /// The date and time the photo was taken.
-  pub date_time: Option<chrono::NaiveDateTime>,
+  pub date_time:   Option<chrono::NaiveDateTime>,
   /// The GPS coordinates where the photo was taken.
-  pub gps:       Option<(f64, f64)>,
+  pub gps:         Option<(f64, f64)>,
+  /// The original orientation of the photo (uses EXIF orientations).
+  pub orientation: Option<u32>,
   /// Extra EXIF data.
-  pub extra:     HashMap<String, String>,
+  pub extra:       HashMap<String, String>,
 }
 
 /// The artifacts for a photo. Not a table.
