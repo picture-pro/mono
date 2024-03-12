@@ -12,7 +12,7 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
         with:
-          extra_conf: |
+          extra-conf: |
             keep-outputs = true
             keep-derivations = true
       - name: Use Nix Cache
@@ -27,7 +27,7 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
         with:
-          extra_conf: |
+          extra-conf: |
             keep-outputs = true
             keep-derivations = true
       - name: Use Nix Cache
