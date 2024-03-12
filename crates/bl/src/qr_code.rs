@@ -27,9 +27,6 @@ pub fn generate_qr_code_inner(data: &str) -> color_eyre::eyre::Result<String> {
 )]
 #[cfg_attr(feature = "ssr", tracing::instrument)]
 pub async fn generate_qr_code(data: String) -> Result<String, ServerFnError> {
-  generate_qr_code_inner(&data).map_err(|e| {
-    let error = e.to_string();
-    tracing::error!("Failed to generate QR code: {}", error);
-    ServerFnError::new(error)
-  })
+  generate_qr_code_inner(&data)
+    .map_err(|e| crate::handle_error(e, "generate qr code"))
 }
