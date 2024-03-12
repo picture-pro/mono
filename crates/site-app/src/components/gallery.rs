@@ -11,7 +11,8 @@ pub fn Gallery() -> impl IntoView {
     .into_view();
   };
 
-  let photo_groups = create_resource(move || user.id, fetch_user_photo_groups);
+  let photo_groups =
+    create_resource(move || user.id, bl::fetch::fetch_user_owned_photo_groups);
 
   view! {
     <Suspense fallback=|| view!{ }>
@@ -56,18 +57,4 @@ fn PhotoGroupList(groups: Vec<core_types::PhotoGroup>) -> impl IntoView {
     </div>
   }
   .into_view()
-}
-
-#[cfg_attr(feature = "ssr", tracing::instrument)]
-#[server]
-pub async fn fetch_user_photo_groups(
-  user_id: core_types::UserRecordId,
-) -> Result<Vec<core_types::PhotoGroup>, ServerFnError> {
-  bl::fetch::fetch_user_owned_photo_groups(user_id)
-    .await
-    .map_err(|e| {
-      let error = format!("Failed to fetch user photo groups: {:?}", e);
-      tracing::error!("{error}");
-      ServerFnError::new(error)
-    })
 }

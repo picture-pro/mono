@@ -32,11 +32,7 @@ pub async fn fetch_user_owned_photo_groups(
     Ok(groups)
   }
   .await
-  .map_err(|e: Report| {
-    let error = e.to_string();
-    tracing::error!("Failed to fetch user owned photo groups: {}", error);
-    ServerFnError::new(error)
-  })
+  .map_err(|e: Report| crate::handle_error(e, "fetch user owned photo groups"))
 }
 
 #[server(
@@ -62,11 +58,7 @@ pub async fn fetch_photo_group(
     Ok(group)
   }
   .await
-  .map_err(|e: Report| {
-    let error = e.to_string();
-    tracing::error!("Failed to fetch photo group: {}", error);
-    ServerFnError::new(error)
-  })
+  .map_err(|e: Report| crate::handle_error(e, "fetch photo group"))
 }
 
 #[server(
@@ -91,11 +83,7 @@ pub async fn fetch_user(
       .wrap_err("Failed to fetch user")
   }
   .await
-  .map_err(|e: Report| {
-    let error = e.to_string();
-    tracing::error!("Failed to fetch user: {}", error);
-    ServerFnError::new(error)
-  })
+  .map_err(|e: Report| crate::handle_error(e, "fetch user"))
 }
 
 #[server(
@@ -153,9 +141,5 @@ pub async fn fetch_photo_thumbnail(
     }))
   }
   .await
-  .map_err(|e: Report| {
-    let error = e.to_string();
-    tracing::error!("Failed to fetch photo thumbnail: {}", error);
-    ServerFnError::new(error)
-  })
+  .map_err(|e: Report| crate::handle_error(e, "fetch photo thumbnail"))
 }
