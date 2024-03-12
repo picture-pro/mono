@@ -86,7 +86,7 @@ pub struct ActiveFormCheckboxElement {
 impl IntoView for ActiveFormCheckboxElement {
   fn into_view(self) -> View {
     let ActiveFormCheckboxElement {
-      field_read_signal,
+      field_read_signal: _,
       field_write_signal,
       display_name,
     } = self;

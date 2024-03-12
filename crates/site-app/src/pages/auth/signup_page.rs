@@ -1,7 +1,7 @@
 use leptos::*;
 #[cfg(feature = "ssr")]
 use validation::LoginParams;
-use validation::{Email, Name, Password, RememberMe, SignupParams};
+use validation::{Email, Name, Password, SignupParams};
 
 use crate::{
   components::{
