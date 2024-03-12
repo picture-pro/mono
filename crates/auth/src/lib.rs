@@ -158,7 +158,9 @@ pub async fn build_auth_layer() -> Result<
   );
 
   let session_manager_layer =
-    tower_sessions::SessionManagerLayer::new(session_store);
+    tower_sessions::SessionManagerLayer::new(session_store).with_expiry(
+      tower_sessions::Expiry::OnInactivity(time::Duration::days(30)),
+    );
 
   Ok(
     AuthManagerLayerBuilder::new(Backend::new().await?, session_manager_layer)
