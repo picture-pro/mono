@@ -10,6 +10,7 @@ use color_eyre::eyre::{eyre, Context, OptionExt, Result};
 use core_types::CoreId;
 use serde::{Deserialize, Serialize};
 use surrealdb::engine::remote::ws::Client;
+use tower_sessions::ExpiredDeletion;
 use tracing::instrument;
 
 /// The credentials type for the authentication layer.
@@ -22,6 +23,8 @@ pub struct Credentials {
   pub email:    String,
   /// The password of the user.
   pub password: String,
+  /// The remember-me flag.
+  pub remember: bool,
 }
 
 /// The backend type for the authentication layer.
@@ -52,8 +55,6 @@ impl Backend {
     email: String,
     password: String,
   ) -> Result<core_types::User> {
-    (*self.surreal_client).use_ns("main").use_db("main").await?;
-
     // check whether a user with the given email already exists
     let user: Option<core_types::User> = (*self.surreal_client)
       .query("SELECT * FROM users WHERE email = $email")
@@ -149,8 +150,17 @@ pub async fn build_auth_layer() -> Result<
     surreal_client.into_inner(),
     "user_session".to_string(),
   );
+
+  tokio::task::spawn(
+    session_store
+      .clone()
+      .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
+  );
+
   let session_manager_layer =
-    tower_sessions::SessionManagerLayer::new(session_store);
+    tower_sessions::SessionManagerLayer::new(session_store).with_expiry(
+      tower_sessions::Expiry::OnInactivity(time::Duration::days(30)),
+    );
 
   Ok(
     AuthManagerLayerBuilder::new(Backend::new().await?, session_manager_layer)

@@ -26,12 +26,14 @@ pub struct AppState {
 }
 
 async fn server_fn_handler(
+  session: tower_sessions::Session,
   auth_session: auth::AuthSession,
   request: Request<Body>,
 ) -> impl IntoResponse {
   handle_server_fns_with_context(
     move || {
       provide_context(auth_session.clone());
+      provide_context(session.clone());
       provide_context(core_types::LoggedInUser(
         auth_session.user.clone().map(core_types::PublicUser::from),
       ))

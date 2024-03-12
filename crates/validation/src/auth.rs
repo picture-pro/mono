@@ -91,8 +91,22 @@ impl NewTypeError for PasswordError {
   }
 }
 
-/// Parameters for signing up.
+/// Remember me preference.
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+pub struct RememberMe(bool);
+
+impl NewType for RememberMe {
+  type Inner = bool;
+  type Error = std::convert::Infallible;
+
+  fn new(inner: Self::Inner) -> Result<Self, Self::Error> {
+    Ok(RememberMe(inner))
+  }
+  fn into_inner(self) -> Self::Inner { self.0 }
+}
+
+/// Parameters for signing up.
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct SignupParams {
   /// The user's name.
   pub name:     String,
@@ -100,13 +114,38 @@ pub struct SignupParams {
   pub email:    String,
   /// The user's password.
   pub password: String,
+  /// The user's remember me preference.
+  pub remember: bool,
+}
+
+impl Debug for SignupParams {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("SignupParams")
+      .field("name", &self.name)
+      .field("email", &self.email)
+      .field("password", &"[redacted]")
+      .field("remember", &self.remember)
+      .finish()
+  }
 }
 
 /// Parameters for logging in.
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct LoginParams {
   /// The user's email.
   pub email:    String,
   /// The user's password.
   pub password: String,
+  /// The user's remember me preference.
+  pub remember: bool,
+}
+
+impl Debug for LoginParams {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("LoginParams")
+      .field("email", &self.email)
+      .field("password", &"[redacted]")
+      .field("remember", &self.remember)
+      .finish()
+  }
 }

@@ -20,6 +20,7 @@ simple_logger.workspace = true
 tokio.workspace = true
 tower.workspace = true
 tower-http.workspace = true
+tower-sessions.workspace = true
 log.workspace = true
 
 tracing-chrome = { version = "0.7", optional = true }

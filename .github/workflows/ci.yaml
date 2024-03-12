@@ -11,6 +11,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            keep-outputs = true
+            keep-derivations = true
       - name: Use Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Build server package
@@ -22,6 +26,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            keep-outputs = true
+            keep-derivations = true
       - name: Use Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Check flake inputs

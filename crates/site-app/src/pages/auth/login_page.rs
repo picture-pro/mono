@@ -2,7 +2,10 @@ use leptos::*;
 use validation::{Email, LoginParams, Password};
 
 use crate::{
-  components::{form::ActiveFormElement, navigation::navigate_to},
+  components::{
+    form::{ActiveFormCheckboxElement, ActiveFormElement},
+    navigation::navigate_to,
+  },
   pages::SmallPageWrapper,
 };
 
@@ -20,13 +23,15 @@ pub fn LoginPageInner() -> impl IntoView {
   // create the signals
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
+  let (remember, set_remember) = create_signal(false);
 
   // create the params, aborting if validation fails
   let params: Memo<LoginParams> = create_memo(move |_| {
-    with!(|email, password| {
+    with!(|email, password, remember| {
       LoginParams {
         email:    email.to_string(),
         password: password.to_string(),
+        remember: *remember,
       }
     })
   });
@@ -49,6 +54,11 @@ pub fn LoginPageInner() -> impl IntoView {
     html_form_input_type:   Some("password"),
     skip_validate:          true,
     skip_validate_on_empty: false,
+  };
+  let remember_element = ActiveFormCheckboxElement {
+    field_read_signal:  remember,
+    field_write_signal: set_remember,
+    display_name:       "Remember me",
   };
 
   // create the login action
@@ -95,8 +105,9 @@ pub fn LoginPageInner() -> impl IntoView {
     <div class="d-card-body">
       <p class="d-card-title text-2xl">"Login to PicturePro"</p>
 
-      { email_element.into_view() }
-      { password_element.into_view() }
+      { email_element }
+      { password_element }
+      { remember_element }
 
       { result_message }
 
@@ -116,7 +127,7 @@ pub fn LoginPageInner() -> impl IntoView {
 }
 
 #[cfg_attr(feature = "ssr", tracing::instrument)]
-#[server(Login)]
+#[server]
 pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   // construct the nutype wrappers and fail if validation fails
   let _ = Email::new(params.email.clone())
@@ -127,9 +138,12 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   let creds = auth::Credentials {
     email:    params.email,
     password: params.password,
+    remember: params.remember,
   };
   let mut auth_session = use_context::<auth::AuthSession>()
     .ok_or_else(|| ServerFnError::new("Failed to get auth session"))?;
+  let session = use_context::<tower_sessions::Session>()
+    .ok_or_else(|| ServerFnError::new("Failed to get session"))?;
 
   let user = match auth_session.authenticate(creds.clone()).await {
     Ok(Some(user)) => user,
@@ -143,6 +157,12 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
     .login(&user)
     .await
     .map_err(|e| ServerFnError::new(format!("Failed to log in: {e}")))?;
+
+  if creds.remember {
+    session.set_expiry(Some(tower_sessions::Expiry::AtDateTime(
+      time::OffsetDateTime::now_utc() + time::Duration::days(30),
+    )));
+  }
 
   tracing::info!("logged in user: {} ({})", user.name, user.id.0);
   leptos_axum::redirect("/");
