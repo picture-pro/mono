@@ -80,7 +80,7 @@ pub fn SignupPageInner() -> impl IntoView {
     skip_validate_on_empty: true,
   };
   let remember_element = ActiveFormCheckboxElement {
-    field_read_signal:  remember,
+    initial_value:      true,
     field_write_signal: set_remember,
     display_name:       "Remember Me",
   };

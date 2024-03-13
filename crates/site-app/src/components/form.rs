@@ -78,17 +78,17 @@ impl<P: NewType> IntoView for ActiveFormElement<P> {
 /// This one is separate because no validation is needed and the value property
 /// works differently for checkboxes.
 pub struct ActiveFormCheckboxElement {
-  pub field_read_signal:  ReadSignal<bool>,
   pub field_write_signal: WriteSignal<bool>,
   pub display_name:       &'static str,
+  pub initial_value:      bool,
 }
 
 impl IntoView for ActiveFormCheckboxElement {
   fn into_view(self) -> View {
     let ActiveFormCheckboxElement {
-      field_read_signal: _,
       field_write_signal,
       display_name,
+      initial_value,
     } = self;
 
     let write_callback = move |ev: Event| {
@@ -102,6 +102,7 @@ impl IntoView for ActiveFormCheckboxElement {
           class="d-checkbox"
           type="checkbox"
           on:input=write_callback
+          checked=initial_value
         />
       </div>
     }
