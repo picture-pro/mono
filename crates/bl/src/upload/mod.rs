@@ -3,16 +3,20 @@ mod exif_ops;
 #[cfg(feature = "ssr")]
 mod watermark;
 
+#[cfg(feature = "ssr")]
 use std::collections::HashMap;
 
 #[cfg(feature = "ssr")]
 use color_eyre::eyre::Result;
-use core_types::{PhotoGroupRecordId, PhotoGroupUploadParams, PhotoRecordId};
+#[cfg(feature = "ssr")]
+use core_types::PhotoRecordId;
+use core_types::{PhotoGroupRecordId, PhotoGroupUploadParams};
 use leptos::{server, server_fn::codec::Json, ServerFnError};
 use strum::{Display, EnumString};
 
 use crate::rmp_sfn::{MessagePack, RmpEncoded};
 
+#[cfg(feature = "ssr")]
 fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
   if aspect_ratio > 1.0 {
     (200, (200.0 / aspect_ratio) as u32)

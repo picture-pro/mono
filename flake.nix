@@ -134,22 +134,19 @@
       
       in {
         checks = {
-          # Run clippy (and deny all warnings) on the crate source,
-          # again, resuing the dependency artifacts from above.
-          #
-          # Note that this is done as a separate derivation so that
-          # we can block the CI if there are issues here, but not
-          # prevent downstream consumers from building our crate by itself.
           site-server-clippy = craneLib.cargoClippy (common_args // {
             cargoArtifacts = site-server-deps;
-            cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+            cargoClippyExtraArgs = "-p site-server -- --deny warnings";
+          });
+          site-frontend-clippy = craneLib.cargoClippy (common_args // {
+            cargoArtifacts = site-server-deps;
+            cargoClippyExtraArgs = "-p site-frontend -- --deny warnings";
           });
 
           site-server-doc = craneLib.cargoDoc (common_args // {
             cargoArtifacts = site-server-deps;
           });
 
-          # Check formatting
           site-server-fmt = craneLib.cargoFmt {
             pname = common_args.pname;
             version = common_args.version;

@@ -1,11 +1,12 @@
-use leptos::ServerFnError;
-
 pub mod fetch;
 #[cfg(feature = "ssr")]
 pub mod model_ext;
 pub mod qr_code;
 pub mod rmp_sfn;
 pub mod upload;
+
+#[cfg(feature = "ssr")]
+use leptos::ServerFnError;
 
 #[cfg(feature = "ssr")]
 pub fn handle_error(
