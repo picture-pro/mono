@@ -80,7 +80,7 @@ pub fn SignupPageInner() -> impl IntoView {
     skip_validate_on_empty: true,
   };
   let remember_element = ActiveFormCheckboxElement {
-    field_read_signal:  remember,
+    initial_value:      true,
     field_write_signal: set_remember,
     display_name:       "Remember Me",
   };
@@ -89,7 +89,8 @@ pub fn SignupPageInner() -> impl IntoView {
   let value = signup_action.value();
   let pending = signup_action.pending();
 
-  let submit_callback = move |_| {
+  let submit_callback = move |ev: leptos::ev::SubmitEvent| {
+    ev.prevent_default();
     signup_action.dispatch(Signup {
       params: params().unwrap(),
     });
@@ -123,7 +124,7 @@ pub fn SignupPageInner() -> impl IntoView {
   });
 
   view! {
-    <div class="d-card-body">
+    <form class="d-card-body" on:submit=submit_callback>
       <p class="d-card-title text-2xl">"Sign Up to PicturePro"</p>
 
       { name_element }
@@ -139,13 +140,13 @@ pub fn SignupPageInner() -> impl IntoView {
       <div class="d-form-control">
         <button
           class="d-btn d-btn-primary"
-          disabled=disabled on:click=submit_callback
+          disabled=disabled type="submit"
         >
           { move || pending().then(|| view! { <span class="d-loading d-loading-spinner" /> })}
           "Sign Up"
         </button>
       </div>
-    </div>
+    </form>
   }
 }
 

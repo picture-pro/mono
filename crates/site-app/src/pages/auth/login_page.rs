@@ -56,7 +56,7 @@ pub fn LoginPageInner() -> impl IntoView {
     skip_validate_on_empty: false,
   };
   let remember_element = ActiveFormCheckboxElement {
-    field_read_signal:  remember,
+    initial_value:      true,
     field_write_signal: set_remember,
     display_name:       "Remember me",
   };
@@ -66,7 +66,8 @@ pub fn LoginPageInner() -> impl IntoView {
   let value = login_action.value();
   let pending = login_action.pending();
 
-  let submit_callback = move |_| {
+  let submit_callback = move |ev: leptos::ev::SubmitEvent| {
+    ev.prevent_default();
     login_action.dispatch(Login { params: params() });
   };
 
@@ -102,7 +103,7 @@ pub fn LoginPageInner() -> impl IntoView {
   });
 
   view! {
-    <div class="d-card-body">
+    <form class="d-card-body" on:submit=submit_callback>
       <p class="d-card-title text-2xl">"Login to PicturePro"</p>
 
       { email_element }
@@ -116,13 +117,13 @@ pub fn LoginPageInner() -> impl IntoView {
       <div class="d-form-control">
         <button
           class="d-btn d-btn-primary"
-          disabled=disabled on:click=submit_callback
+          disabled=disabled type="submit"
         >
           { move || pending().then(|| view! { <span class="d-loading d-loading-spinner" /> })}
           "Login"
         </button>
       </div>
-    </div>
+    </form>
   }
 }
 
