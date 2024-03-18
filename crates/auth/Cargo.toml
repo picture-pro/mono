@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "0.1.77"
+async-trait = "0.1.78"
 redact = { version = "0.1.8", features = [ "serde" ] }
 tower-sessions-surrealdb-store = { version = "0.3" }
 
