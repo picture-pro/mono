@@ -38,6 +38,12 @@
           cargo-leptos = cargo-leptos-src;
         };
 
+        style-js-deps = (import ./nix/style-js-deps.nix) {
+          inherit pkgs nix-filter;
+
+          source-root = ./.;
+        };
+
         common_args = {
           inherit src;
 
@@ -87,39 +93,28 @@
           '';
         });
 
-        # an offline yarn registry for the tailwind packages
-        style-js-packages-yarn-registry = pkgs.fetchYarnDeps {
-          yarnLock = ./crates/site-app/style/tailwind/yarn.lock;
-          hash = "sha256-uYcqauHqsk58oWtA2uUYsJ2OuW8o2Rh6KrW88fK9UfE=";
-          # hash = "";
-        };
-
         # Build the actual crate itself, reusing the dependency
         # artifacts from above.
         site-server = craneLib.buildPackage (common_args // {
+          # link the style packages node_modules into the build directory
+          preBuild = ''
+            ln -s ${style-js-deps}/node_modules \
+              ./crates/site-app/style/tailwind/node_modules
+          '';
+          
           buildPhaseCargoCommand = ''
-            # install the yarn packages so `cargo-leptos` can build the styles
-            export HOME=$(mktemp -d)
-            cd crates/site-app/style/tailwind
-            yarn config --offline set yarn-offline-mirror ${style-js-packages-yarn-registry}
-            fixup_yarn_lock yarn.lock
-            yarn install --offline --frozen-lockfile
-            cd ../../../..
-
-            # build the application
             cargo leptos build --release -vvv
           '';
+
           installPhaseCommand = ''
             mkdir -p $out/bin
             cp target/release/site-server $out/bin/
             cp target/release/hash.txt $out/bin/
             cp -r target/site $out/bin/
           '';
-          # Prevent cargo test and nextest from duplicating tests
+
           doCheck = false;
           cargoArtifacts = site-server-deps;
-
-          APP_ENVIRONMENT = "production";
         });
 
         site-server-container = pkgs.dockerTools.buildLayeredImage {
