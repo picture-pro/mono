@@ -59,21 +59,17 @@ pub fn App() -> impl IntoView {
 #[component]
 pub fn Navbar() -> impl IntoView {
   let current_user = authenticated_user();
-  let home_url = if current_user.is_some() {
-    "/dashboard"
-  } else {
-    "/"
-  };
+  let button_class = "d-btn d-btn-neutral d-btn-sm";
 
   let user_area = match current_user {
     Some(_user) => view! {
-      <a class="d-btn d-btn-neutral d-btn-sm" href="/dashboard">Dashboard</a>
-      <LogoutButton class={Some("d-btn d-btn-neutral d-btn-sm".into())} />
+      <a class={button_class} href="/dashboard">Dashboard</a>
+      <LogoutButton class={Some(button_class.into())} />
     }
     .into_view(),
     None => view! {
-      <a class="d-btn d-btn-neutral d-btn-sm" href="/login">Login</a>
-      <a class="d-btn d-btn-neutral d-btn-sm" href="/signup">Sign Up</a>
+      <a class={button_class} href="/login">Login</a>
+      <a class={button_class} href="/signup">Sign Up</a>
     }
     .into_view(),
   };
@@ -82,7 +78,7 @@ pub fn Navbar() -> impl IntoView {
     <div class="bg-base-100 w-full shadow">
       <div class="d-navbar md:container md:mx-auto">
         <div class="flex-1">
-          <a class="d-btn d-btn-ghost text-xl d-btn-sm" href={home_url}>PicturePro</a>
+          <a class="d-btn d-btn-ghost text-xl d-btn-sm" href="/">PicturePro</a>
         </div>
         <div class="flex-none flex flex-row items-center gap-2">
           {user_area}
