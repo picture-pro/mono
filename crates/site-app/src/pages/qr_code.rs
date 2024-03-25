@@ -6,14 +6,15 @@ use crate::pages::SmallPageWrapper;
 #[component]
 pub fn QrCodePage() -> impl IntoView {
   view! {
-    <InnerQrCodePage class="md:hidden" theme_override=Some("black") />
-    <InnerQrCodePage class="max-md:hidden" />
+    <InnerQrCodePage wrapper_class="md:hidden" inner_class="border rounded-box" theme_override=Some("black") />
+    <InnerQrCodePage wrapper_class="max-md:hidden" />
   }
 }
 
 #[component]
 pub fn InnerQrCodePage(
-  #[prop(default = "")] class: &'static str,
+  #[prop(default = "")] wrapper_class: &'static str,
+  #[prop(default = "")] inner_class: &'static str,
   #[prop(default = None)] theme_override: Option<&'static str>,
 ) -> impl IntoView {
   let params = use_params_map();
@@ -26,8 +27,7 @@ pub fn InnerQrCodePage(
     std::env::var("APP_BASE_URL").expect("APP_BASE_URL not set"),
   );
 
-  // we will display the qr code regardless, but if we can map it to a photo
-  // group, we will also display the photo deck
+  // attempt to locate the photo group
   let photo_deck_element = match id.parse::<core_types::Ulid>() {
     Ok(ulid) => view! {
       <PhotoDeckWrapper group_id={core_types::PhotoGroupRecordId(ulid)} />
@@ -37,11 +37,11 @@ pub fn InnerQrCodePage(
   };
 
   view! {
-    <SmallPageWrapper extra_class=class theme_override=theme_override>
-      <div class="d-card-body gap-4">
+    <SmallPageWrapper extra_class=wrapper_class theme_override=theme_override>
+      <div class={format!("d-card-body gap-4 {}", inner_class)}>
         <p class="text-2xl font-semibold tracking-tight">"QR Code"</p>
-        <QrCode data=url class="rounded-box border shadow" />
         {photo_deck_element}
+        <QrCode data=url class="rounded-box border shadow size-24 self-end" />
         <div class="flex flex-row items-center gap-4">
           <a href="/dashboard" class="d-btn d-btn-primary d-btn-sm">"Back to Dashboard"</a>
           <div class="flex-1" />
@@ -92,7 +92,7 @@ pub fn PhotoDeckWrapper(
         match r {
           Ok(Some(photo_group)) => view! {
             <div class="flex flex-row justify-center">
-              <crate::components::photo_deck::PhotoDeck ids={photo_group.photos.clone()} />
+              <crate::components::photo_deck::PhotoDeck ids={photo_group.photos.clone()} size={crate::components::photo::PhotoSize::FitsWithinSquare(320)} />
             </div>
           }.into_view(),
           Ok(None) => view! {
