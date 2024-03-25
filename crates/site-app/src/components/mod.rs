@@ -38,11 +38,27 @@ pub mod basic {
 
   #[component]
   pub fn TimeAgo(time: chrono::DateTime<chrono::Utc>) -> impl IntoView {
-    let formatter = timeago::Formatter::new();
-    let formatted = formatter.convert_chrono(time, chrono::Utc::now());
+    let formatted_time = create_blocking_resource(move || time, format_timeago);
 
     view! {
-      <span>{ formatted }</span>
+      <Suspense fallback=|| view!{}>
+        { move || match formatted_time() {
+          Some(Ok(time)) => view! {
+            <span>{ time }</span>
+          }.into_view(),
+          _ => view! {
+          <span>...</span>
+          }.into_view()
+        }}
+      </Suspense>
     }
+  }
+
+  #[server]
+  async fn format_timeago(
+    date: chrono::DateTime<chrono::Utc>,
+  ) -> Result<String, ServerFnError> {
+    let formatter = timeago::Formatter::new();
+    Ok(formatter.convert_chrono(date, chrono::Utc::now()))
   }
 }

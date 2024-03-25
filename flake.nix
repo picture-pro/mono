@@ -1,8 +1,14 @@
 {
   inputs = {
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2311.556557.tar.gz";
-    rust-overlay.url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1271.tar.gz";
-    crane.url = "https://flakehub.com/f/ipetkov/crane/0.16.1.tar.gz";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    rust-overlay = {
+      url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1330.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    crane = {
+      url = "https://flakehub.com/f/ipetkov/crane/0.16.1.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos"; flake = false; };
     nix-filter.url = "github:numtide/nix-filter";
   };
@@ -129,6 +135,14 @@
       
       in {
         checks = {
+          app-hydrate-clippy = craneLib.cargoClippy (common_args // {
+            cargoArtifacts = site-server-deps;
+            cargoClippyExtraArgs = "-p site-app --features hydrate -- --deny warnings";
+          });
+          app-ssr-clippy = craneLib.cargoClippy (common_args // {
+            cargoArtifacts = site-server-deps;
+            cargoClippyExtraArgs = "-p site-app --features ssr -- --deny warnings";
+          });
           site-server-clippy = craneLib.cargoClippy (common_args // {
             cargoArtifacts = site-server-deps;
             cargoClippyExtraArgs = "-p site-server -- --deny warnings";

@@ -12,7 +12,6 @@ fn round_with_scale(input: f32, scale: f32) -> f32 {
 }
 
 /// Converts a price to a reasonable multiple.
-#[allow(illegal_floating_point_literal_pattern)]
 fn sensible_price(input: f32) -> f32 {
   match input {
     0.0..=1.0 => round_with_scale(input, 0.05),
@@ -72,47 +71,44 @@ pub fn PhotoUpload() -> impl IntoView {
   });
 
   view! {
-    <div class="d-card bg-base-100 shadow max-w-sm">
-      <div class="d-card-body gap-4">
-        <p class="text-2xl font-semibold tracking-tight">"Upload Photo"</p>
+    <div class="flex flex-col p-8 gap-4 rounded-box bg-base-100 shadow max-w-sm">
+      <p class="text-2xl font-semibold tracking-tight">"Upload Photo"</p>
 
-        // price input
-        <div class="flex flex-row gap-4 items-center">
-          <label for="price">"Price"</label>
-          <input
-            type="range" class="d-range" id="price" name="price"
-            min={MIN_PRICE.log10()} max={MAX_PRICE.log10()} step=0.01
-            on:input=move |e: Event| {
-              set_logarithmic_price(event_target_value(&e).parse::<f32>().unwrap());
-            }
-            value={DEFAULT_PRICE.log10()}
-            prop:value=logarithmic_price
-          />
-          <p class="min-w-[4rem] text-right">{move || format!("${:.2}", price())}</p>
-        </div>
-
-        // file input
+      // price input
+      <div class="flex flex-row gap-4 items-center">
+        <label for="price">"Price"</label>
         <input
-          type="file" class="d-file-input d-file-input-bordered w-full"
-          name="photo" accept="image/*" capture="camera" multiple="multiple"
-          required=true on:input=move |e: Event| {
-            let target = e.target().unwrap().dyn_into::<HtmlInputElement>().unwrap();
-            set_files(target.files());
+          type="range" class="d-range" id="price" name="price"
+          min={MIN_PRICE.log10()} max={MAX_PRICE.log10()} step=0.01
+          on:input=move |e: Event| {
+            set_logarithmic_price(event_target_value(&e).parse::<f32>().unwrap());
           }
+          value={DEFAULT_PRICE.log10()}
+          prop:value=logarithmic_price
         />
+        <p class="min-w-[4rem] text-right">{move || format!("${:.2}", price())}</p>
+      </div>
 
-        // upload button
-        <div class="d-form-control mt-6">
-          <button
-            class="d-btn d-btn-primary w-full"
-            disabled=move || pending() || files().is_none()
-            on:click=move |_| upload_action.dispatch((files().unwrap(), price()))
-          >
-            { move || if pending() { view!{ <span class="d-loading d-loading-spinner" /> }.into_view() } else { view! {}.into_view() } }
-            "Upload"
-          </button>
-        </div>
+      // file input
+      <input
+        type="file" class="d-file-input d-file-input-bordered w-full"
+        name="photo" accept="image/*" capture="camera" multiple="multiple"
+        required=true on:input=move |e: Event| {
+          let target = e.target().unwrap().dyn_into::<HtmlInputElement>().unwrap();
+          set_files(target.files());
+        }
+      />
 
+      // upload button
+      <div class="d-form-control mt-6">
+        <button
+          class="d-btn d-btn-primary w-full"
+          disabled=move || pending() || files().is_none()
+          on:click=move |_| upload_action.dispatch((files().unwrap(), price()))
+        >
+          { move || if pending() { view!{ <span class="d-loading d-loading-spinner" /> }.into_view() } else { view! {}.into_view() } }
+          "Upload"
+        </button>
       </div>
     </div>
   }

@@ -18,16 +18,36 @@ pub fn object_store_from_env(
   Ok(Box::new(object_store))
 }
 
-fn cache_dir() -> std::path::PathBuf { std::env::temp_dir() }
-fn cache_path(id: &str) -> std::path::PathBuf { cache_dir().join(id) }
+/// Get the cache directory for artifacts.
+///
+/// By default, this is the system's temporary directory. It can be overridden
+/// by setting the `TMPDIR` environment variable. If the directory does not
+/// exist, it will be created.
+fn get_cache_dir() -> Result<std::path::PathBuf> {
+  let cache_dir = std::env::temp_dir();
+  if !cache_dir.exists() {
+    tracing::debug!("creating cache directory");
+    std::fs::create_dir_all(&cache_dir)
+      .wrap_err("Failed to create cache directory")?;
+  }
+  Ok(cache_dir)
+}
+/// Get the path to the cached artifact.
+///
+/// The parent directory will be created in [`get_cache_dir`] if it does not
+/// exist.
+fn cache_path(id: &str) -> Result<std::path::PathBuf> {
+  get_cache_dir().map(|d| d.join(id))
+}
 
 #[instrument(skip(object_store))]
 pub async fn download_artifact(
   object_store: ObjectStoreGenerator,
   id: &str,
 ) -> Result<bytes::Bytes> {
-  let cache_path = cache_path(id);
+  let cache_path = cache_path(id)?;
   if cache_path.exists() {
+    tracing::debug!("using cached artifact instead of downloading");
     let contents = tokio::fs::read(cache_path)
       .await
       .wrap_err("Failed to read cached artifact")?;
@@ -35,13 +55,9 @@ pub async fn download_artifact(
   }
 
   let object_store = object_store()?;
+  tracing::debug!("downloading uncached artifact");
   let contents = inner_download_artifact(&*object_store, id).await?;
 
-  if !cache_dir().exists() {
-    tokio::fs::create_dir_all(cache_dir())
-      .await
-      .wrap_err("Failed to create cache directory")?;
-  }
   tokio::fs::write(&cache_path, &contents)
     .await
     .wrap_err("Failed to write cached artifact")?;
@@ -73,7 +89,7 @@ pub async fn upload_artifact(
   id: &str,
   contents: bytes::Bytes,
 ) -> Result<()> {
-  let cache_path = cache_path(id);
+  let cache_path = cache_path(id)?;
   tokio::fs::write(&cache_path, &contents)
     .await
     .wrap_err("Failed to write cached artifact")?;

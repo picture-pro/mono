@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 core_types = { path = "../core_types" }
 leptos.workspace = true
-bytes.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 http.workspace = true
@@ -19,6 +18,7 @@ artifact = { path = "../artifact", optional = true }
 rmp-serde = "1.1.2"
 
 base64 = { workspace = true, optional = true }
+bytes = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
 color-eyre = { workspace = true, optional = true }
 image = { workspace = true, optional = true }
@@ -37,5 +37,5 @@ hydrate = [ "leptos/hydrate" ]
 ssr = [
   "core_types/ssr", "leptos/ssr", "dep:clients", "dep:artifact", "dep:base64",
   "dep:color-eyre", "dep:image", "dep:qrcode", "dep:rayon", "dep:surrealdb",
-  "dep:tokio", "dep:tracing", "dep:kamadak-exif", "dep:chrono", 
+  "dep:tokio", "dep:tracing", "dep:kamadak-exif", "dep:chrono", "dep:bytes", 
 ]
