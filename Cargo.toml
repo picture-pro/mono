@@ -81,7 +81,9 @@ env = "DEV"
 
 bin-features = []
 bin-default-features = false
+
 lib-features = []
 lib-default-features = false
 lib-profile-release = "wasm-release"
 
+lib-cargo-args = ["-Zbuild-std=std,panic_abort,core,alloc"]
