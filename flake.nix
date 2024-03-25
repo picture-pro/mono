@@ -135,6 +135,14 @@
       
       in {
         checks = {
+          app-hydrate-clippy = craneLib.cargoClippy (common_args // {
+            cargoArtifacts = site-server-deps;
+            cargoClippyExtraArgs = "-p site-app --features hydrate -- --deny warnings";
+          });
+          app-ssr-clippy = craneLib.cargoClippy (common_args // {
+            cargoArtifacts = site-server-deps;
+            cargoClippyExtraArgs = "-p site-app --features ssr -- --deny warnings";
+          });
           site-server-clippy = craneLib.cargoClippy (common_args // {
             cargoArtifacts = site-server-deps;
             cargoClippyExtraArgs = "-p site-server -- --deny warnings";
