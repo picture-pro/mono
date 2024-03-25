@@ -11,7 +11,7 @@ lto = true
 codegen-units = 1
 
 [workspace.dependencies]
-axum = { version = "0.7.4", features = ["macros", "tracing"] }
+axum = { version = "0.7.5", features = ["macros", "tracing"] }
 axum-login = "0.13"
 base64 = { version = "0.21" }
 bytes = "1.5.0"
