@@ -24,7 +24,7 @@ pub fn App() -> impl IntoView {
     <Stylesheet id="leptos" href="/pkg/site.css"/>
     <Link rel="preload" href="/fonts/inter.ttf" as_="font" type_="font/ttf" crossorigin="anonymous" />
 
-    <Html lang="en" attr:data-theme="wireframe" />
+    <Html lang="en" attr:data-theme="dark" />
 
     // set the metadata
     <Title text="PicturePro"/>
