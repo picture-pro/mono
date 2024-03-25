@@ -12,7 +12,6 @@ fn round_with_scale(input: f32, scale: f32) -> f32 {
 }
 
 /// Converts a price to a reasonable multiple.
-#[allow(illegal_floating_point_literal_pattern)]
 fn sensible_price(input: f32) -> f32 {
   match input {
     0.0..=1.0 => round_with_scale(input, 0.05),
