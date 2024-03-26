@@ -98,7 +98,7 @@ pub fn LoginPageInner() -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(true))) {
-      navigate_to("/dashboard");
+      navigate_to("/");
     }
   });
 
@@ -166,7 +166,5 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
   }
 
   tracing::info!("logged in user: {} ({})", user.name, user.id.0);
-  leptos_axum::redirect("/");
-
   Ok(true)
 }

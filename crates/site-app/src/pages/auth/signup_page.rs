@@ -119,7 +119,7 @@ pub fn SignupPageInner() -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(_))) {
-      navigate_to("/dashboard");
+      navigate_to("/");
     }
   });
 
