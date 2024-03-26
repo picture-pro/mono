@@ -57,7 +57,7 @@ impl Backend {
   ) -> Result<core_types::User> {
     // check whether a user with the given email already exists
     let user: Option<core_types::User> = (*self.surreal_client)
-      .query("SELECT * FROM users WHERE email = $email")
+      .query("SELECT * FROM user WHERE email = $email")
       .bind(("email", &email))
       .await?
       .take(0)
@@ -103,7 +103,7 @@ impl AuthnBackend for Backend {
   ) -> Result<Option<Self::User>, Self::Error> {
     (*self.surreal_client).use_ns("main").use_db("main").await?;
 
-    let user: Option<core_types::User> = (*self.surreal_client)
+    let user: Vec<core_types::User> = (*self.surreal_client)
       .query(
         "SELECT * FROM user WHERE email = $email AND \
          crypto::argon2::compare(pw_hash, $password)",
@@ -113,7 +113,13 @@ impl AuthnBackend for Backend {
       .await?
       .take(0)?;
 
-    Ok(user)
+    match user.len() {
+      0 => Ok(None),
+      1 => Ok(Some(user.into_iter().next().unwrap())),
+      _ => Err(surrealdb::Error::Api(surrealdb::error::Api::Query(
+        "Duplicate users exist!".to_string(),
+      ))),
+    }
   }
 
   #[instrument(skip(self))]
