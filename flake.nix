@@ -93,7 +93,7 @@
           # commands from the logs of `cargo leptos build --release -vvv`
           buildPhaseCargoCommand = ''
             # build the server dependencies
-            cargo build --package=site-server --no-default-features --release -Zbuild-std=std,panic_abort,core,alloc
+            cargo build --package=site-server --no-default-features --release
             # build the frontend dependencies
             cargo build --package=site-frontend --lib --target-dir=/build/source/target/front --target=wasm32-unknown-unknown --no-default-features --profile=wasm-release
           '';
