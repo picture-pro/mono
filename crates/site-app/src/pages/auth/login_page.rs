@@ -150,7 +150,7 @@ pub async fn login(params: LoginParams) -> Result<bool, ServerFnError> {
     Ok(Some(user)) => user,
     Ok(None) => return Ok(false),
     Err(e) => {
-      return Err(ServerFnError::new(format!("Failed to authenticate: {e}")))
+      return Err(ServerFnError::new(format!("Failed to authenticate: {e:?}")))
     }
   };
 
