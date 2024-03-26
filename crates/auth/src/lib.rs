@@ -57,7 +57,7 @@ impl Backend {
   ) -> Result<core_types::User> {
     // check whether a user with the given email already exists
     let user: Option<core_types::User> = (*self.surreal_client)
-      .query("SELECT * FROM users WHERE email = $email")
+      .query("SELECT * FROM user WHERE email = $email")
       .bind(("email", &email))
       .await?
       .take(0)
