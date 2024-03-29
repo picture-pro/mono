@@ -63,7 +63,7 @@ fn ColoredBoxHero() -> impl IntoView {
         text_color="text-orange-200/80"
         title="Private Session"
         description="Separate subjects, separate customers."
-        href={if authenticated { Some("/dashboard") } else { Some("/login") } }
+        href={if authenticated { Some("/dashboard") } else { Some("/login?next=/dashboard") } }
       />
       <ColoredBox
         border_color="border-green-700"
@@ -92,65 +92,3 @@ fn ColoredBoxHero() -> impl IntoView {
     </div>
   }
 }
-
-// #[component]
-// pub fn AuthenticatedHomePage() -> impl IntoView {
-//   view! {
-//     <super::PageWrapper backed=false>
-//       <p class="font-semibold tracking-tight text-4xl">
-//         "Share / Sell Photos with Anyone!"
-//       </p>
-//       <div class="grid gap-4 grid-cols-2 grid-rows-2 w-full">
-//         <ColoredBox
-//           border_color="border-orange-700"
-//           bg_color="bg-orange-500/20"
-//           text_color="text-orange-200/80"
-//           title="Private Session"
-//           description="Separate subjects, separate customers."
-//           href="/dashboard"
-//         />
-//         <ColoredBox
-//           border_color="border-green-700"
-//           bg_color="bg-green-500/20"
-//           text_color="text-green-200/80"
-//           title="Public Session"
-//           description="Share with everyone, sell to everyone."
-//         />
-//         <ColoredBox
-//           border_color="border-blue-700"
-//           bg_color="bg-blue-500/20"
-//           text_color="text-blue-200/80"
-//           title="Discover"
-//           description="Discover photos from around the world."
-//         />
-//         <ColoredBox
-//           border_color="border-purple-700"
-//           bg_color="bg-purple-500/20"
-//           text_color="text-purple-200/80"
-//           title="School Event"
-//           description="Share photos from school events."
-//         />
-//       </div>
-//     </super::PageWrapper>
-//   }
-// }
-
-// #[component]
-// pub fn UnauthenticatedHomePage() -> impl IntoView {
-//   view! {
-//     <super::SmallPageWrapper>
-//       <div class="flex flex-col p-8 gap-4">
-//         <p class="text-2xl font-semibold tracking-tight">"Welcome to
-// PicturePro!"</p>         <p>
-//           "You are not logged in."
-//         </p>
-//         <p>"Please "
-//           <Link href="/login".to_string()>login</Link>
-//           " or "
-//           <Link href="/signup".to_string()>"sign up"</Link>
-//           "."
-//         </p>
-//       </div>
-//     </super::SmallPageWrapper>
-//   }
-// }
