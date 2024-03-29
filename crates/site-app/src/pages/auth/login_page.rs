@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos_router::use_query_map;
 use validation::{Email, LoginParams, Password};
 
 use crate::{
@@ -11,15 +12,18 @@ use crate::{
 
 #[component]
 pub fn LoginPage() -> impl IntoView {
+  let query = use_query_map();
+  let next_url = query().get("next").cloned();
+
   view! {
     <SmallPageWrapper>
-      <LoginPageInner/>
+      <LoginPageInner next_url=next_url />
     </SmallPageWrapper>
   }
 }
 
 #[island]
-pub fn LoginPageInner() -> impl IntoView {
+pub fn LoginPageInner(next_url: Option<String>) -> impl IntoView {
   // create the signals
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
@@ -98,7 +102,7 @@ pub fn LoginPageInner() -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(true))) {
-      navigate_to("/");
+      navigate_to(&next_url.clone().unwrap_or("/".to_string()));
     }
   });
 

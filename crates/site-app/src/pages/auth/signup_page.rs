@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos_router::use_params_map;
 #[cfg(feature = "ssr")]
 use validation::LoginParams;
 use validation::{Email, Name, Password, SignupParams};
@@ -13,15 +14,18 @@ use crate::{
 
 #[component]
 pub fn SignupPage() -> impl IntoView {
+  let url_params = use_params_map();
+  let next_url = url_params().get("next").cloned();
+
   view! {
     <SmallPageWrapper>
-      <SignupPageInner/>
+      <SignupPageInner next_url=next_url/>
     </SmallPageWrapper>
   }
 }
 
 #[island]
-pub fn SignupPageInner() -> impl IntoView {
+pub fn SignupPageInner(next_url: Option<String>) -> impl IntoView {
   let (name, set_name) = create_signal(String::new());
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
@@ -119,7 +123,7 @@ pub fn SignupPageInner() -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(_))) {
-      navigate_to("/");
+      navigate_to(&next_url.clone().unwrap_or("/".to_string()));
     }
   });
 
