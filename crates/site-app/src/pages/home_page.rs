@@ -1,7 +1,5 @@
 use leptos::*;
 
-use crate::components::basic::Link;
-
 #[component]
 pub fn HomePage() -> impl IntoView {
   view! {
