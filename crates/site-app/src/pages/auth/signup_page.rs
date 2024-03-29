@@ -31,6 +31,7 @@ pub fn SignupPageInner(next_url: Option<String>) -> impl IntoView {
   let (password, set_password) = create_signal(String::new());
   let (confirm, set_confirm) = create_signal(String::new());
   let (remember, set_remember) = create_signal(false);
+  let next_url = create_memo(move |_| next_url.clone());
 
   let params: Memo<Option<SignupParams>> = create_memo(move |_| {
     with!(|name, email, password, confirm, remember| {
@@ -123,13 +124,22 @@ pub fn SignupPageInner(next_url: Option<String>) -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(_))) {
-      navigate_to(&next_url.clone().unwrap_or("/".to_string()));
+      navigate_to(&next_url().unwrap_or("/".to_string()));
     }
   });
 
   view! {
     <form class="d-card-body" on:submit=submit_callback>
       <p class="d-card-title text-2xl">"Sign Up to PicturePro"</p>
+      <p class="d-card-subtitle">
+        "Already have an account? "
+        <a
+          href={format!("/login{}", next_url().map(|n| format!("?next={}", n)).unwrap_or_default())}
+          class="underline hover:no-underline"
+        >
+          "Login here."
+        </a>
+      </p>
 
       { name_element }
       { email_element }

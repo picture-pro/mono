@@ -28,6 +28,7 @@ pub fn LoginPageInner(next_url: Option<String>) -> impl IntoView {
   let (email, set_email) = create_signal(String::new());
   let (password, set_password) = create_signal(String::new());
   let (remember, set_remember) = create_signal(false);
+  let next_url = create_memo(move |_| next_url.clone());
 
   // create the params, aborting if validation fails
   let params: Memo<LoginParams> = create_memo(move |_| {
@@ -102,13 +103,22 @@ pub fn LoginPageInner(next_url: Option<String>) -> impl IntoView {
 
   create_effect(move |_| {
     if matches!(value(), Some(Ok(true))) {
-      navigate_to(&next_url.clone().unwrap_or("/".to_string()));
+      navigate_to(&next_url().unwrap_or("/".to_string()));
     }
   });
 
   view! {
     <form class="d-card-body" on:submit=submit_callback>
       <p class="d-card-title text-2xl">"Login to PicturePro"</p>
+      <p class="d-card-subtitle">
+        "Enter your email and password to login. No account? "
+        <a
+          href={format!("/signup{}", next_url().map(|n| format!("?next={}", n)).unwrap_or_default())}
+          class="underline hover:no-underline"
+        >
+          "Sign up here."
+        </a>
+      </p>
 
       { email_element }
       { password_element }
