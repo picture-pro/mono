@@ -134,7 +134,7 @@ pub fn SignupPageInner(next_url: Option<String>) -> impl IntoView {
       <p class="d-card-subtitle">
         "Already have an account? "
         <a
-          href={format!("/login{}", next_url().map(|n| format!("?next={}", n)).unwrap_or_default())}
+          href={move || format!("/login{}", next_url().map(|n| format!("?next={}", n)).unwrap_or_default())}
           class="underline hover:no-underline"
         >
           "Login here."
