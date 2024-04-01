@@ -2,6 +2,9 @@ module.exports = {
   content: {
     files: ["crates/site-app/src/**/*.rs"],
   },
+  safelist: [
+    "d-file-input-error"
+  ],
   theme: {
     fontFamily: {
 			'sans': [
