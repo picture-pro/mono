@@ -28,6 +28,8 @@ pub fn PhotoUpload() -> impl IntoView {
   let price = move || sensible_price((10.0_f32).powf(logarithmic_price()));
 
   let (files, set_files) = create_signal(None::<web_sys::FileList>);
+  let (show_missing_files_error, set_show_missing_files_error) =
+    create_signal(false);
 
   let upload_action =
     create_action(move |(file_list, price): &(web_sys::FileList, f32)| {
@@ -89,24 +91,36 @@ pub fn PhotoUpload() -> impl IntoView {
         <p class="min-w-[4rem] text-right">{move || format!("${:.2}", price())}</p>
       </div>
 
-      // file input
-      <input
-        type="file" class="d-file-input d-file-input-bordered w-full"
-        name="photo" accept="image/*" capture="camera" multiple="multiple"
-        required=true on:input=move |e: Event| {
-          let target = e.target().unwrap().dyn_into::<HtmlInputElement>().unwrap();
-          set_files(target.files());
-        }
-      />
+      <label class="flex flex-row">
+        <span class="d-btn d-btn-neutral rounded-r-none flex-1">"Take Photo"</span>
+        <input
+          type="file" name="photo" accept="image/*" capture="camera" multiple="multiple"
+          class="d-file-input d-file-input-bordered rounded-l-none [&::file-selector-button]:hidden p-2.5 flex-1"
+          class:d-file-input-error=show_missing_files_error
+          required=true on:input=move |e: Event| {
+            let target = e.target().unwrap().dyn_into::<HtmlInputElement>().unwrap();
+            set_files(target.files());
+          }
+        />
+      </label>
 
       // upload button
       <div class="d-form-control mt-6">
         <button
           class="d-btn d-btn-primary w-full"
-          disabled=move || pending() || files().is_none()
-          on:click=move |_| upload_action.dispatch((files().unwrap(), price()))
+          on:click={move |_| {
+            if let Some(files) = files() {
+              upload_action.dispatch((files, price()));
+            } else {
+              set_show_missing_files_error(true);
+            }
+          }}
         >
-          { move || if pending() { view!{ <span class="d-loading d-loading-spinner" /> }.into_view() } else { view! {}.into_view() } }
+          { move || if pending() {
+            view!{ <span class="d-loading d-loading-spinner" /> }.into_view()
+          } else {
+            view! {}.into_view() }
+          }
           "Upload"
         </button>
       </div>

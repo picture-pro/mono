@@ -39,13 +39,11 @@ pub fn InnerQrCodePage(
   view! {
     <SmallPageWrapper extra_class=wrapper_class theme_override=theme_override>
       <div class={format!("d-card-body gap-4 {}", inner_class)}>
-        <p class="text-2xl font-semibold tracking-tight">"QR Code"</p>
         {photo_deck_element}
-        <QrCode data=url class="rounded-box border shadow size-24 self-end" />
         <div class="flex flex-row items-center gap-4">
-          <a href="/dashboard" class="d-btn d-btn-primary d-btn-sm">"Back to Dashboard"</a>
-          <div class="flex-1" />
-          <a href={format!("/photo/{}", id)} class="d-btn d-btn-sm">"View Photo"</a>
+          <a href="/dashboard" class="d-btn d-btn-primary w-full h-full flex-1">"Back to Dashboard"</a>
+          <QrCode data=url class="rounded-box border shadow size-24 flex-1" />
+          <a href={format!("/photo/{}", id)} class="d-btn w-full h-full flex-1">"Purchase Page"</a>
         </div>
       </div>
     </SmallPageWrapper>
