@@ -72,13 +72,6 @@ pub fn PhotoUpload() -> impl IntoView {
     }
   });
 
-  create_effect(move |_| {
-    logging::debug_warn!(
-      "show_missing_files_error: {}",
-      show_missing_files_error()
-    );
-  });
-
   view! {
     <div class="flex flex-col p-8 gap-4 rounded-box bg-base-100 shadow max-w-sm">
       <p class="text-2xl font-semibold tracking-tight">"Upload Photo"</p>
