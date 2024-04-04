@@ -22,6 +22,9 @@ jobs:
 
   flake-check:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        check: [ "app-hydrate-clippy", "app-ssr-clippy", "site-server-clippy", "site-frontend-clippy", "site-server-doc", "site-server-fmt", "site-server-deny", "site-server-nextest" ]
     steps:
       - uses: actions/checkout@v3
       - name: Install Nix
@@ -35,7 +38,7 @@ jobs:
       - name: Check flake inputs
         uses: DeterminateSystems/flake-checker-action@main
       - name: Run flake checks
-        run: nix flake check -L
+        run: nix build "./#checks.x86_64-linux.${{ matrix.check }}" -L
 
   fly-check:
     runs-on: ubuntu-22.04
