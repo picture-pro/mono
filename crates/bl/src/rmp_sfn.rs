@@ -1,3 +1,5 @@
+//! A custom implementation of using messagepack as a leptos codec.
+
 use http::Method;
 use leptos::server_fn::{
   codec::{Encoding, FromReq, FromRes, IntoReq, IntoRes},

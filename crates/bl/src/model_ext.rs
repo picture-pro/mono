@@ -1,10 +1,16 @@
+//! Provides [`ModelExt`], an extension of the [`CoreModel`] trait.
+
 use clients::surreal::SurrealRootClient;
 use color_eyre::eyre::{OptionExt, Result};
 use core_types::{CoreId, CoreModel};
 
-pub trait ModelExt: core_types::CoreModel {
+/// Provides [`fetch`](ModelExt::fetch), [`create`](ModelExt::create), and
+/// [`patch`](ModelExt::patch) methods for interfacing with Surreal for a given
+/// model.
+pub trait ModelExt: CoreModel {
+  /// Fetches the model from Surreal given its [`CoreModel::Id`].
   fn fetch(
-    id: <Self as core_types::CoreModel>::Id,
+    id: <Self as CoreModel>::Id,
     client: &SurrealRootClient,
   ) -> impl std::future::Future<Output = Result<Option<Self>>> + Send {
     async move {
@@ -13,6 +19,7 @@ pub trait ModelExt: core_types::CoreModel {
     }
   }
 
+  /// Pushes a model instance to Surreal, and returns the pushed version.
   fn create(
     &self,
     client: &SurrealRootClient,
@@ -31,8 +38,10 @@ pub trait ModelExt: core_types::CoreModel {
     }
   }
 
+  /// Patches a model in Surreal using its [`CoreModel::Id`] and a
+  /// [`PatchOp`](surrealdb::opt::PatchOp).
   fn patch(
-    id: <Self as core_types::CoreModel>::Id,
+    id: <Self as CoreModel>::Id,
     client: &SurrealRootClient,
     patch: surrealdb::opt::PatchOp,
   ) -> impl std::future::Future<Output = Result<Self>> + Send {
@@ -43,4 +52,4 @@ pub trait ModelExt: core_types::CoreModel {
   }
 }
 
-impl<T: core_types::CoreModel> ModelExt for T {}
+impl<T: CoreModel> ModelExt for T {}

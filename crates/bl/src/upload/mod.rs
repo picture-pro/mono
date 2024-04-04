@@ -1,3 +1,5 @@
+//! Photo upload logic.
+
 #[cfg(feature = "ssr")]
 mod exif_ops;
 #[cfg(feature = "ssr")]
@@ -25,13 +27,19 @@ fn thumbnail_size(aspect_ratio: f32) -> (u32, u32) {
   }
 }
 
+/// Structured error type for the [`upload_photo_group`] server function.
 #[derive(Clone, Debug, EnumString, Display)]
 pub enum PhotoUploadError {
+  /// The image could not be parsed by the [`image`] crate.
   InvalidImage,
+  /// The request is unauthenticated.
   Unauthenticated,
+  /// Something failed internally.
   InternalError(String),
 }
 
+/// Creates and stores a [`PhotoGroup`](core_types::PhotoGroup) and its
+/// [`Photo`](core_types::Photo)s built from the [`PhotoGroupUploadParams`].
 #[server(
   input = MessagePack,
   custom = RmpEncoded,
