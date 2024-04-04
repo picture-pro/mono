@@ -135,6 +135,7 @@
       
       in {
         checks = {
+          # lint packages
           app-hydrate-clippy = craneLib.cargoClippy (common_args // {
             cargoArtifacts = site-server-deps;
             cargoClippyExtraArgs = "-p site-app --features hydrate -- --deny warnings";
@@ -152,10 +153,12 @@
             cargoClippyExtraArgs = "-p site-frontend -- --deny warnings";
           });
 
+          # make sure the docs build
           site-server-doc = craneLib.cargoDoc (common_args // {
             cargoArtifacts = site-server-deps;
           });
 
+          # check formatting
           site-server-fmt = craneLib.cargoFmt {
             pname = common_args.pname;
             version = common_args.version;
@@ -163,7 +166,7 @@
             inherit src;
           };
 
-          # Audit licenses
+          # audit licenses
           site-server-deny = craneLib.cargoDeny {
             pname = common_args.pname;
             version = common_args.version;
@@ -171,9 +174,7 @@
             inherit src;
           };
 
-          # Run tests with cargo-nextest
-          # Consider setting `doCheck = false` on `site-server` if you do not want
-          # the tests to run twice
+          # run tests
           site-server-nextest = craneLib.cargoNextest (common_args // {
             cargoArtifacts = site-server-deps;
             partitions = 1;
