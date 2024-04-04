@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        check: [ "app-hydrate-clippy", "app-ssr-clippy", "site-server-clippy", "site-frontend-clippy", "site-server-docs", "site-server-fmt", "site-server-deny", "site-server-nextest" ]
+        check: [ "app-hydrate-clippy", "app-ssr-clippy", "site-server-clippy", "site-frontend-clippy", "site-server-doc", "site-server-fmt", "site-server-deny", "site-server-nextest" ]
     steps:
       - uses: actions/checkout@v3
       - name: Install Nix
