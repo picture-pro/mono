@@ -23,6 +23,7 @@ jobs:
   flake-check:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         check: [ "app-hydrate-clippy", "app-ssr-clippy", "site-server-clippy", "site-frontend-clippy", "site-server-doc", "site-server-fmt", "site-server-deny", "site-server-nextest" ]
     steps:
