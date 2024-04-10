@@ -2,11 +2,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     rust-overlay = {
-      url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1330.tar.gz";
+      url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1346.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     crane = {
-      url = "https://flakehub.com/f/ipetkov/crane/0.16.1.tar.gz";
+      url = "https://flakehub.com/f/ipetkov/crane/0.16.4.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos?tag=v0.2.16"; flake = false; };
