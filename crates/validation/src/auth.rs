@@ -32,10 +32,10 @@ impl_newtype!(Name, NameError);
 impl NewTypeError for NameError {
   fn to_string(&self) -> String {
     match self {
-      __nutype_private_Name__::NameError::LenCharMinViolated => {
+      NameError::LenCharMinViolated => {
         "Name must be at least 3 characters long".to_owned()
       }
-      __nutype_private_Name__::NameError::LenCharMaxViolated => {
+      NameError::LenCharMaxViolated => {
         "Name must be at most 256 characters long".to_owned()
       }
     }
@@ -55,7 +55,7 @@ impl_newtype!(Email, EmailError);
 impl NewTypeError for EmailError {
   fn to_string(&self) -> String {
     match self {
-      __nutype_private_Email__::EmailError::LenCharMaxViolated => {
+      EmailError::LenCharMaxViolated => {
         "Email must be at most 256 characters long".to_owned()
       }
     }
@@ -81,10 +81,10 @@ impl Debug for Password {
 impl NewTypeError for PasswordError {
   fn to_string(&self) -> String {
     match self {
-      __nutype_private_Password__::PasswordError::LenCharMinViolated => {
+      PasswordError::LenCharMinViolated => {
         "Password must be at least 8 characters long".to_owned()
       }
-      __nutype_private_Password__::PasswordError::LenCharMaxViolated => {
+      PasswordError::LenCharMaxViolated => {
         "Password must be at most 256 characters long".to_owned()
       }
     }
