@@ -1,4 +1,4 @@
-#![warn(missing_docs)]
+// #![warn(missing_docs)]
 
 //! The `bl` crate is for business logic. Any arbitrary code that needs to run
 //! on the server should be in the `bl` crate. Modules are based on semantic
