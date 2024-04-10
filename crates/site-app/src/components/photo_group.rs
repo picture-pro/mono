@@ -62,7 +62,10 @@ pub fn PhotoGroup(
         "col-start-1 col-span-1 row-start-1 flex flex-col justify-center xs:px-4 {adjusted_for_action}",
         adjusted_for_action = if !read_only { "row-span-1 sm:row-span-2" } else { "row-span-2" },
       )}>
-        <crate::components::photo_deck::PhotoDeck ids={group.photos.clone()} />
+        <crate::components::photo_deck::PhotoDeck
+          ids={group.photos.clone()}
+          size=crate::components::photo::PhotoSize::FitsWithinSquare(200)
+        />
       </div>
       <div class="col-start-2 col-span-1 row-start-1 row-span-1 flex flex-row justify-between gap-4">
         { status_element }
