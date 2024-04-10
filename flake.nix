@@ -2,14 +2,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     rust-overlay = {
-      url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1330.tar.gz";
+      url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1346.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     crane = {
-      url = "https://flakehub.com/f/ipetkov/crane/0.16.1.tar.gz";
+      url = "https://flakehub.com/f/ipetkov/crane/0.16.4.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos?tag=v0.2.16"; flake = false; };
+    cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos?tag=v0.2.17"; flake = false; };
     nix-filter.url = "github:numtide/nix-filter";
   };
 
@@ -22,12 +22,17 @@
           config.allowUnfree = true;
         };
         
-        toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
-          extensions = [ "rust-src" "rust-analyzer" ];
-          targets = [ "wasm32-unknown-unknown" ];
-        });
+        create-toolchain = extensions: pkgs.rust-bin.selectLatestNightlyWith (toolchain:
+          toolchain.default.override {
+            inherit extensions;
+            targets = [ "wasm32-unknown-unknown" ];
+          }
+        );
+
+        dev-toolchain = create-toolchain [ "rust-src" "rust-analyzer" ];
+        build-toolchain = create-toolchain [ ];
         
-        craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
+        craneLib = (crane.mkLib pkgs).overrideToolchain build-toolchain;
 
         src = nix-filter {
           root = ./.;
@@ -50,6 +55,9 @@
           source-root = ./.;
         };
 
+        vendored-rust-deps = craneLib.vendorCargoDeps {
+          inherit src;
+        };
         common_args = {
           inherit src;
 
@@ -57,6 +65,7 @@
           version = "0.1.0";
 
           doCheck = false;
+          cargoVendorDir = vendored-rust-deps;
 
           nativeBuildInputs = [
             # Add additional build inputs here
@@ -64,7 +73,6 @@
             pkgs.cargo-generate
             pkgs.binaryen
             pkgs.clang
-            pkgs.mold
 
             # for styling
             pkgs.dart-sass
@@ -190,7 +198,7 @@
         
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = (with pkgs; [
-            toolchain # cargo and such
+            dev-toolchain # cargo and such
             dive # docker images
             cargo-leptos
             flyctl # fly.io
