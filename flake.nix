@@ -54,6 +54,9 @@
           source-root = ./.;
         };
 
+        vendored-rust-deps = craneLib.vendorCargoDeps {
+          inherit src;
+        };
         common_args = {
           inherit src;
 
@@ -61,6 +64,7 @@
           version = "0.1.0";
 
           doCheck = false;
+          cargoVendorDir = vendored-rust-deps;
 
           nativeBuildInputs = [
             # Add additional build inputs here
