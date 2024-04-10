@@ -9,7 +9,7 @@
       url = "https://flakehub.com/f/ipetkov/crane/0.16.4.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos?tag=v0.2.16"; flake = false; };
+    cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos?tag=v0.2.17"; flake = false; };
     nix-filter.url = "github:numtide/nix-filter";
   };
 
