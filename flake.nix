@@ -72,7 +72,6 @@
             pkgs.cargo-generate
             pkgs.binaryen
             pkgs.clang
-            pkgs.mold
 
             # for styling
             pkgs.dart-sass
