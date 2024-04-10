@@ -2,6 +2,7 @@ use leptos::*;
 
 use crate::components::photo_group::PhotoGroup;
 
+#[allow(unused)]
 #[component]
 pub fn Gallery() -> impl IntoView {
   let Some(user) = crate::authenticated_user() else {

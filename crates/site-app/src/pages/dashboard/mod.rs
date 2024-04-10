@@ -22,7 +22,7 @@ pub fn DashboardPage() -> impl IntoView {
       <p class="text-4xl font-semibold tracking-tight">"Private Session Photos"</p>
       <div class="flex flex-col lg:flex-row-reverse items-stretch lg:justify-between gap-4 items-start">
         <crate::components::photo_upload::PhotoUpload />
-        <crate::components::gallery::Gallery />
+        // <crate::components::gallery::Gallery />
       </div>
     </PageWrapper>
   }
