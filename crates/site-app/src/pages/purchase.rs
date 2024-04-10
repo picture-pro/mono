@@ -162,12 +162,12 @@ fn PhotoPurchaseOptions(group: core_types::PhotoGroup) -> impl IntoView {
     }
     core_types::PhotoGroupStatus::OwnershipForSale { digital_price } => {
       vec![
-        PurchaseOption {
-          title: "Ownership",
-          desc:  "Own the digital rights to this photo. You'll recieve an \
-                  email with a link to download the full resolution photo.",
-          price: Some(digital_price.0),
-        },
+        // PurchaseOption {
+        //   title: "Ownership",
+        //   desc:  "Own the digital rights to this photo. You'll recieve an \
+        //           email with a link to download the full resolution photo.",
+        //   price: Some(digital_price.0),
+        // },
         PurchaseOption {
           title: "Prints",
           desc:  "Order physical prints of this photo. Includes digital \
