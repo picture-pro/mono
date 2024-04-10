@@ -1,6 +1,13 @@
+//! Fetcher logic.
+//!
+//! This module is used mostly for first-party fetchers. If you need to fetch
+//! something from the database, it should go here.
+
 use core_types::{PhotoGroup, PhotoThumbnailDisplayParams};
 use leptos::{server, server_fn::codec::Json, ServerFnError};
 
+/// Fetches all the [`PhotoGroup`]s owned by a
+/// [`User`](core_types::UserRecordId).
 #[server(
   input = Json,
   output = Json,
@@ -35,6 +42,8 @@ pub async fn fetch_user_owned_photo_groups(
   .map_err(|e: Report| crate::handle_error(e, "fetch user owned photo groups"))
 }
 
+/// Fetches a [`PhotoGroup`] given its
+/// [`PhotoGroupRecordId`](core_types::PhotoGroupRecordId).
 #[server(
   input = Json,
   output = Json,
@@ -61,6 +70,8 @@ pub async fn fetch_photo_group(
   .map_err(|e: Report| crate::handle_error(e, "fetch photo group"))
 }
 
+/// Fetches a [`PublicUser`](core_types::PublicUser) given its
+/// [`UserRecordId`](core_types::UserRecordId).
 #[server(
   input = Json,
   output = Json,
@@ -86,6 +97,8 @@ pub async fn fetch_user(
   .map_err(|e: Report| crate::handle_error(e, "fetch user"))
 }
 
+/// Fetches a photo thumbnail ([`PhotoThumbnailDisplayParams`]) given its
+/// [`PhotoRecordId`](core_types::PhotoRecordId).
 #[server(
   input = Json,
   output = Json,

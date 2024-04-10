@@ -1,3 +1,5 @@
+//! QR-code logic.
+
 use leptos::{server, server_fn::codec::Json, ServerFnError};
 
 /// Generate a QR code from the given data. Returns base64 encoded PNG data.
@@ -21,6 +23,7 @@ pub fn generate_qr_code_inner(data: &str) -> color_eyre::eyre::Result<String> {
   Ok(data)
 }
 
+/// Generates a QR-code from arbitrary data.
 #[server(
   input = Json,
   output = Json,
