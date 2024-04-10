@@ -1,22 +1,8 @@
 use leptos::*;
 use leptos_router::use_params_map;
 
-use crate::pages::SmallPageWrapper;
-
 #[component]
 pub fn QrCodePage() -> impl IntoView {
-  view! {
-    <InnerQrCodePage wrapper_class="md:hidden" inner_class="border rounded-box" theme_override=Some("black") />
-    <InnerQrCodePage wrapper_class="max-md:hidden" />
-  }
-}
-
-#[component]
-pub fn InnerQrCodePage(
-  #[prop(default = "")] wrapper_class: &'static str,
-  #[prop(default = "")] inner_class: &'static str,
-  #[prop(default = None)] theme_override: Option<&'static str>,
-) -> impl IntoView {
   let params = use_params_map();
   let id = params().get("id").cloned();
 
@@ -37,16 +23,18 @@ pub fn InnerQrCodePage(
   };
 
   view! {
-    <SmallPageWrapper extra_class=wrapper_class theme_override=theme_override>
-      <div class={format!("d-card-body gap-4 {}", inner_class)}>
+    <div
+      class="flex-1 flex flex-col justify-center items-center h-full"
+    >
+      <div class="bg-base-100 max-w-md flex flex-col p-8 gap-4 rounded-lg shadow-xl">
         {photo_deck_element}
-        <div class="flex flex-row items-center gap-4">
-          <a href="/dashboard" class="d-btn d-btn-primary w-full h-full flex-1">"Back to Dashboard"</a>
+        <div class="flex flex-row items-center gap-4 h-24 items-stretch">
+          <a href="/dashboard" class="flex-1 h-full d-btn d-btn-primary text-xl">"Retake"</a>
           <QrCode data=url class="rounded-box border shadow size-24 flex-1" />
-          <a href={format!("/photo/{}", id)} class="d-btn w-full h-full flex-1">"Purchase Page"</a>
+          <a href={format!("/photo/{}", id)} class="flex-1 h-full d-btn text-xl">"Delete"</a>
         </div>
       </div>
-    </SmallPageWrapper>
+    </div>
   }
 }
 
@@ -90,7 +78,7 @@ pub fn PhotoDeckWrapper(
         match r {
           Ok(Some(photo_group)) => view! {
             <div class="flex flex-row justify-center">
-              <crate::components::photo_deck::PhotoDeck ids={photo_group.photos.clone()} size={crate::components::photo::PhotoSize::FitsWithinSquare(320)} />
+              <crate::components::photo_deck::PhotoDeck ids={photo_group.photos.clone()} size={crate::components::photo::PhotoSize::FitsWithinSquare(400)} />
             </div>
           }.into_view(),
           Ok(None) => view! {
