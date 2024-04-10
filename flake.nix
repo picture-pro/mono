@@ -22,12 +22,16 @@
           config.allowUnfree = true;
         };
         
-        toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
-          extensions = [ "rust-src" "rust-analyzer" ];
-          targets = [ "wasm32-unknown-unknown" ];
-        });
+        create-toolchain = extensions: pkgs.rust-bin.selectLatestNightlyWith (toolchain:
+          toolchain.default.override {
+            inherit extensions;
+            targets = [ "wasm32-unknown-unknown" ];
+          }
+        );
+        dev-toolchain = create-toolchain [ "rust-src" "rust-analyzer" ];
+        build-toolchain = create-toolchain [ ];
         
-        craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
+        craneLib = (crane.mkLib pkgs).overrideToolchain build-toolchain;
 
         src = nix-filter {
           root = ./.;
@@ -190,7 +194,7 @@
         
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = (with pkgs; [
-            toolchain # cargo and such
+            dev-toolchain # cargo and such
             dive # docker images
             cargo-leptos
             flyctl # fly.io
