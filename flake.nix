@@ -28,6 +28,7 @@
             targets = [ "wasm32-unknown-unknown" ];
           }
         );
+
         dev-toolchain = create-toolchain [ "rust-src" "rust-analyzer" ];
         build-toolchain = create-toolchain [ ];
         
