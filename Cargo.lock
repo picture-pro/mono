@@ -4315,9 +4315,9 @@ dependencies = [
 
 [[package]]
 name = "server_fn"
-version = "0.6.10"
+version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15a46a2ffdecb81430ecfb995989218a18b6e94c1ead50cb806b5927c986a8ce"
+checksum = "b06e6e5467a2cd93ce1accfdfd8b859404f0b3b2041131ffd774fabf666b8219"
 dependencies = [
  "axum",
  "bytes",
