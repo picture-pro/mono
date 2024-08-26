@@ -6,12 +6,28 @@ use crate::ObjectStoreGenerator;
 pub fn object_store_from_env(
   bucket_name: &str,
 ) -> Result<Box<dyn object_store::ObjectStore>> {
-  let object_store = object_store::aws::AmazonS3Builder::from_env()
-    .with_region(
-      std::env::var("AWS_DEFAULT_REGION")
-        .wrap_err("Failed to get AWS region from environment")?,
-    )
+  let endpoint = format!(
+    "https://{}.r2.cloudflarestorage.com",
+    std::env::var("R2_ACCOUNT")
+      .wrap_err("Failed to get R2 account from environment")?
+  );
+  tracing::info!("endpoint: {}", endpoint);
+
+  let object_store = object_store::aws::AmazonS3Builder::new()
+    // .with_region(
+    //   std::env::var("AWS_DEFAULT_REGION")
+    //     .wrap_err("Failed to get AWS region from environment")?,
+    // )
+    .with_endpoint(endpoint)
     .with_bucket_name(bucket_name)
+    .with_access_key_id(
+      std::env::var("AWS_ACCESS_KEY_ID")
+        .wrap_err("Failed to get AWS access key ID from environment")?,
+    )
+    .with_secret_access_key(
+      std::env::var("AWS_SECRET_ACCESS_KEY")
+        .wrap_err("Failed to get AWS secret access key from environment")?,
+    )
     .build()
     .wrap_err("Failed to create object store")?;
 

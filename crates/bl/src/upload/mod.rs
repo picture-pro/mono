@@ -45,7 +45,7 @@ pub enum PhotoUploadError {
   custom = RmpEncoded,
   output = Json,
 )]
-#[cfg_attr(feature = "ssr", tracing::instrument)]
+#[cfg_attr(feature = "ssr", tracing::instrument(skip(params)))]
 pub async fn upload_photo_group(
   params: PhotoGroupUploadParams,
 ) -> Result<PhotoGroupRecordId, ServerFnError<PhotoUploadError>> {
@@ -180,10 +180,12 @@ async fn create_photo(
   let original_upload_task = tokio::spawn({
     let original_artifact = original_artifact.clone();
     async move {
-      original_artifact
+      let result = original_artifact
         .upload_and_push()
         .await
-        .wrap_err("Failed to create original artifact")
+        .wrap_err("Failed to create original artifact");
+      tracing::info!("original artifact: {:?}", result);
+      result
     }
   });
 

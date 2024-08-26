@@ -30,8 +30,8 @@ use core_types::{PrivateArtifact, PublicArtifact};
 
 use self::methods::*;
 
-const ARTIFACT_PRIVATE_LTS_BUCKET: &str = "picturepro-artifact-private-lts";
-const ARTIFACT_PUBLIC_LTS_BUCKET: &str = "picturepro-artifact-public-lts";
+const ARTIFACT_PRIVATE_LTS_BUCKET: &str = "picturepro-private";
+const ARTIFACT_PUBLIC_LTS_BUCKET: &str = "picturepro-public";
 
 type ObjectStoreGenerator =
   Box<dyn Fn() -> Result<Box<dyn object_store::ObjectStore>> + Send + 'static>;
@@ -89,12 +89,10 @@ impl Artifact for PublicArtifact {
     Self::new_with_id(id, contents)
   }
   fn new_with_id(id: Self::Id, contents: Option<bytes::Bytes>) -> Self {
-    let url = format!(
-      "https://s3.{}.amazonaws.com/{}/{}",
-      std::env::var("AWS_DEFAULT_REGION").unwrap(),
-      ARTIFACT_PUBLIC_LTS_BUCKET,
-      id.0
-    );
+    let url =
+      format!("https://{}.jlewis.sh/{}", ARTIFACT_PUBLIC_LTS_BUCKET, id.0);
+    tracing::info!("public artifact url: {}", url);
+
     Self {
       id,
       url,
