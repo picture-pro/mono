@@ -22,17 +22,25 @@ pub fn QrCodePage() -> impl IntoView {
     Err(_) => view! { <p>"Invalid photo group ID"</p> }.into_view(),
   };
 
+  // view! {
+  //   <div
+  //     class="flex-1 flex flex-col justify-center items-center h-full"
+  //   >
+  //     <div class="bg-base-100 max-w-md flex flex-col p-8 gap-4 rounded-lg
+  // shadow-xl">       {photo_deck_element}
+  //       <div class="flex flex-row items-center gap-4 h-24 items-stretch">
+  //         <a href="/dashboard" class="flex-1 h-full d-btn d-btn-primary
+  // text-xl">"Retake"</a>         <QrCode data=url class="rounded-box border
+  // shadow size-24 flex-1" />         <a href={format!("/photo/{}", id)}
+  // class="flex-1 h-full d-btn text-xl">"Delete"</a>       </div>
+  //     </div>
+  //   </div>
+  // }
   view! {
-    <div
-      class="flex-1 flex flex-col justify-center items-center h-full"
-    >
-      <div class="bg-base-100 max-w-md flex flex-col p-8 gap-4 rounded-lg shadow-xl">
-        {photo_deck_element}
-        <div class="flex flex-row items-center gap-4 h-24 items-stretch">
-          <a href="/dashboard" class="flex-1 h-full d-btn d-btn-primary text-xl">"Retake"</a>
-          <QrCode data=url class="rounded-box border shadow size-24 flex-1" />
-          <a href={format!("/photo/{}", id)} class="flex-1 h-full d-btn text-xl">"Delete"</a>
-        </div>
+    <div class="flex-1 flex flex-col justify-center items-center h-full">
+      <div class="bg-base-100 max-w-md flex flex-col items-start p-8 gap-4 rounded-lg shadow-xl">
+        <QrCode data=url class="rounded-box border shadow flex-1 aspect-square w-full" />
+        <p class="text-base-content text-xl">"Scan the QR code to view the photos for sale."</p>
       </div>
     </div>
   }
