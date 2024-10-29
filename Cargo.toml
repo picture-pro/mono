@@ -61,7 +61,7 @@ site-pkg-dir = "pkg"
 style-file = "crates/site-app/style/main.scss"
 assets-dir = "crates/site-app/public"
 
-site-addr = "127.0.0.1:3000"
+site-addr = "0.0.0.0:3000"
 reload-port = 3001
 
 browserquery = "defaults"
