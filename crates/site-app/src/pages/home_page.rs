@@ -62,43 +62,43 @@ fn ColoredBoxHero() -> impl IntoView {
           border_color="border-orange-700"
           bg_color="bg-orange-500/20"
           text_color="text-orange-200/80"
-          title="Private Session"
+          title="Take Photos"
           description="Separate subjects, separate customers."
           href={if authenticated { Some("/dashboard") } else { Some("/login?next=/dashboard") } }
         />
-        <ColoredBox
-          border_color="border-green-700"
-          bg_color="bg-green-500/20"
-          text_color="text-green-200/80"
-          title="Public Session"
-          description="Share with everyone, sell to everyone."
-          href={if authenticated { None } else { Some("/login") } }
-        />
-        <ColoredBox
-          border_color="border-blue-700"
-          bg_color="bg-blue-500/20"
-          text_color="text-blue-200/80"
-          title="Discover"
-          description="Discover photos from around the world."
-          href={if authenticated { None } else { Some("/login") } }
-        />
-        <ColoredBox
-          border_color="border-purple-700"
-          bg_color="bg-purple-500/20"
-          text_color="text-purple-200/80"
-          title="School Event"
-          description="Share photos from school events."
-          href={if authenticated { None } else { Some("/login") } }
-        />
+      //   <ColoredBox
+      //     border_color="border-green-700"
+      //     bg_color="bg-green-500/20"
+      //     text_color="text-green-200/80"
+      //     title="Public Session"
+      //     description="Share with everyone, sell to everyone."
+      //     href={if authenticated { None } else { Some("/login") } }
+      //   />
+      //   <ColoredBox
+      //     border_color="border-blue-700"
+      //     bg_color="bg-blue-500/20"
+      //     text_color="text-blue-200/80"
+      //     title="Discover"
+      //     description="Discover photos from around the world."
+      //     href={if authenticated { None } else { Some("/login") } }
+      //   />
+      //   <ColoredBox
+      //     border_color="border-purple-700"
+      //     bg_color="bg-purple-500/20"
+      //     text_color="text-purple-200/80"
+      //     title="School Event"
+      //     description="Share photos from school events."
+      //     href={if authenticated { None } else { Some("/login") } }
+      //   />
       </div>
-      <ColoredBox
-        border_color="border-slate-700"
-        bg_color="bg-slate-500/20"
-        text_color="text-slate-200/80"
-        title="Settings Event"
-        description="Change essential settings and preferences."
-        href={None}
-      />
+      // <ColoredBox
+      //   border_color="border-slate-700"
+      //   bg_color="bg-slate-500/20"
+      //   text_color="text-slate-200/80"
+      //   title="Settings Event"
+      //   description="Change essential settings and preferences."
+      //   href={None}
+      // />
     </div>
   }
 }
