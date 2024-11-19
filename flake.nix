@@ -30,6 +30,8 @@
       (importApply ./flake-modules/nixpkgs { })
       # configures rust toolchains
       (importApply ./flake-modules/rust-toolchain { })
+      # defines rust builds
+      (importApply ./flake-modules/rust-builds { })
       # defines devshell
       (importApply ./flake-modules/devshell { })
     ];
