@@ -1,5 +1,0 @@
-target/
-
-.env
-history.txt
-trace-*.json

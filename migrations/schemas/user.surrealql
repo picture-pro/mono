@@ -1,7 +1,0 @@
-DEFINE TABLE user SCHEMALESS;
-
-DEFINE FIELD name ON user TYPE string;
-DEFINE FIELD email ON user TYPE string;
-DEFINE FIELD pw_hash ON user TYPE string;
-
-DEFINE INDEX unique_email ON user COLUMNS email UNIQUE;
