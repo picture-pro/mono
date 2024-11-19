@@ -1,0 +1,9 @@
+
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.lints.rust]
+missing_docs = "deny"
+
+[workspace.dependencies]
