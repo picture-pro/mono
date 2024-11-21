@@ -6,6 +6,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "https://flakehub.com/f/hercules-ci/flake-parts/0.1.tar.gz";
 
+    # still first party I guess
+    rambit.url = "github:rambit-systems/rambit";
+    tikv-explorer.url = "github:rambit-systems/tikv-explorer";
+
     # nix tools
     nix-filter.url = "github:numtide/nix-filter";
     devshell.url = "github:numtide/devshell";
