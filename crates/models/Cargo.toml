@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+serde.workspace = true
+
+dvf.workspace = true
+model.workspace = true
 
 [lints]
 workspace = true
