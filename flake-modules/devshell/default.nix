@@ -1,5 +1,5 @@
 localFlake: { ... }: {
-  perSystem = { pkgs, rust, inputs', ... }: let
+  perSystem = { pkgs, rust-toolchain, inputs', ... }: let
     mkShell = pkgs.devshell.mkShell;
 
     # note; there's a UTF-8 control character in the esc string below
@@ -46,7 +46,7 @@ localFlake: { ... }: {
     devShells.default = mkShell {
       packages = with pkgs; [
         # rust dev toolchain (with RA), built from current nixpkgs
-        (rust.dev-toolchain pkgs)
+        (rust-toolchain.dev-toolchain pkgs)
 
         # tools
         mprocs # runs commands in parallel
@@ -74,6 +74,14 @@ localFlake: { ... }: {
           command = "nix flake check $@";
           help = "Runs nix flake checks.";
           category = "[nix actions]";
+        }
+        {
+          name = "site-container";
+          command = ''
+            docker load -i $(nix build .#site-server-container --print-out-paths --no-link) && \
+            docker run --rm -p 3000:3000 site-server
+          '';
+          help = "Run the ${bin-hl "site-server"} in a container.";
         }
       ]
         ++ tikv-docker-commands
