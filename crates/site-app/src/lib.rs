@@ -17,7 +17,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <HashedStylesheet options id="leptos"/>
         <MetaTags/>
       </head>
-      <body class="bg-primary-app text-primary-normal">
+      <body class="bg-base-app text-base-normal">
         <App/>
       </body>
     </html>
