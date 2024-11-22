@@ -5,6 +5,16 @@ use site_app::*;
 
 #[tokio::main]
 async fn main() {
+  tracing_subscriber::fmt()
+    .with_env_filter(
+      tracing_subscriber::EnvFilter::builder()
+        .with_default_directive(
+          tracing::level_filters::LevelFilter::INFO.into(),
+        )
+        .from_env_lossy(),
+    )
+    .init();
+
   let conf = get_configuration(None).unwrap();
   let addr = conf.leptos_options.site_addr;
   let leptos_options = conf.leptos_options;
@@ -22,7 +32,7 @@ async fn main() {
 
   // run our app with hyper
   // `axum::Server` is a re-export of `hyper::Server`
-  leptos::logging::log!("listening on http://{}", &addr);
+  tracing::info!("listening on http://{}", &addr);
   let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
   axum::serve(listener, app.into_make_service())
     .await
