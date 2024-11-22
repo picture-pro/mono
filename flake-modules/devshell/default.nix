@@ -19,7 +19,7 @@ localFlake: { ... }: {
         ${dockerLoad imagePath} && \
         ${runEphemeralDocker { inherit imageName imageVersion; }}
       '';
-      help = args.desc or "Run the ${bin-hl imageName} server in an ephemeral container.";
+      help = args.desc or "Runs the ${bin-hl imageName} server in an ephemeral container.";
       category = "[docker actions]";
     };
     tikv-docker-commands = [
@@ -38,7 +38,7 @@ localFlake: { ... }: {
         imageName = "tikv-explorer";
         imageVersion = "latest";
         commandName = "tikv-explorer";
-        desc = "Run ${bin-hl "tikv-explorer"}.";
+        desc = "Runs ${bin-hl "tikv-explorer"}.";
       } )
     ];
     
@@ -66,7 +66,7 @@ localFlake: { ... }: {
         {
           name = "tikv";
           command = "mprocs \"run-tikv\" \"run-pd\"";
-          help = "Run the ${bin-hl "tikv"} stack.";
+          help = "Runs the ${bin-hl "tikv"} stack.";
           category = "[stack actions]";
         }
         {
@@ -76,12 +76,18 @@ localFlake: { ... }: {
           category = "[nix actions]";
         }
         {
-          name = "site-container";
+          name = "container";
           command = ''
             docker load -i $(nix build .#site-server-container --print-out-paths --no-link) && \
             docker run --rm -p 3000:3000 site-server
           '';
-          help = "Run the ${bin-hl "site-server"} in a container.";
+          help = "Runs the ${bin-hl "site-server"} in a container.";
+        }
+        {
+          name = "watch";
+          command = "cargo leptos watch $@";
+          help = "Runs ${bin-hl "cargo-leptos"} in watch mode.";
+          category = "[build actions]";
         }
       ]
         ++ tikv-docker-commands
