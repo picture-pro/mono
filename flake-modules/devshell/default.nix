@@ -50,6 +50,9 @@ localFlake: { ... }: {
 
         # tools
         mprocs # runs commands in parallel
+        cargo-leptos # leptos build tool
+        dart-sass tailwindcss yarn # css build tools
+        binaryen # wasm tools
 
         # dependencies for local rust builds
         pkg-config
@@ -63,8 +66,14 @@ localFlake: { ... }: {
         {
           name = "tikv";
           command = "mprocs \"run-tikv\" \"run-pd\"";
-          help = "Run the ${bin-hl "tikv"} stack";
+          help = "Run the ${bin-hl "tikv"} stack.";
           category = "[stack actions]";
+        }
+        {
+          name = "check";
+          command = "nix flake check $@";
+          help = "Runs nix flake checks.";
+          category = "[nix actions]";
         }
       ]
         ++ tikv-docker-commands
