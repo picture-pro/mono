@@ -12,12 +12,21 @@ serde = { version = "1", features = ["derive"] }
 tracing = { version = "0.1" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+# errors
+# miette = { version = "7", default-features = false, features = [ "derive" ] }
+miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f0ec74317166ec08113", default-features = false, features = ["derive"] }
+thiserror = "2"
+
 # inherited from rambit
-dvf = { git = "https://github.com/rambit-systems/rambit" }
-model = { git = "https://github.com/rambit-systems/rambit" }
+crunch = { git = "https://github.com/rambit-systems/rambit" }
+dvf =    { git = "https://github.com/rambit-systems/rambit" }
+hex =    { git = "https://github.com/rambit-systems/rambit" }
+model =  { git = "https://github.com/rambit-systems/rambit" }
+repos =  { git = "https://github.com/rambit-systems/rambit" }
 
 # async
 tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
 
 # app-level http
 axum = { version = "0.7", features = ["macros", "tracing"] }
