@@ -1,11 +1,12 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use axum::{extract::FromRef, Router};
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use miette::Result;
 use prime_domain::{
-  DynPrimeDomainService, PrimeDomainService, PrimeDomainServiceCanonical,
+  hex::retryable::Retryable, DynPrimeDomainService, PrimeDomainService,
+  PrimeDomainServiceCanonical,
 };
 use site_app::*;
 
@@ -16,10 +17,14 @@ struct AppState {
 
 impl AppState {
   async fn new() -> Result<Self> {
-    let tikv_store =
-      prime_domain::repos::db::kv::tikv::TikvClient::new_from_env().await?;
-    let kv_db_adapter =
-      Arc::new(prime_domain::repos::db::KvDatabaseAdapter::new(tikv_store));
+    let tikv_store_init = move || async move {
+      prime_domain::repos::db::kv::tikv::TikvClient::new_from_env().await
+    };
+    let retryable_tikv_store =
+      Retryable::init(5, Duration::from_secs(2), tikv_store_init).await;
+    let kv_db_adapter = Arc::new(
+      prime_domain::repos::db::KvDatabaseAdapter::new(retryable_tikv_store),
+    );
 
     let photo_repo =
       prime_domain::repos::BaseRepository::new(kv_db_adapter.clone());
@@ -45,19 +50,33 @@ async fn main() {
     )
     .init();
 
+  tracing::info!("starting picturepro site server");
+
   let conf = get_configuration(None).unwrap();
   let addr = conf.leptos_options.site_addr;
   let leptos_options = conf.leptos_options;
   // Generate the list of routes in your Leptos App
   let routes = generate_route_list(App);
 
+  tracing::info!("initializing app state");
   let app_state = AppState::new().await.unwrap();
+  tracing::info!("app state initialized");
 
   let app = Router::new()
-    .leptos_routes(&leptos_options, routes, {
-      let leptos_options = leptos_options.clone();
-      move || shell(leptos_options.clone())
-    })
+    .leptos_routes_with_context(
+      &leptos_options,
+      routes,
+      {
+        let app_state = app_state.clone();
+        move || {
+          provide_context(app_state.clone());
+        }
+      },
+      {
+        let leptos_options = leptos_options.clone();
+        move || shell(leptos_options.clone())
+      },
+    )
     .fallback(leptos_axum::file_and_error_handler(shell))
     .layer(tower_http::compression::CompressionLayer::new())
     .with_state(leptos_options);
