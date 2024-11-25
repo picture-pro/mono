@@ -2,6 +2,7 @@ use leptos::prelude::*;
 
 use crate::components::Section;
 
+#[component]
 pub fn HomePage() -> impl IntoView {
   view! {
     <Section>

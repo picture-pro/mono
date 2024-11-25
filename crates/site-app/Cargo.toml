@@ -21,6 +21,3 @@ ssr = [
   "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
   "dep:leptos_axum", "dep:prime-domain"
 ]
-
-[lints.rust]
-non-snake-case = "allow"
