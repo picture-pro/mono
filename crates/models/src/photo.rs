@@ -38,6 +38,7 @@ impl Model for Photo {
 }
 
 /// A request to create a new [`Photo`].
+#[derive(Debug)]
 pub struct PhotoCreateRequest {
   /// The photo's artifacts.
   pub artifacts: PhotoArtifacts,

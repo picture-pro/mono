@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{fmt::Debug, marker::PhantomData};
 
 pub use db::CreateModelError;
 pub(crate) use db::{DatabaseAdapter, FetchModelByIndexError, FetchModelError};
@@ -9,23 +9,37 @@ use tracing::instrument;
 use crate::ModelRepository;
 
 /// Provides a base repository implementation for any model.
-pub struct BaseRepository<M: models::Model, DB: DatabaseAdapter> {
+pub struct BaseRepository<
+  M: models::Model,
+  MCR: Debug + Into<M> + Send + Sync + 'static,
+  DB: DatabaseAdapter,
+> {
   db_adapter: DB,
   _phantom:   PhantomData<M>,
+  _phantom2:  PhantomData<MCR>,
 }
 
-impl<M: models::Model, DB: DatabaseAdapter + Clone> Clone
-  for BaseRepository<M, DB>
+impl<
+    M: models::Model,
+    MCR: Debug + Into<M> + Send + Sync + 'static,
+    DB: DatabaseAdapter + Clone,
+  > Clone for BaseRepository<M, MCR, DB>
 {
   fn clone(&self) -> Self {
     Self {
       db_adapter: self.db_adapter.clone(),
       _phantom:   PhantomData,
+      _phantom2:  PhantomData,
     }
   }
 }
 
-impl<M: models::Model, DB: DatabaseAdapter> BaseRepository<M, DB> {
+impl<
+    M: models::Model,
+    MCR: Debug + Into<M> + Send + Sync + 'static,
+    DB: DatabaseAdapter,
+  > BaseRepository<M, MCR, DB>
+{
   /// Creates a new `BaseRepository` instance.
   pub fn new(db_adapter: DB) -> Self {
     tracing::info!(
@@ -36,13 +50,17 @@ impl<M: models::Model, DB: DatabaseAdapter> BaseRepository<M, DB> {
     Self {
       db_adapter,
       _phantom: PhantomData,
+      _phantom2: PhantomData,
     }
   }
 }
 
 #[async_trait::async_trait]
-impl<M: models::Model, DB: DatabaseAdapter> health::HealthReporter
-  for BaseRepository<M, DB>
+impl<
+    M: models::Model,
+    MCR: Debug + Into<M> + Send + Sync + 'static,
+    DB: DatabaseAdapter,
+  > health::HealthReporter for BaseRepository<M, MCR, DB>
 {
   fn name(&self) -> &'static str { stringify!(BaseRepository<M, DB>) }
   async fn health_check(&self) -> health::ComponentHealth {
@@ -55,11 +73,14 @@ impl<M: models::Model, DB: DatabaseAdapter> health::HealthReporter
 }
 
 #[async_trait::async_trait]
-impl<M: models::Model, DB: DatabaseAdapter> ModelRepository
-  for BaseRepository<M, DB>
+impl<
+    M: models::Model,
+    MCR: Debug + Into<M> + Send + Sync + 'static,
+    DB: DatabaseAdapter,
+  > ModelRepository for BaseRepository<M, MCR, DB>
 {
   type Model = M;
-  type ModelCreateRequest = M;
+  type ModelCreateRequest = MCR;
   type CreateError = CreateModelError;
 
   #[instrument(skip(self))]
@@ -67,7 +88,10 @@ impl<M: models::Model, DB: DatabaseAdapter> ModelRepository
     &self,
     input: Self::ModelCreateRequest,
   ) -> Result<Self::Model, CreateModelError> {
-    self.db_adapter.create_model::<Self::Model>(input).await
+    self
+      .db_adapter
+      .create_model::<Self::Model>(input.into())
+      .await
   }
 
   #[instrument(skip(self))]

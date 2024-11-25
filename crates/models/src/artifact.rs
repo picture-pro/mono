@@ -55,6 +55,7 @@ impl Model for Artifact {
 }
 
 /// A request to create a new [`Artifact`].
+#[derive(Debug)]
 pub struct ArtifactCreateRequest {
   /// The artifact's path.
   pub path: ArtifactPath,
