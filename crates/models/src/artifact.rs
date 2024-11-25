@@ -1,3 +1,6 @@
+use std::fmt;
+
+use dvf::slugger::{EitherSlug, StrictSlug};
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
@@ -12,8 +15,31 @@ pub type ArtifactRecordId = RecordId<Artifact>;
 pub struct Artifact {
   /// The artifact's ID.
   pub id:   ArtifactRecordId,
+  /// The artifact's path.
+  pub path: ArtifactPath,
   /// The artifact's compression status.
   pub size: dvf::CompressionStatus,
+}
+
+/// The object storage path for an [`Artifact`].
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ArtifactPath(dvf::Ulid);
+
+impl ArtifactPath {
+  /// Creates a new [`ArtifactPath`] from a [`dvf::Ulid`].
+  pub fn new(ulid: dvf::Ulid) -> Self { Self(ulid) }
+
+  /// Creates a new random [`ArtifactPath`].
+  pub fn new_random() -> Self { Self(dvf::Ulid::new()) }
+
+  /// Converts the [`ArtifactPath`] into a [`dvf::Ulid`].
+  pub fn into_inner(self) -> dvf::Ulid { self.0 }
+}
+
+impl fmt::Display for ArtifactPath {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}", self.0)
+  }
 }
 
 impl Model for Artifact {
@@ -21,7 +47,9 @@ impl Model for Artifact {
   const UNIQUE_INDICES: &'static [(
     &'static str,
     model::SlugFieldGetter<Self>,
-  )] = &[];
+  )] = &[("path", |artifact| {
+    EitherSlug::Strict(StrictSlug::new(artifact.path.to_string()))
+  })];
 
   fn id(&self) -> ArtifactRecordId { self.id }
 }
