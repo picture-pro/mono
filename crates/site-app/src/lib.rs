@@ -1,8 +1,16 @@
+mod components;
+mod pages;
+
 use leptos::prelude::*;
 use leptos_meta::{provide_meta_context, HashedStylesheet, MetaTags, Title};
 use leptos_router::{
   components::{Route, Router, Routes},
   StaticSegment,
+};
+
+use self::{
+  components::{Header, PageContainer},
+  pages::HomePage,
 };
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
@@ -31,26 +39,13 @@ pub fn App() -> impl IntoView {
   view! {
     <Title text="Welcome to Leptos"/>
 
-    <Router>
-      <main>
+    <Header/>
+    <PageContainer>
+      <Router>
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=StaticSegment("") view=HomePage/>
         </Routes>
-      </main>
-    </Router>
-  }
-}
-
-#[island]
-fn HomePage() -> impl IntoView {
-  let count = RwSignal::new(0);
-  let on_click = move |_| *count.write() += 1;
-
-  view! {
-    <p>"Welcome to Leptos!"</p>
-    <button
-      on:click=on_click
-      class=""
-    >"Click Me: " {count}</button>
+      </Router>
+    </PageContainer>
   }
 }
