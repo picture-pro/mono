@@ -23,7 +23,6 @@ db =     { git = "https://github.com/rambit-systems/rambit" }
 dvf =    { git = "https://github.com/rambit-systems/rambit" }
 hex =    { git = "https://github.com/rambit-systems/rambit" }
 model =  { git = "https://github.com/rambit-systems/rambit" }
-repos =  { git = "https://github.com/rambit-systems/rambit" }
 
 # async
 tokio = { version = "1", features = ["full"] }

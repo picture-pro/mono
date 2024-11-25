@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 models = { path = "../models" }
+repos = { path = "../repos" }
 
 crunch.workspace = true
 hex.workspace = true
-repos.workspace = true
 
 tracing.workspace = true
 

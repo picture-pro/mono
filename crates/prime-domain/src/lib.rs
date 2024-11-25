@@ -7,8 +7,10 @@ use std::sync::Arc;
 
 pub use hex;
 use hex::Hexagonal;
-use models::{Artifact, ArtifactRecordId, Photo, PhotoRecordId};
-use repos::db::FetchModelError;
+use models::{Photo, PhotoRecordId};
+use repos::FetchModelError;
+
+pub use self::canonical::*;
 
 /// A dynamic [`PrimeDomainService`] trait object.
 pub type DynPrimeDomainService = Arc<Box<dyn PrimeDomainService>>;
@@ -16,11 +18,6 @@ pub type DynPrimeDomainService = Arc<Box<dyn PrimeDomainService>>;
 /// The prime domain service trait.
 #[async_trait::async_trait]
 pub trait PrimeDomainService: Hexagonal {
-  /// Fetch an [`Artifact`] by its ID.
-  async fn fetch_cache_by_id(
-    &self,
-    id: ArtifactRecordId,
-  ) -> Result<Option<Artifact>, FetchModelError>;
   /// Fetch a [`Photo`] by its ID.
   async fn fetch_photo_by_id(
     &self,

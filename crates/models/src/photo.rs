@@ -36,3 +36,18 @@ impl Model for Photo {
 
   fn id(&self) -> PhotoRecordId { self.id }
 }
+
+/// A request to create a new [`Photo`].
+pub struct PhotoCreateRequest {
+  /// The photo's artifacts.
+  pub artifacts: PhotoArtifacts,
+}
+
+impl From<PhotoCreateRequest> for Photo {
+  fn from(input: PhotoCreateRequest) -> Self {
+    Self {
+      id:        PhotoRecordId::default(),
+      artifacts: input.artifacts,
+    }
+  }
+}

@@ -53,3 +53,21 @@ impl Model for Artifact {
 
   fn id(&self) -> ArtifactRecordId { self.id }
 }
+
+/// A request to create a new [`Artifact`].
+pub struct ArtifactCreateRequest {
+  /// The artifact's path.
+  pub path: ArtifactPath,
+  /// The artifact's compression status.
+  pub size: dvf::CompressionStatus,
+}
+
+impl From<ArtifactCreateRequest> for Artifact {
+  fn from(input: ArtifactCreateRequest) -> Self {
+    Self {
+      id:   ArtifactRecordId::default(),
+      path: input.path,
+      size: input.size,
+    }
+  }
+}
