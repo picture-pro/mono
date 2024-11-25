@@ -69,7 +69,7 @@ async fn main() {
       {
         let app_state = app_state.clone();
         move || {
-          provide_context(app_state.clone());
+          provide_context(app_state.prime_domain_service.clone());
         }
       },
       {
