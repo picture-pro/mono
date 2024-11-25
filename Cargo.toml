@@ -19,6 +19,7 @@ thiserror = "2"
 
 # inherited from rambit
 crunch = { git = "https://github.com/rambit-systems/rambit" }
+db =     { git = "https://github.com/rambit-systems/rambit" }
 dvf =    { git = "https://github.com/rambit-systems/rambit" }
 hex =    { git = "https://github.com/rambit-systems/rambit" }
 model =  { git = "https://github.com/rambit-systems/rambit" }

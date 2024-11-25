@@ -1,0 +1,19 @@
+[package]
+name = "repos"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+models = { path = "../models" }
+
+db.workspace = true
+hex.workspace = true
+
+tracing.workspace = true
+
+miette.workspace = true
+
+async-trait.workspace = true
+
+[lints]
+workspace = true
