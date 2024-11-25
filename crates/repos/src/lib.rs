@@ -1,6 +1,6 @@
 //! Repositories for use in services.
 
-pub use db::{CreateModelError, FetchModelByIndexError, FetchModelError};
+pub use db::{self, CreateModelError, FetchModelByIndexError, FetchModelError};
 use hex::Hexagonal;
 use miette::Result;
 use models::EitherSlug;

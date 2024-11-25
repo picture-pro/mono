@@ -1,7 +1,37 @@
-use axum::Router;
+use std::sync::Arc;
+
+use axum::{extract::FromRef, Router};
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
+use miette::Result;
+use prime_domain::{
+  DynPrimeDomainService, PrimeDomainService, PrimeDomainServiceCanonical,
+};
 use site_app::*;
+
+#[derive(Clone, FromRef)]
+struct AppState {
+  prime_domain_service: DynPrimeDomainService,
+}
+
+impl AppState {
+  async fn new() -> Result<Self> {
+    let tikv_store =
+      prime_domain::repos::db::kv::tikv::TikvClient::new_from_env().await?;
+    let kv_db_adapter =
+      Arc::new(prime_domain::repos::db::KvDatabaseAdapter::new(tikv_store));
+
+    let photo_repo =
+      prime_domain::repos::BaseRepository::new(kv_db_adapter.clone());
+
+    let prime_domain_service: Arc<Box<dyn PrimeDomainService>> =
+      Arc::new(Box::new(PrimeDomainServiceCanonical::new(photo_repo)));
+
+    Ok(Self {
+      prime_domain_service,
+    })
+  }
+}
 
 #[tokio::main]
 async fn main() {
@@ -20,6 +50,8 @@ async fn main() {
   let leptos_options = conf.leptos_options;
   // Generate the list of routes in your Leptos App
   let routes = generate_route_list(App);
+
+  let app_state = AppState::new().await.unwrap();
 
   let app = Router::new()
     .leptos_routes(&leptos_options, routes, {

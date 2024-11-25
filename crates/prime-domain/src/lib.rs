@@ -8,6 +8,7 @@ use std::sync::Arc;
 pub use hex;
 use hex::Hexagonal;
 use models::{Photo, PhotoRecordId};
+pub use repos;
 use repos::FetchModelError;
 
 pub use self::canonical::*;

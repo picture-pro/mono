@@ -12,6 +12,8 @@ leptos = { workspace = true, features = [ "ssr", "tracing" ]}
 leptos_axum.workspace = true
 leptos_router.workspace = true
 
+prime-domain = { path = "../prime-domain" }
+
 axum.workspace = true
 tokio.workspace = true
 tower.workspace = true
@@ -19,3 +21,5 @@ tower-http.workspace = true
 
 tracing.workspace = true
 tracing-subscriber.workspace = true
+
+miette = { workspace = true, features = [ "fancy-no-syscall" ] }
