@@ -12,8 +12,8 @@ pub type ArtifactRecordId = RecordId<Artifact>;
 pub struct Artifact {
   /// The artifact's ID.
   pub id:   ArtifactRecordId,
-  /// The artifact's file size.
-  pub size: dvf::FileSize,
+  /// The artifact's compression status.
+  pub size: dvf::CompressionStatus,
 }
 
 impl Model for Artifact {
