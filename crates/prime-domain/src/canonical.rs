@@ -1,4 +1,5 @@
 use hex::health;
+use miette::Result;
 use models::{Photo, PhotoCreateRequest, PhotoRecordId};
 use repos::FetchModelError;
 
@@ -42,6 +43,10 @@ where
     id: PhotoRecordId,
   ) -> Result<Option<Photo>, FetchModelError> {
     self.photo_repo.fetch_model_by_id(id).await
+  }
+
+  async fn enumerate_photos(&self) -> Result<Vec<Photo>> {
+    self.photo_repo.enumerate_models().await
   }
 }
 

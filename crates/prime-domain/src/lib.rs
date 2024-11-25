@@ -7,6 +7,7 @@ use std::sync::Arc;
 
 pub use hex;
 use hex::Hexagonal;
+use miette::Result;
 use models::{Photo, PhotoRecordId};
 pub use repos;
 use repos::FetchModelError;
@@ -24,4 +25,6 @@ pub trait PrimeDomainService: Hexagonal {
     &self,
     id: PhotoRecordId,
   ) -> Result<Option<Photo>, FetchModelError>;
+  /// Produce a list of all [`Photo`]s.
+  async fn enumerate_photos(&self) -> Result<Vec<Photo>>;
 }
