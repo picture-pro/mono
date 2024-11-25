@@ -19,5 +19,5 @@ ssr = [
   "dep:leptos_axum",
 ]
 
-[lints.clippy]
+[lints.rust]
 non-snake-case = "allow"
