@@ -41,6 +41,19 @@
       rust-cargo-clippy = rust-toolchain.craneLib.cargoClippy (workspace-base-args // {
         cargoArtifacts = workspace-base-cargo-artifacts;
         cargoClippyExtraArgs = "--all-targets --no-deps -- --deny warnings";
+        pnameSuffix = "-clippy-all";
+      });
+      # run clippy on `site-app` with the `hydrate` feature
+      rust-cargo-clippy-site-app-hydrate = rust-toolchain.craneLib.cargoClippy (workspace-base-args // {
+        cargoArtifacts = workspace-base-cargo-artifacts;
+        cargoClippyExtraArgs = "-p site-app --features hydrate --no-deps -- --deny warnings";
+        pnameSuffix = "-clippy-site-app-hydrate";
+      });
+      # run clippy on `site-app` with the `ssr` feature
+      rust-cargo-clippy-site-app-ssr = rust-toolchain.craneLib.cargoClippy (workspace-base-args // {
+        cargoArtifacts = workspace-base-cargo-artifacts;
+        cargoClippyExtraArgs = "-p site-app --features ssr --no-deps -- --deny warnings";
+        pnameSuffix = "-clippy-site-app-ssr";
       });
       # run rust-doc, denying warnings
       rust-cargo-docs = rust-toolchain.craneLib.cargoDoc (workspace-base-args // {
