@@ -490,16 +490,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22ec99545bb0ed0ea7bb9b8e1e9122ea386ff8a48c0922e43f36d45ab09e0e80"
 
 [[package]]
-name = "crunch"
-version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit#3550e7852ee10030713225dde2d22b44c1dc5478"
-dependencies = [
- "dvf",
- "snap",
- "stream-tools",
-]
-
-[[package]]
 name = "dashmap"
 version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1954,7 +1944,6 @@ name = "prime-domain"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "crunch",
  "hex",
  "miette",
  "models",
@@ -2687,12 +2676,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
-name = "snap"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b6b67fb9a61334225b5b790716f609cd58395f895b3fe8b328786812a40bc3b"
-
-[[package]]
 name = "socket2"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2718,15 +2701,6 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 name = "starc"
 version = "0.1.0"
 source = "git+https://github.com/rambit-systems/rambit#3550e7852ee10030713225dde2d22b44c1dc5478"
-
-[[package]]
-name = "stream-tools"
-version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit#3550e7852ee10030713225dde2d22b44c1dc5478"
-dependencies = [
- "dvf",
- "tokio",
-]
 
 [[package]]
 name = "syn"

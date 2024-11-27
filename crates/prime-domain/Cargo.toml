@@ -7,7 +7,6 @@ edition = "2021"
 models = { path = "../models" }
 repos = { path = "../repos" }
 
-crunch.workspace = true
 hex.workspace = true
 
 tracing.workspace = true
