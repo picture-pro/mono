@@ -10,7 +10,7 @@ localFlake: { ... }: {
 
     dockerLoad = imagePath: "docker load -i ${imagePath}";
     runEphemeralDocker = { imageName, imageVersion }: ''
-      docker run --rm --network host ${imageName}-server:${imageVersion}
+      docker run --rm --network host ${imageName}:${imageVersion}
     '';
     ephemeralDockerCommand = args @ { imagePath, imageName, imageVersion, ... }: {
       # use the commandName argument if provided, otherwise default to the image name
@@ -25,13 +25,15 @@ localFlake: { ... }: {
     tikv-docker-commands = [
       ( ephemeralDockerCommand {
         imagePath = inputs'.rambit.images.tikv;
-        imageName = "tikv";
+        imageName = "tikv-server";
         imageVersion = "8.1.1";
+        commandName = "run-tikv";
       } )
       ( ephemeralDockerCommand {
         imagePath = inputs'.rambit.images.pd;
-        imageName = "pd";
+        imageName = "pd-server";
         imageVersion = "8.1.1";
+        commandName = "run-pd";
       } )
       ( ephemeralDockerCommand {
         imagePath = inputs'.tikv-explorer.packages.container;

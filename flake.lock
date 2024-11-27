@@ -435,11 +435,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1732205255,
-        "narHash": "sha256-okHDWoiD2utv677XgV8iyMocp0jR473NEcxBPg28voQ=",
+        "lastModified": 1732549652,
+        "narHash": "sha256-Kfpjn7MYCAHfMwQ433RFMB4V4ZNXg48nxwGlMvY0Ix4=",
         "owner": "rambit-systems",
         "repo": "tikv-explorer",
-        "rev": "145358f5d21606141b91fdd8b78b69a98d018156",
+        "rev": "f5790d47e3c8672c0e165fe80bf9c1fca934f70b",
         "type": "github"
       },
       "original": {
