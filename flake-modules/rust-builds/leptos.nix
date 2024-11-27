@@ -3,20 +3,22 @@
     inherit (rust-workspace.workspace-base-args) src;
     inherit (rust-toolchain) craneLib;
 
+    # get the leptos options from the Cargo.toml
     workspace-cargo-manifest = builtins.fromTOML (builtins.readFile ../../Cargo.toml);
     leptos-options = builtins.elemAt workspace-cargo-manifest.workspace.metadata.leptos 0;
 
+    # get the style node_modules for the frontend
     js2nix = pkgs.callPackage (pkgs.fetchgit {
       url = "https://github.com/canva-public/js2nix";
       hash = "sha256-Bmv0ERVeb6vjYzy4MuCDgSiz9fSm/Bhg+Xk3AxPisBw=";
     }) { };
     style-root = ../../crates/site-app/style/tailwind;
-
     style-node-env = (js2nix {
       package-json = style-root + "/package.json";
       yarn-lock = style-root + "/yarn.lock";
     }).nodeModules;
 
+    # options for both the frontend and server builds
     common-args = {
       inherit src;
       pname = leptos-options.bin-package;
@@ -24,14 +26,14 @@
 
       doCheck = false;
 
-      nativeBuildInputs = [
-        pkgs.pkg-config
-        pkgs.binaryen # provides wasm-opt for cargo-leptos
-      ] ++ pkgs.lib.optionals (system == "x86_64-linux") [
+      nativeBuildInputs = (with pkgs; [
+        pkg-config
+        binaryen # provides wasm-opt for cargo-leptos
+        clang lld
+      ]) ++ pkgs.lib.optionals (system == "x86_64-linux") [
         pkgs.nasm # wasm compiler only for x86_64-linux
       ];
-      buildInputs = [
-      ];
+      buildInputs = [ ];
     };
       # build the deps for the frontend bundle, and export the target folder
       site-frontend-deps = craneLib.mkCargoDerivation (common-args // {
@@ -78,7 +80,7 @@
             ./crates/site-app/style/tailwind/node_modules
         '';
         
-        # enable hash_files again
+        # enable hash_files again, so we generate `hash.txt`
         buildPhaseCargoCommand = ''
           LEPTOS_HASH_FILES=true cargo leptos build --release -vvv
         '';
