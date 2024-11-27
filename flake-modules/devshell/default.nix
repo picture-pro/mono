@@ -67,7 +67,7 @@ localFlake: { ... }: {
       commands = [
         {
           name = "tikv";
-          command = "mprocs \"run-tikv\" \"run-pd\"";
+          command = "mprocs \"run-tikv\" \"run-pd\" $@";
           help = "Runs the ${bin-hl "tikv"} stack.";
           category = "[stack actions]";
         }
