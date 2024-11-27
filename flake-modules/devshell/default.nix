@@ -91,6 +91,12 @@ localFlake: { ... }: {
           help = "Runs ${bin-hl "cargo-leptos"} in watch mode.";
           category = "[build actions]";
         }
+        {
+          name = "serve";
+          command = "cargo leptos serve --release $@";
+          help = "Runs ${bin-hl "cargo-leptos"} in watch mode.";
+          category = "[build actions]";
+        }
       ]
         ++ tikv-docker-commands
         ;
