@@ -27,7 +27,7 @@ impl AppState {
     );
 
     let photo_repo =
-      prime_domain::repos::BaseRepository::new(kv_db_adapter.clone());
+      prime_domain::repos::BaseModelRepository::new(kv_db_adapter.clone());
 
     let prime_domain_service: Arc<Box<dyn PrimeDomainService>> =
       Arc::new(Box::new(PrimeDomainServiceCanonical::new(photo_repo)));

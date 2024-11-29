@@ -9,7 +9,7 @@ use tracing::instrument;
 use crate::ModelRepository;
 
 /// Provides a base repository implementation for any model.
-pub struct BaseRepository<
+pub struct BaseModelRepository<
   M: models::Model,
   MCR: Debug + Into<M> + Send + Sync + 'static,
   DB: DatabaseAdapter,
@@ -23,7 +23,7 @@ impl<
     M: models::Model,
     MCR: Debug + Into<M> + Send + Sync + 'static,
     DB: DatabaseAdapter + Clone,
-  > Clone for BaseRepository<M, MCR, DB>
+  > Clone for BaseModelRepository<M, MCR, DB>
 {
   fn clone(&self) -> Self {
     Self {
@@ -38,7 +38,7 @@ impl<
     M: models::Model,
     MCR: Debug + Into<M> + Send + Sync + 'static,
     DB: DatabaseAdapter,
-  > BaseRepository<M, MCR, DB>
+  > BaseModelRepository<M, MCR, DB>
 {
   /// Creates a new `BaseRepository` instance.
   pub fn new(db_adapter: DB) -> Self {
@@ -60,7 +60,7 @@ impl<
     M: models::Model,
     MCR: Debug + Into<M> + Send + Sync + 'static,
     DB: DatabaseAdapter,
-  > health::HealthReporter for BaseRepository<M, MCR, DB>
+  > health::HealthReporter for BaseModelRepository<M, MCR, DB>
 {
   fn name(&self) -> &'static str { stringify!(BaseRepository<M, DB>) }
   async fn health_check(&self) -> health::ComponentHealth {
@@ -77,7 +77,7 @@ impl<
     M: models::Model,
     MCR: Debug + Into<M> + Send + Sync + 'static,
     DB: DatabaseAdapter,
-  > ModelRepository for BaseRepository<M, MCR, DB>
+  > ModelRepository for BaseModelRepository<M, MCR, DB>
 {
   type Model = M;
   type ModelCreateRequest = MCR;

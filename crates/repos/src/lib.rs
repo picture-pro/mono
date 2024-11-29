@@ -6,7 +6,7 @@ use miette::Result;
 use models::EitherSlug;
 
 mod base;
-pub use self::base::BaseRepository;
+pub use self::base::BaseModelRepository;
 
 /// Defines a repository interface for models.
 #[async_trait::async_trait]
