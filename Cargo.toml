@@ -19,11 +19,11 @@ miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f
 thiserror = "2"
 
 # inherited from rambit
-db =      { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
-dvf =     { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
-hex =     { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
-model =   { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
-storage = { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
+db =      { git = "https://github.com/rambit-systems/rambit", rev = "a78d9a0" }
+dvf =     { git = "https://github.com/rambit-systems/rambit", rev = "a78d9a0" }
+hex =     { git = "https://github.com/rambit-systems/rambit", rev = "a78d9a0" }
+model =   { git = "https://github.com/rambit-systems/rambit", rev = "a78d9a0" }
+storage = { git = "https://github.com/rambit-systems/rambit", rev = "a78d9a0" }
 
 # async
 async-trait = "0.1"
@@ -36,10 +36,10 @@ tower = { version = "0.5", features = ["full"] }
 tower-http = { version = "0.5", features = ["full"] }
 
 # leptos
-leptos = { version = "0.7.0-rc1", features = ["nightly", "tracing", "experimental-islands"] }
-leptos_axum = { version = "0.7.0-rc1", features = ["tracing"] }
-leptos_meta = { version = "0.7.0-rc1", features = ["tracing"] }
-leptos_router = { version = "0.7.0-rc1", features = ["nightly", "tracing"] }
+leptos = { version = "0.7.0-rc2", features = ["nightly", "tracing", "islands"] }
+leptos_axum = { version = "0.7.0-rc2", features = ["tracing"] }
+leptos_meta = { version = "0.7.0-rc2", features = ["tracing"] }
+leptos_router = { version = "0.7.0-rc2", features = ["nightly", "tracing"] }
 wasm-bindgen = "=0.2.95"
 console_error_panic_hook = "0.1"
 console_log = "1"
