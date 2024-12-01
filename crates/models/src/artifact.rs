@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, path::PathBuf};
 
 use dvf::slugger::{EitherSlug, StrictSlug};
 use model::{Model, RecordId};
@@ -14,11 +14,11 @@ pub type ArtifactRecordId = RecordId<Artifact>;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Artifact {
   /// The artifact's ID.
-  pub id:   ArtifactRecordId,
+  pub id:          ArtifactRecordId,
   /// The artifact's path.
-  pub path: ArtifactPath,
+  pub path:        ArtifactPath,
   /// The artifact's compression status.
-  pub size: dvf::CompressionStatus,
+  pub comp_status: dvf::CompressionStatus,
 }
 
 /// The object storage path for an [`Artifact`].
@@ -34,6 +34,9 @@ impl ArtifactPath {
 
   /// Converts the [`ArtifactPath`] into a [`dvf::Ulid`].
   pub fn into_inner(self) -> dvf::Ulid { self.0 }
+
+  /// Converts the [`ArtifactPath`] into a [`PathBuf`].
+  pub fn to_path_buf(&self) -> PathBuf { self.0.to_string().into() }
 }
 
 impl fmt::Display for ArtifactPath {
@@ -58,17 +61,17 @@ impl Model for Artifact {
 #[derive(Debug)]
 pub struct ArtifactCreateRequest {
   /// The artifact's path.
-  pub path: ArtifactPath,
+  pub path:        ArtifactPath,
   /// The artifact's compression status.
-  pub size: dvf::CompressionStatus,
+  pub comp_status: dvf::CompressionStatus,
 }
 
 impl From<ArtifactCreateRequest> for Artifact {
   fn from(input: ArtifactCreateRequest) -> Self {
     Self {
-      id:   ArtifactRecordId::default(),
-      path: input.path,
-      size: input.size,
+      id:          ArtifactRecordId::default(),
+      path:        input.path,
+      comp_status: input.comp_status,
     }
   }
 }

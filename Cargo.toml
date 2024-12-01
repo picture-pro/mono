@@ -19,10 +19,11 @@ miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f
 thiserror = "2"
 
 # inherited from rambit
-db =     { git = "https://github.com/rambit-systems/rambit" }
-dvf =    { git = "https://github.com/rambit-systems/rambit" }
-hex =    { git = "https://github.com/rambit-systems/rambit" }
-model =  { git = "https://github.com/rambit-systems/rambit" }
+db =      { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
+dvf =     { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
+hex =     { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
+model =   { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
+storage = { git = "https://github.com/rambit-systems/rambit", rev = "3676ab7" }
 
 # async
 async-trait = "0.1"

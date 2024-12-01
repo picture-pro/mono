@@ -1,12 +1,14 @@
 //! Repositories for use in services.
 
+mod artifact;
+mod base;
+
 pub use db::{self, CreateModelError, FetchModelByIndexError, FetchModelError};
 use hex::Hexagonal;
 use miette::Result;
 use models::EitherSlug;
 
-mod base;
-pub use self::base::BaseModelRepository;
+pub use self::{artifact::*, base::BaseModelRepository};
 
 /// Defines a repository interface for models.
 #[async_trait::async_trait]

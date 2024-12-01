@@ -8,9 +8,11 @@ models = { path = "../models" }
 
 db.workspace = true
 hex.workspace = true
+storage.workspace = true
 
 tracing.workspace = true
 
+thiserror.workspace = true
 miette.workspace = true
 
 async-trait.workspace = true
