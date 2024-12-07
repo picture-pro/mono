@@ -1,0 +1,20 @@
+[package]
+name = "auth-domain"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+models = { path = "../models" }
+repos = { path = "../repos" }
+
+hex.workspace = true
+
+tracing.workspace = true
+
+miette.workspace = true
+thiserror.workspace = true
+
+async-trait.workspace = true
+
+[lints]
+workspace = true

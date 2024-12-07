@@ -69,7 +69,7 @@ pub struct ArtifactCreateRequest {
 impl From<ArtifactCreateRequest> for Artifact {
   fn from(input: ArtifactCreateRequest) -> Self {
     Self {
-      id:          ArtifactRecordId::default(),
+      id:          ArtifactRecordId::new(),
       path:        input.path,
       comp_status: input.comp_status,
     }
