@@ -2,13 +2,14 @@
 
 mod artifact;
 mod base;
+mod mock;
 
 pub use db::{self, CreateModelError, FetchModelByIndexError, FetchModelError};
 use hex::Hexagonal;
 use miette::Result;
 use models::EitherSlug;
 
-pub use self::{artifact::*, base::BaseModelRepository};
+pub use self::{artifact::*, base::BaseModelRepository, mock::*};
 
 /// Defines a repository interface for models.
 #[async_trait::async_trait]
