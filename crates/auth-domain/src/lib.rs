@@ -29,8 +29,11 @@ pub enum CreateUserError {
 #[derive(Debug, thiserror::Error, miette::Diagnostic)]
 pub enum AuthenticationError {
   /// Indicates that an error occurred while fetching users.
-  #[error(transparent)]
+  #[error("Failed to fetch user")]
   FetchError(#[from] FetchModelError),
+  /// Indicates that an error occurred while fetching users by index.
+  #[error("Failed to fetch user by index")]
+  FetchByIndexError(#[from] FetchModelByIndexError),
 }
 
 /// The authentication service trait.
@@ -135,9 +138,14 @@ impl<
 
   async fn user_authenticate(
     &self,
-    _creds: UserAuthCredentials,
+    creds: UserAuthCredentials,
   ) -> Result<Option<User>, AuthenticationError> {
-    todo!()
+    let user = match creds {
+      UserAuthCredentials::EmailEntryOnly(email) => {
+        self.fetch_user_by_email(email).await?
+      }
+    };
+    Ok(user)
   }
 }
 
@@ -264,5 +272,30 @@ mod tests {
 
     let user2 = service.user_signup(user_2_req).await;
     assert!(matches!(user2, Err(CreateUserError::EmailAlreadyUsed(_))));
+  }
+
+  #[tokio::test]
+  async fn test_user_authenticate() {
+    let user_repo = MockModelRepository::<User, UserCreateRequest>::new();
+    let service = AuthDomainServiceCanonical::new(Arc::new(user_repo));
+
+    let email = EmailAddress::try_new("test@example.com").unwrap();
+    let user_1_req = UserCreateRequest {
+      email: email.clone(),
+      name:  HumanName::try_new("Test User 1").unwrap(),
+      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
+    };
+    let user = service.user_signup(user_1_req).await.unwrap();
+    assert_eq!(user.email, email);
+
+    let creds = UserAuthCredentials::EmailEntryOnly(email.clone());
+    let auth_user = service.user_authenticate(creds).await.unwrap();
+    assert_eq!(auth_user, Some(user));
+
+    let creds = UserAuthCredentials::EmailEntryOnly(
+      EmailAddress::try_new("untest@example.com").unwrap(),
+    );
+    let auth_user = service.user_authenticate(creds).await.unwrap();
+    assert_eq!(auth_user, None);
   }
 }
