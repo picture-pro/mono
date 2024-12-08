@@ -1,0 +1,15 @@
+[package]
+name = "lsc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+leptos = { workspace = true }
+
+[lints]
+workspace = true
+
+[features]
+default = [ ]
+hydrate = [ "leptos/hydrate" ]
+ssr = [ "leptos/ssr" ]
