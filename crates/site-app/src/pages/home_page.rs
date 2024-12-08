@@ -34,6 +34,9 @@ pub fn HomePage() -> impl IntoView {
         { photos_suspense_viewer }
       </Suspense>
     </Section>
+    <Section>
+      <lsc::ButtonMatrixTestPage />
+    </Section>
   }
 }
 

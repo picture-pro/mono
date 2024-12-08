@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+enum-iterator = "2.1.0"
 leptos = { workspace = true }
+serde = { workspace = true }
 
 [lints]
 workspace = true

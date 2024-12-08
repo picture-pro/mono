@@ -8,6 +8,7 @@ module.exports = {
     require('tailwindcss-radix-colors')({
       aliases: {
         slate: "base",
+        indigo: "primary",
       },
     }),
   ],
