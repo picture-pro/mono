@@ -2,6 +2,7 @@
 //! authentication, and authorization logic.
 
 use core::fmt;
+use std::sync::Arc;
 
 use axum_login::{AuthUser, AuthnBackend};
 use hex::{health, Hexagonal};
@@ -10,6 +11,9 @@ use models::{
   EitherSlug, LaxSlug, User, UserAuthCredentials, UserCreateRequest,
 };
 use repos::{FetchModelByIndexError, FetchModelError, ModelRepository};
+
+/// A dynamic [`AuthDomainService`] trait object.
+pub type DynAuthDomainService = Arc<Box<dyn AuthDomainService>>;
 
 /// An error that occurs during user creation.
 #[derive(Debug, thiserror::Error, miette::Diagnostic)]
@@ -61,6 +65,42 @@ pub trait AuthDomainService: Hexagonal {
     &self,
     creds: UserAuthCredentials,
   ) -> Result<Option<User>, AuthenticationError>;
+}
+
+// smart pointer impl
+#[async_trait::async_trait]
+impl<T, I> AuthDomainService for T
+where
+  T: std::ops::Deref<Target = I> + Hexagonal + Sized,
+  I: AuthDomainService + ?Sized,
+{
+  async fn fetch_user_by_id(
+    &self,
+    id: models::UserRecordId,
+  ) -> Result<Option<User>, FetchModelError> {
+    I::fetch_user_by_id(self, id).await
+  }
+
+  async fn fetch_user_by_email(
+    &self,
+    email: models::EmailAddress,
+  ) -> Result<Option<User>, FetchModelByIndexError> {
+    I::fetch_user_by_email(self, email).await
+  }
+
+  async fn user_signup(
+    &self,
+    req: UserCreateRequest,
+  ) -> Result<User, CreateUserError> {
+    I::user_signup(self, req).await
+  }
+
+  async fn user_authenticate(
+    &self,
+    creds: UserAuthCredentials,
+  ) -> Result<Option<User>, AuthenticationError> {
+    I::user_authenticate(self, creds).await
+  }
 }
 
 /// The canonical implementation of the [`AuthDomainService`].

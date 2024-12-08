@@ -28,3 +28,21 @@ pub trait PrimeDomainService: Hexagonal {
   /// Produce a list of all [`Photo`]s.
   async fn enumerate_photos(&self) -> Result<Vec<Photo>>;
 }
+
+#[async_trait::async_trait]
+impl<T, I> PrimeDomainService for T
+where
+  T: std::ops::Deref<Target = I> + Hexagonal + Sized,
+  I: PrimeDomainService + ?Sized,
+{
+  async fn fetch_photo_by_id(
+    &self,
+    id: PhotoRecordId,
+  ) -> Result<Option<Photo>, FetchModelError> {
+    self.deref().fetch_photo_by_id(id).await
+  }
+
+  async fn enumerate_photos(&self) -> Result<Vec<Photo>> {
+    self.deref().enumerate_photos().await
+  }
+}
