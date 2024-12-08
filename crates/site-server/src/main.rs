@@ -1,18 +1,24 @@
 use std::{sync::Arc, time::Duration};
 
+use auth_domain::{
+  AuthDomainService, AuthDomainServiceCanonical, DynAuthDomainService,
+};
 use axum::{extract::FromRef, Router};
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use miette::Result;
 use prime_domain::{
-  hex::retryable::Retryable, DynPrimeDomainService, PrimeDomainService,
-  PrimeDomainServiceCanonical,
+  hex::retryable::Retryable,
+  models::{User, UserCreateRequest},
+  repos::CreateModelError,
+  DynPrimeDomainService, PrimeDomainService, PrimeDomainServiceCanonical,
 };
 use site_app::*;
 
 #[derive(Clone, FromRef)]
 struct AppState {
   prime_domain_service: DynPrimeDomainService,
+  auth_domain_service:  DynAuthDomainService,
 }
 
 impl AppState {
@@ -28,12 +34,26 @@ impl AppState {
 
     let photo_repo =
       prime_domain::repos::BaseModelRepository::new(kv_db_adapter.clone());
+    let user_repo: Arc<
+      Box<
+        dyn prime_domain::repos::ModelRepository<
+          Model = User,
+          ModelCreateRequest = UserCreateRequest,
+          CreateError = CreateModelError,
+        >,
+      >,
+    > = Arc::new(Box::new(prime_domain::repos::BaseModelRepository::new(
+      kv_db_adapter.clone(),
+    )));
 
     let prime_domain_service: Arc<Box<dyn PrimeDomainService>> =
       Arc::new(Box::new(PrimeDomainServiceCanonical::new(photo_repo)));
+    let auth_domain_service: Arc<Box<dyn AuthDomainService>> =
+      Arc::new(Box::new(AuthDomainServiceCanonical::new(user_repo)));
 
     Ok(Self {
       prime_domain_service,
+      auth_domain_service,
     })
   }
 }

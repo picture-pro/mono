@@ -8,11 +8,12 @@ edition = "2021"
 [dependencies]
 site-app = { path = "../site-app", default-features = false, features = ["ssr"] }
 
+prime-domain = { path = "../prime-domain" }
+auth-domain = { path = "../auth-domain" }
+
 leptos = { workspace = true, features = [ "ssr", "tracing" ]}
 leptos_axum.workspace = true
 leptos_router.workspace = true
-
-prime-domain = { path = "../prime-domain" }
 
 axum.workspace = true
 tokio.workspace = true
