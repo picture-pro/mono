@@ -1,3 +1,5 @@
+use std::hash::{self, Hash, Hasher};
+
 use dvf::slugger::{EitherSlug, LaxSlug};
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
@@ -19,6 +21,15 @@ pub struct User {
   pub email: dvf::EmailAddress,
   /// The user's authentication secrets.
   pub auth:  UserAuthCredentials,
+}
+
+impl User {
+  /// Returns the hash of the user's authentication secrets.
+  pub fn auth_hash(&self) -> u64 {
+    let mut hasher = hash::DefaultHasher::new();
+    self.auth.hash(&mut hasher);
+    hasher.finish()
+  }
 }
 
 /// The authentication method for a [`User`].
