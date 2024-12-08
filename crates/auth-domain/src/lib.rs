@@ -1,14 +1,15 @@
 //! Provides the [`AuthDomainService`], the entry point for users,
 //! authentication, and authorization logic.
 
+use core::fmt;
+
 use axum_login::{AuthUser, AuthnBackend};
 use hex::{health, Hexagonal};
+use miette::IntoDiagnostic;
 use models::{
   EitherSlug, LaxSlug, User, UserAuthCredentials, UserCreateRequest,
 };
-use repos::{
-  CreateModelError, FetchModelByIndexError, FetchModelError, ModelRepository,
-};
+use repos::{FetchModelByIndexError, FetchModelError, ModelRepository};
 
 /// An error that occurs during user creation.
 #[derive(Debug, thiserror::Error, miette::Diagnostic)]
@@ -18,7 +19,7 @@ pub enum CreateUserError {
   EmailAlreadyUsed(models::EmailAddress),
   /// Indicates that an error occurred while creating the user.
   #[error("Failed to create the user")]
-  CreateError(#[from] CreateModelError),
+  CreateError(miette::Report),
   /// Indicates that an error occurred while fetching users by index.
   #[error("Failed to fetch users by index")]
   FetchByIndexError(#[from] FetchModelByIndexError),
@@ -61,22 +62,14 @@ pub trait AuthDomainService: Hexagonal {
 
 /// The canonical implementation of the [`AuthDomainService`].
 pub struct AuthDomainServiceCanonical<
-  UR: ModelRepository<
-    Model = User,
-    ModelCreateRequest = UserCreateRequest,
-    CreateError = CreateModelError,
-  >,
+  UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
 > {
   user_repo: UR,
 }
 
 impl<
     UR: Clone
-      + ModelRepository<
-        Model = User,
-        ModelCreateRequest = UserCreateRequest,
-        CreateError = CreateModelError,
-      >,
+      + ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
   > Clone for AuthDomainServiceCanonical<UR>
 {
   fn clone(&self) -> Self {
@@ -86,13 +79,21 @@ impl<
   }
 }
 
+impl<
+    UR: fmt::Debug
+      + ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
+  > fmt::Debug for AuthDomainServiceCanonical<UR>
+{
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct(stringify!(AuthDomainServiceCanonical))
+      .field("user_repo", &self.user_repo)
+      .finish()
+  }
+}
+
 #[async_trait::async_trait]
 impl<
-    UR: ModelRepository<
-      Model = User,
-      ModelCreateRequest = UserCreateRequest,
-      CreateError = CreateModelError,
-    >,
+    UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
   > AuthDomainService for AuthDomainServiceCanonical<UR>
 {
   async fn fetch_user_by_id(
@@ -124,7 +125,12 @@ impl<
       return Err(CreateUserError::EmailAlreadyUsed(email));
     }
 
-    self.user_repo.create_model(req).await.map_err(|e| e.into())
+    self
+      .user_repo
+      .create_model(req)
+      .await
+      .into_diagnostic()
+      .map_err(CreateUserError::CreateError)
   }
 
   async fn user_authenticate(
@@ -136,11 +142,7 @@ impl<
 }
 
 impl<
-    UR: ModelRepository<
-      Model = User,
-      ModelCreateRequest = UserCreateRequest,
-      CreateError = CreateModelError,
-    >,
+    UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
   > AuthDomainServiceCanonical<UR>
 {
   /// Creates a new [`AuthDomainServiceCanonical`] with the given user
@@ -150,11 +152,7 @@ impl<
 
 #[async_trait::async_trait]
 impl<
-    UR: ModelRepository<
-      Model = User,
-      ModelCreateRequest = UserCreateRequest,
-      CreateError = CreateModelError,
-    >,
+    UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
   > health::HealthReporter for AuthDomainServiceCanonical<UR>
 {
   fn name(&self) -> &'static str { stringify!(AuthDomainServiceCanonical) }
@@ -204,11 +202,8 @@ impl AuthUser for PublicUser {
 
 #[async_trait::async_trait]
 impl<
-    UR: ModelRepository<
-        Model = User,
-        ModelCreateRequest = UserCreateRequest,
-        CreateError = CreateModelError,
-      > + Clone,
+    UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>
+      + Clone,
   > AuthnBackend for AuthDomainServiceCanonical<UR>
 {
   type User = PublicUser;
@@ -233,5 +228,41 @@ impl<
       .await
       .map(|u| u.map(Into::into))
       .map_err(Into::into)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::sync::Arc;
+
+  use models::{EmailAddress, HumanName};
+  use repos::MockModelRepository;
+
+  use super::*;
+
+  #[tokio::test]
+  async fn test_user_signup() {
+    let user_repo = MockModelRepository::<User, UserCreateRequest>::new();
+    let service = AuthDomainServiceCanonical::new(Arc::new(user_repo));
+
+    let email = EmailAddress::try_new("test@example.com").unwrap();
+    let user_1_req = UserCreateRequest {
+      email: email.clone(),
+      name:  HumanName::try_new("Test User 1").unwrap(),
+      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
+    };
+    let user = service.user_signup(user_1_req).await.unwrap();
+    assert_eq!(user.email, email);
+
+    dbg!(&service);
+
+    let user_2_req = UserCreateRequest {
+      email: email.clone(),
+      name:  HumanName::try_new("Test User 2").unwrap(),
+      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
+    };
+
+    let user2 = service.user_signup(user_2_req).await;
+    assert!(matches!(user2, Err(CreateUserError::EmailAlreadyUsed(_))));
   }
 }
