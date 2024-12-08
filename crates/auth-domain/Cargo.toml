@@ -15,6 +15,7 @@ miette.workspace = true
 thiserror.workspace = true
 
 async-trait.workspace = true
+axum-login.workspace = true
 
 [lints]
 workspace = true

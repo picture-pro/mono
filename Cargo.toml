@@ -32,6 +32,7 @@ tokio = { version = "1" }
 
 # app-level http
 axum = { version = "0.7", features = [ "macros", "tracing" ] }
+axum-login = { version = "0.16" }
 tower = { version = "0.5", features = [ ] }
 tower-http = { version = "0.5", features = [ ] }
 
