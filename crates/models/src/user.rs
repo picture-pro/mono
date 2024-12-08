@@ -22,11 +22,11 @@ pub struct User {
 }
 
 /// The authentication method for a [`User`].
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Hash, PartialEq, Serialize, Deserialize)]
 pub enum UserAuthCredentials {
   /// Indicates that the user is authenticated through just an email entry, and
   /// no other verification. VERY DANGEROUS.
-  EmailEntryOnly,
+  EmailEntryOnly(dvf::EmailAddress),
 }
 
 impl Model for User {
