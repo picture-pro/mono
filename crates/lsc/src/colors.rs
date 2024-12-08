@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 )]
 pub enum NamedColor {}
 
+#[allow(dead_code)]
 impl NamedColor {
   pub(crate) fn base_name(&self) -> &'static str { match *self {} }
 

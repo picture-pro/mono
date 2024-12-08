@@ -254,7 +254,7 @@ pub fn Button(
 }
 
 /// A test page for the `lsc` [`Button`].
-#[component]
+#[island]
 pub fn ButtonMatrixTestPage() -> impl IntoView {
   view! {
     <div class="flex flex-col gap-4">

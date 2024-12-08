@@ -24,18 +24,15 @@ pub fn HomePage() -> impl IntoView {
 
   view! {
     <Section>
-      <p class="text-5xl font-serif font-semibold tracking-tight mb-4">
+      <p class="text-6xl tracking-tight mb-4">
         "Welcome to PicturePro"
       </p>
-      <p class="max-w-prose">
+      <p class="max-w-prose text-base-dim">
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonne merninisti licere mihi ista probare, quae sunt a te dicta? Duo Reges: constructio interrete. Quae cum dixisset, finem ille."
       </p>
       <Suspense fallback>
         { photos_suspense_viewer }
       </Suspense>
-    </Section>
-    <Section>
-      <lsc::ButtonMatrixTestPage />
     </Section>
   }
 }
