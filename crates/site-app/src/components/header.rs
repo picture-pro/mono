@@ -2,14 +2,14 @@ use leptos::prelude::*;
 
 #[component]
 pub fn Header() -> impl IntoView {
-  let outer_class = "bg-basea-2 dark:bg-basedarka-2 text-base-dim w-full h-12";
-  let inner_class = "container mx-auto h-full flex flex-row items-center";
+  let class = "sticky top-0 container bg-base-l dark:bg-basedark-1 h-12 \
+               mx-auto text-base-dim px-4 flex flex-row items-center \
+               rounded-b-xl border border-t-0 border-base-6 \
+               dark:border-basedark-6 shadow";
 
   view! {
-    <header class=outer_class>
-      <div class=inner_class>
-        <p class="text-xl font-semibold tracking-tight">"PicturePro"</p>
-      </div>
+    <header class=class>
+      <p class="text-xl font-semibold tracking-tight">"PicturePro"</p>
     </header>
   }
 }
