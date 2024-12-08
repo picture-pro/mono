@@ -1,6 +1,7 @@
 //! Provides the [`AuthDomainService`], the entry point for users,
 //! authentication, and authorization logic.
 
+use axum_login::{AuthUser, AuthnBackend};
 use hex::{health, Hexagonal};
 use models::{
   EitherSlug, LaxSlug, User, UserAuthCredentials, UserCreateRequest,
@@ -16,15 +17,20 @@ pub enum CreateUserError {
   #[error("The email address is already in use: \"{0}\"")]
   EmailAlreadyUsed(models::EmailAddress),
   /// Indicates that an error occurred while creating the user.
-  #[error(transparent)]
+  #[error("Failed to create the user")]
   CreateError(#[from] CreateModelError),
-  /// Indicates that an error occurred while fetching users.
-  #[error(transparent)]
-  FetchError(#[from] FetchModelByIndexError),
+  /// Indicates that an error occurred while fetching users by index.
+  #[error("Failed to fetch users by index")]
+  FetchByIndexError(#[from] FetchModelByIndexError),
 }
 
 /// An error that occurs during user authentication.
-pub enum AuthenticationError {}
+#[derive(Debug, thiserror::Error, miette::Diagnostic)]
+pub enum AuthenticationError {
+  /// Indicates that an error occurred while fetching users.
+  #[error(transparent)]
+  FetchError(#[from] FetchModelError),
+}
 
 /// The authentication service trait.
 #[async_trait::async_trait]
@@ -62,6 +68,22 @@ pub struct AuthDomainServiceCanonical<
   >,
 > {
   user_repo: UR,
+}
+
+impl<
+    UR: Clone
+      + ModelRepository<
+        Model = User,
+        ModelCreateRequest = UserCreateRequest,
+        CreateError = CreateModelError,
+      >,
+  > Clone for AuthDomainServiceCanonical<UR>
+{
+  fn clone(&self) -> Self {
+    Self {
+      user_repo: self.user_repo.clone(),
+    }
+  }
 }
 
 #[async_trait::async_trait]
@@ -173,9 +195,43 @@ impl PublicUser {
   pub fn auth_hash(&self) -> u64 { self.user.auth_hash() }
 }
 
-impl axum_login::AuthUser for PublicUser {
+impl AuthUser for PublicUser {
   type Id = models::UserRecordId;
   fn id(&self) -> Self::Id { self.id() }
 
   fn session_auth_hash(&self) -> &[u8] { &self.last_auth_hash }
+}
+
+#[async_trait::async_trait]
+impl<
+    UR: ModelRepository<
+        Model = User,
+        ModelCreateRequest = UserCreateRequest,
+        CreateError = CreateModelError,
+      > + Clone,
+  > AuthnBackend for AuthDomainServiceCanonical<UR>
+{
+  type User = PublicUser;
+  type Credentials = UserAuthCredentials;
+  type Error = AuthenticationError;
+
+  async fn authenticate(
+    &self,
+    creds: Self::Credentials,
+  ) -> Result<Option<Self::User>, Self::Error> {
+    self
+      .user_authenticate(creds)
+      .await
+      .map(|u| u.map(Into::into))
+  }
+  async fn get_user(
+    &self,
+    id: &<Self::User as AuthUser>::Id,
+  ) -> Result<Option<Self::User>, Self::Error> {
+    self
+      .fetch_user_by_id(*id)
+      .await
+      .map(|u| u.map(Into::into))
+      .map_err(Into::into)
+  }
 }
