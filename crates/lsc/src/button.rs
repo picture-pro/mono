@@ -1,5 +1,5 @@
 use enum_iterator::Sequence;
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::NamedColor;
@@ -216,7 +216,7 @@ impl ButtonStyleProps {
 
   fn class(&self) -> String {
     format!(
-      "inline-flex items-center justify-center shrink-0 transition \
+      "inline-flex items-center justify-center gap-1.5 shrink-0 transition \
        text-center rounded border {} {}",
       self.color_class(),
       self.size_class(),
@@ -236,6 +236,9 @@ pub fn Button(
   /// The variant of the button.
   #[prop(into, optional)]
   variant: Signal<ButtonVariant>,
+  /// The button's HREF (optional).
+  #[prop(into, optional)]
+  href: Signal<Option<String>>,
   /// The button's children.
   children: Children,
 ) -> impl IntoView {
@@ -246,10 +249,17 @@ pub fn Button(
   };
   let class = Memo::new(move |_| style_props().class());
 
-  view! {
-    <button class=class>
-      { children() }
-    </button>
+  match href.get() {
+    Some(href) => Either::Left(view! {
+      <a href=href class=class>
+        { children() }
+      </a>
+    }),
+    None => Either::Right(view! {
+      <button class=class>
+        { children() }
+      </button>
+    }),
   }
 }
 
