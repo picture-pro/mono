@@ -8,7 +8,7 @@ use leptos_meta::{
 };
 use leptos_router::{
   components::{Route, Router, Routes},
-  path, StaticSegment,
+  path,
 };
 
 use self::{
