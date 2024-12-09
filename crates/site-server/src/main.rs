@@ -10,7 +10,7 @@ use miette::Result;
 use prime_domain::{
   hex::retryable::Retryable,
   models::{User, UserCreateRequest},
-  repos::CreateModelError,
+  repos::{db::kv, CreateModelError},
   DynPrimeDomainService, PrimeDomainService, PrimeDomainServiceCanonical,
 };
 use site_app::*;
@@ -19,15 +19,26 @@ use site_app::*;
 struct AppState {
   prime_domain_service: DynPrimeDomainService,
   auth_domain_service:  DynAuthDomainService,
+  session_store: tower_sessions_kv_store::TowerSessionsKvStore<
+    Arc<
+      prime_domain::hex::retryable::Retryable<
+        kv::tikv::TikvClient,
+        miette::Report,
+      >,
+    >,
+  >,
 }
 
 impl AppState {
   async fn new() -> Result<Self> {
-    let tikv_store_init = move || async move {
-      prime_domain::repos::db::kv::tikv::TikvClient::new_from_env().await
-    };
-    let retryable_tikv_store =
-      Retryable::init(5, Duration::from_secs(2), tikv_store_init).await;
+    let tikv_store_init =
+      move || async move { kv::tikv::TikvClient::new_from_env().await };
+    let retryable_tikv_store = Arc::new(
+      Retryable::init(5, Duration::from_secs(2), tikv_store_init).await,
+    );
+    let session_store = tower_sessions_kv_store::TowerSessionsKvStore::new(
+      retryable_tikv_store.clone(),
+    );
     let kv_db_adapter = Arc::new(
       prime_domain::repos::db::KvDatabaseAdapter::new(retryable_tikv_store),
     );
@@ -54,6 +65,7 @@ impl AppState {
     Ok(Self {
       prime_domain_service,
       auth_domain_service,
+      session_store,
     })
   }
 }
@@ -82,6 +94,9 @@ async fn main() {
   let app_state = AppState::new().await.unwrap();
   tracing::info!("app state initialized");
 
+  let session_layer =
+    tower_sessions::SessionManagerLayer::new(app_state.session_store.clone());
+
   let app = Router::new()
     .leptos_routes_with_context(
       &leptos_options,
@@ -98,7 +113,8 @@ async fn main() {
       },
     )
     .fallback(leptos_axum::file_and_error_handler(shell))
-    .with_state(leptos_options);
+    .with_state(leptos_options)
+    .layer(session_layer);
 
   // run our app with hyper
   // `axum::Server` is a re-export of `hyper::Server`

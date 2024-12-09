@@ -20,6 +20,14 @@ impl<KV: KvTransactional> fmt::Debug for TowerSessionsKvStore<KV> {
   }
 }
 
+impl<KV: KvTransactional + Clone> Clone for TowerSessionsKvStore<KV> {
+  fn clone(&self) -> Self {
+    Self {
+      kv: self.kv.clone(),
+    }
+  }
+}
+
 impl<KV: KvTransactional> TowerSessionsKvStore<KV> {
   /// Create a new key-value store backend.
   pub fn new(kv: KV) -> Self { Self { kv } }
