@@ -2,7 +2,12 @@
 module.exports = {
   content: [ "./crates/**/*.rs" ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["Roboto", "sans-serif"],
+        serif: ["Aleo", "serif"],
+      },
+    },
   },
   safelist: [ ],
   plugins: [

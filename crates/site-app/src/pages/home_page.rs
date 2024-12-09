@@ -4,35 +4,18 @@ use crate::components::Section;
 
 #[component]
 pub fn HomePage() -> impl IntoView {
-  let fallback = move || {
-    view! {
-      <p>"Loading photos..."</p>
-    }
-  };
-  let photos = Resource::new(|| (), |_| enumerate_photos());
-  let photos_viewer = move |val: Result<Vec<models::Photo>, ServerFnError>| {
-    let code_text = match val {
-      Ok(photos) => format!("{photos:#?}"),
-      Err(e) => format!("{e}"),
-    };
-    view! {
-      <pre>{ code_text }</pre>
-    }
-  };
-  let photos_suspense_viewer =
-    move || Suspend::new(async move { photos_viewer(photos.await) });
-
   view! {
     <Section>
-      <p class="text-6xl tracking-tight mb-4">
-        "Welcome to PicturePro"
+      <p class="text-6xl font-serif font-light tracking-tight mb-4">
+        "Welcome to "
+        <span class="font-semibold">"PicturePro"</span>
+        "."
       </p>
       <p class="max-w-prose text-base-dim">
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonne merninisti licere mihi ista probare, quae sunt a te dicta? Duo Reges: constructio interrete. Quae cum dixisset, finem ille."
+        "Sharing candids is now easier than ever. Cute moment at the park? Done. Posing at the Grand Canyon? Done. "
+        <span class="font-semibold">"PicturePro"</span>
+        " is the best way to share your photos with friends and family."
       </p>
-      <Suspense fallback>
-        { photos_suspense_viewer }
-      </Suspense>
     </Section>
   }
 }

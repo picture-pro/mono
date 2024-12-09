@@ -3,10 +3,12 @@ mod components;
 mod pages;
 
 use leptos::prelude::*;
-use leptos_meta::{provide_meta_context, HashedStylesheet, MetaTags, Title};
+use leptos_meta::{
+  provide_meta_context, HashedStylesheet, Link, MetaTags, Style, Title,
+};
 use leptos_router::{
   components::{Route, Router, Routes},
-  StaticSegment,
+  path, StaticSegment,
 };
 
 use self::{
@@ -15,6 +17,8 @@ use self::{
 };
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
+  provide_meta_context();
+
   view! {
     <!DOCTYPE html>
     <html lang="en">
@@ -23,7 +27,11 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <AutoReload options=options.clone() />
         <HydrationScripts options=options.clone() islands=true/>
+
         <HashedStylesheet options id="leptos"/>
+        <Style>{include_str!("../style/fonts.css")}</Style>
+        <Link rel="preload" href="/fonts/roboto/Roboto-Regular.ttf" as_="font" type_="font/ttf" crossorigin="anonymous" />
+
         <MetaTags/>
       </head>
       <body class="bg-base-app text-base-normal">
@@ -35,8 +43,6 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
 #[component]
 pub fn App() -> impl IntoView {
-  provide_meta_context();
-
   view! {
     <Title text="Welcome to Leptos"/>
 
@@ -44,7 +50,9 @@ pub fn App() -> impl IntoView {
     <PageContainer>
       <Router>
         <Routes fallback=|| "Page not found.".into_view()>
-          <Route path=StaticSegment("") view=HomePage/>
+          <Route path=path!("/") view=HomePage/>
+          <Route path=path!("/component-testing/link") view=lsc::LinkMatrixTestPage/>
+          <Route path=path!("/component-testing/button") view=lsc::ButtonMatrixTestPage/>
         </Routes>
       </Router>
     </PageContainer>

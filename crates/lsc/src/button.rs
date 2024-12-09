@@ -239,12 +239,12 @@ pub fn Button(
   /// The button's children.
   children: Children,
 ) -> impl IntoView {
-  let style_props_memo = move || ButtonStyleProps {
+  let style_props = move || ButtonStyleProps {
     color:   color.get(),
     size:    size.get(),
     variant: variant.get(),
   };
-  let class = Memo::new(move |_| style_props_memo().class());
+  let class = Memo::new(move |_| style_props().class());
 
   view! {
     <button class=class>
@@ -254,7 +254,7 @@ pub fn Button(
 }
 
 /// A test page for the `lsc` [`Button`].
-#[island]
+#[component]
 pub fn ButtonMatrixTestPage() -> impl IntoView {
   view! {
     <div class="flex flex-col gap-4">
