@@ -19,12 +19,10 @@ pub fn HomePage() -> impl IntoView {
           " is the best way to share your photos with friends and family."
         </p>
         <div class="h-8" />
-        <div class="mx-0">
-          <Button href="/sign-up" color=ButtonColor::Primary size=ButtonSize::Large>
-            "Get started"
-            <icons::ArrowRightIcon {..} class="size-5" />
-          </Button>
-        </div>
+        <Button href="/sign-up" color=ButtonColor::Primary size={ButtonSize::Large} {..} class=("mx-8", move || true)>
+          "Get started"
+          <icons::ArrowRightIcon {..} class="size-5" />
+        </Button>
       </div>
     </Section>
   }
