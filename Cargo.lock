@@ -3099,6 +3099,7 @@ version = "0.1.0"
 dependencies = [
  "auth-domain",
  "axum 0.7.9",
+ "axum-login",
  "leptos",
  "leptos_axum",
  "leptos_router",

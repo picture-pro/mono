@@ -13,7 +13,18 @@ use models::{
 use repos::{FetchModelByIndexError, FetchModelError, ModelRepository};
 
 /// A dynamic [`AuthDomainService`] trait object.
-pub type DynAuthDomainService = Arc<Box<dyn AuthDomainService>>;
+#[derive(Clone)]
+pub struct DynAuthDomainService(Arc<Box<dyn AuthDomainService>>);
+
+impl std::ops::Deref for DynAuthDomainService {
+  type Target = dyn AuthDomainService;
+  fn deref(&self) -> &Self::Target { &self.0 }
+}
+
+impl DynAuthDomainService {
+  /// Creates a new dynamic [`AuthDomainService`] from the given service.
+  pub fn new(inner: Arc<Box<dyn AuthDomainService>>) -> Self { Self(inner) }
+}
 
 /// An error that occurs during user creation.
 #[derive(Debug, thiserror::Error, miette::Diagnostic)]
@@ -249,11 +260,7 @@ impl AuthUser for PublicUser {
 }
 
 #[async_trait::async_trait]
-impl<
-    UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>
-      + Clone,
-  > AuthnBackend for AuthDomainServiceCanonical<UR>
-{
+impl AuthnBackend for DynAuthDomainService {
   type User = PublicUser;
   type Credentials = UserAuthCredentials;
   type Error = AuthenticationError;

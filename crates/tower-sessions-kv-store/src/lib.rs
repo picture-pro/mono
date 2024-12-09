@@ -1,6 +1,9 @@
 //! A key-value store backend for the tower-sessions crate.
 
-use std::{fmt, sync::LazyLock};
+use std::{
+  fmt,
+  sync::{Arc, LazyLock},
+};
 
 use kv::prelude::*;
 use tower_sessions::{
@@ -10,8 +13,9 @@ use tower_sessions::{
 };
 
 /// A key-value store backend for the tower-sessions crate.
+#[derive(Clone)]
 pub struct TowerSessionsKvStore<KV: KvTransactional> {
-  kv: KV,
+  kv: Arc<KV>,
 }
 
 impl<KV: KvTransactional> fmt::Debug for TowerSessionsKvStore<KV> {
@@ -20,17 +24,9 @@ impl<KV: KvTransactional> fmt::Debug for TowerSessionsKvStore<KV> {
   }
 }
 
-impl<KV: KvTransactional + Clone> Clone for TowerSessionsKvStore<KV> {
-  fn clone(&self) -> Self {
-    Self {
-      kv: self.kv.clone(),
-    }
-  }
-}
-
 impl<KV: KvTransactional> TowerSessionsKvStore<KV> {
   /// Create a new key-value store backend.
-  pub fn new(kv: KV) -> Self { Self { kv } }
+  pub fn new(kv: KV) -> Self { Self { kv: kv.into() } }
 }
 
 static SESSION_NS_SEGMENT: LazyLock<StrictSlug> =
