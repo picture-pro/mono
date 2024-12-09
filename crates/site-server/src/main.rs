@@ -1,9 +1,11 @@
-use std::{sync::Arc, time::Duration};
+mod app_state;
 
-use auth_domain::{AuthDomainServiceCanonical, DynAuthDomainService};
+use std::sync::Arc;
+
+use auth_domain::DynAuthDomainService;
 use axum::{
   body::Body,
-  extract::{FromRef, Request, State},
+  extract::{Request, State},
   response::IntoResponse,
   routing::get,
   Router,
@@ -11,72 +13,16 @@ use axum::{
 use axum_login::AuthManagerLayerBuilder;
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
-use miette::Result;
-use prime_domain::{
-  hex::retryable::Retryable,
-  models::{User, UserCreateRequest},
-  repos::{db::kv, CreateModelError},
-  DynPrimeDomainService, PrimeDomainService, PrimeDomainServiceCanonical,
-};
+use prime_domain::repos::db::kv;
 use site_app::*;
+
+use self::app_state::AppState;
 
 type TowerSessionsBackend = Arc<
   prime_domain::hex::retryable::Retryable<kv::tikv::TikvClient, miette::Report>,
 >;
 
 type AuthSession = axum_login::AuthSession<DynAuthDomainService>;
-
-#[derive(Clone, FromRef)]
-struct AppState {
-  prime_domain_service: DynPrimeDomainService,
-  auth_domain_service:  DynAuthDomainService,
-  session_store:
-    tower_sessions_kv_store::TowerSessionsKvStore<TowerSessionsBackend>,
-  options:              LeptosOptions,
-}
-
-impl AppState {
-  async fn new(l_opts: LeptosOptions) -> Result<Self> {
-    let tikv_store_init =
-      move || async move { kv::tikv::TikvClient::new_from_env().await };
-    let retryable_tikv_store = Arc::new(
-      Retryable::init(5, Duration::from_secs(2), tikv_store_init).await,
-    );
-    let session_store = tower_sessions_kv_store::TowerSessionsKvStore::new(
-      retryable_tikv_store.clone(),
-    );
-    let kv_db_adapter = Arc::new(
-      prime_domain::repos::db::KvDatabaseAdapter::new(retryable_tikv_store),
-    );
-
-    let photo_repo =
-      prime_domain::repos::BaseModelRepository::new(kv_db_adapter.clone());
-    let user_repo: Arc<
-      Box<
-        dyn prime_domain::repos::ModelRepository<
-          Model = User,
-          ModelCreateRequest = UserCreateRequest,
-          CreateError = CreateModelError,
-        >,
-      >,
-    > = Arc::new(Box::new(prime_domain::repos::BaseModelRepository::new(
-      kv_db_adapter.clone(),
-    )));
-
-    let prime_domain_service: Arc<Box<dyn PrimeDomainService>> =
-      Arc::new(Box::new(PrimeDomainServiceCanonical::new(photo_repo)));
-    let auth_domain_service: DynAuthDomainService = DynAuthDomainService::new(
-      Arc::new(Box::new(AuthDomainServiceCanonical::new(user_repo))),
-    );
-
-    Ok(Self {
-      prime_domain_service,
-      auth_domain_service,
-      session_store,
-      options: l_opts,
-    })
-  }
-}
 
 #[axum::debug_handler]
 async fn leptos_routes_handler(
@@ -94,7 +40,7 @@ async fn leptos_routes_handler(
       }
     },
     {
-      let leptos_options = app_state.options.clone();
+      let leptos_options = app_state.leptos_options.clone();
       move || shell(leptos_options.clone())
     },
   );
