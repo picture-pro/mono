@@ -29,10 +29,3 @@ pub fn HomePage() -> impl IntoView {
     </Section>
   }
 }
-
-#[server]
-pub async fn enumerate_photos() -> Result<Vec<models::Photo>, ServerFnError> {
-  let service: prime_domain::DynPrimeDomainService = expect_context();
-
-  service.enumerate_photos().await.map_err(ServerFnError::new)
-}
