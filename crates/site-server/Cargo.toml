@@ -19,7 +19,7 @@ leptos_router.workspace = true
 axum.workspace = true
 tokio.workspace = true
 tower.workspace = true
-tower-http = { workspace = true, features = [ "fs" ] }
+tower-http = { workspace = true, features = [ "fs", "compression-full", "trace" ] }
 tower-sessions.workspace = true
 
 tracing.workspace = true

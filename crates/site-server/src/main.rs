@@ -8,6 +8,7 @@ use axum::{
   body::Body,
   extract::{Request, State},
   response::IntoResponse,
+  routing::{get, post},
   Router,
 };
 use axum_login::AuthManagerLayerBuilder;
@@ -15,6 +16,8 @@ use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use prime_domain::repos::db::kv;
 use site_app::*;
+use tower::ServiceBuilder;
+use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
 use self::app_state::AppState;
 
@@ -30,7 +33,7 @@ async fn leptos_routes_handler(
   State(app_state): State<AppState>,
   request: Request<Body>,
 ) -> axum::response::Response {
-  let handler = leptos_axum::render_app_async_with_context(
+  let handler = leptos_axum::render_app_to_stream_with_context(
     {
       let app_state = app_state.clone();
       move || {
@@ -80,17 +83,45 @@ async fn main() {
   )
   .build();
 
+  // fallback service with compression
+  // this nastiness is to serve an "unrouted" axum handler with state
+  let fallback_service = ServiceBuilder::new()
+    .layer(CompressionLayer::new())
+    .service(
+      Router::new()
+        .route("/", get(self::file_and_error_handler::fallback_handler))
+        .route("/*a", get(self::file_and_error_handler::fallback_handler))
+        .with_state(app_state.clone())
+        .layer(auth_layer.clone()),
+    );
+
+  let server_fn_handler = {
+    let app_state = app_state.clone();
+    move |req: Request| {
+      leptos_axum::handle_server_fns_with_context(
+        {
+          let app_state = app_state.clone();
+          move || {
+            provide_context(app_state.prime_domain_service.clone());
+            provide_context(app_state.auth_domain_service.clone());
+          }
+        },
+        req,
+      )
+    }
+  };
+
   let app = Router::new()
-    .leptos_routes_with_handler(routes, leptos_routes_handler)
-    .fallback(self::file_and_error_handler::fallback_handler)
+    .leptos_routes_with_handler(routes.clone(), leptos_routes_handler)
+    .route("/api/*fn_name", post(server_fn_handler))
+    .fallback_service(fallback_service)
     .with_state(app_state)
-    .layer(auth_layer);
+    .layer(auth_layer)
+    .layer(TraceLayer::new_for_http());
 
   // run our app with hyper
   // `axum::Server` is a re-export of `hyper::Server`
   tracing::info!("listening on http://{}", &addr);
   let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-  axum::serve(listener, app.into_make_service())
-    .await
-    .unwrap();
+  axum::serve(listener, app).await.unwrap();
 }
