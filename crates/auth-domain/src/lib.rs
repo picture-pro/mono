@@ -8,7 +8,7 @@ use axum_login::{AuthUser, AuthnBackend};
 use hex::{health, Hexagonal};
 use miette::IntoDiagnostic;
 use models::{
-  EitherSlug, LaxSlug, User, UserAuthCredentials, UserCreateRequest,
+  EitherSlug, LaxSlug, PublicUser, User, UserAuthCredentials, UserCreateRequest,
 };
 use repos::{FetchModelByIndexError, FetchModelError, ModelRepository};
 
@@ -222,41 +222,6 @@ impl<
     .await
     .into()
   }
-}
-
-/// A public view of a [`User`].
-#[derive(Debug, Clone)]
-pub struct PublicUser {
-  user:           User,
-  last_auth_hash: Box<[u8]>,
-}
-
-impl From<User> for PublicUser {
-  fn from(user: User) -> Self {
-    let last_auth_hash = Box::from(user.auth_hash().to_be_bytes().as_slice());
-    Self {
-      user,
-      last_auth_hash,
-    }
-  }
-}
-
-impl PublicUser {
-  /// Returns the user's ID.
-  pub fn id(&self) -> models::UserRecordId { self.user.id }
-  /// Returns the user's name.
-  pub fn name(&self) -> &models::HumanName { &self.user.name }
-  /// Returns the user's email address.
-  pub fn email(&self) -> &models::EmailAddress { &self.user.email }
-  /// Returns the hash of the user's authentication secrets.
-  pub fn auth_hash(&self) -> u64 { self.user.auth_hash() }
-}
-
-impl AuthUser for PublicUser {
-  type Id = models::UserRecordId;
-  fn id(&self) -> Self::Id { self.id() }
-
-  fn session_auth_hash(&self) -> &[u8] { &self.last_auth_hash }
 }
 
 #[async_trait::async_trait]

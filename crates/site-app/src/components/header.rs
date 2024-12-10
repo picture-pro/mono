@@ -1,11 +1,16 @@
 use leptos::prelude::*;
 use lsc::*;
 
+use crate::AuthStatus;
+
 #[component]
 pub fn Header() -> impl IntoView {
   let class = "sticky top-0 container bg-base-subtle h-12 mx-auto px-3 flex \
                flex-row items-center rounded-b-xl border border-t-0 \
                border-base-7 dark:border-basedark-7";
+
+  let auth_status = use_context::<AuthStatus>();
+  let auth_status_text = format!("Status: {:?}", auth_status);
 
   view! {
     <header class=class>
@@ -16,6 +21,7 @@ pub fn Header() -> impl IntoView {
       </span>
       <div class="flex-1" />
       <div class="flex flex-row items-center gap-2">
+        { auth_status_text }
         <Button href="/sign-up" color=ButtonColor::Primary>
           "Sign Up"
         </Button>

@@ -22,3 +22,6 @@ ssr = [
   "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
   "lsc/ssr", "dep:leptos_axum", "dep:prime-domain"
 ]
+
+[lints]
+workspace = true

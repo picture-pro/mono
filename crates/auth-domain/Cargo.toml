@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-models = { path = "../models" }
+models = { path = "../models", features = [ "auth" ] }
 repos = { path = "../repos" }
 
 hex.workspace = true

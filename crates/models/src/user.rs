@@ -71,3 +71,39 @@ impl From<UserCreateRequest> for User {
     }
   }
 }
+
+/// A public view of a [`User`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PublicUser {
+  /// The user's ID.
+  pub id:              UserRecordId,
+  /// The user's name.
+  pub name:            dvf::HumanName,
+  /// The hash of the user's authentication secrets.
+  pub auth_hash_bytes: Box<[u8]>,
+}
+
+impl From<User> for PublicUser {
+  fn from(user: User) -> Self {
+    let auth_hash_bytes =
+      user.auth_hash().to_be_bytes().to_vec().into_boxed_slice();
+    Self {
+      id: user.id,
+      name: user.name,
+      auth_hash_bytes,
+    }
+  }
+}
+
+#[cfg(feature = "auth")]
+mod auth {
+  use axum_login::AuthUser;
+
+  use super::PublicUser;
+
+  impl AuthUser for PublicUser {
+    type Id = super::UserRecordId;
+    fn id(&self) -> Self::Id { self.id }
+    fn session_auth_hash(&self) -> &[u8] { &self.auth_hash_bytes }
+  }
+}

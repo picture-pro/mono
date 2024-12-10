@@ -9,5 +9,11 @@ serde.workspace = true
 dvf.workspace = true
 model.workspace = true
 
+axum-login = { workspace = true, optional = true }
+
+[features]
+default = [ ]
+auth = [ "dep:axum-login" ]
+
 [lints]
 workspace = true

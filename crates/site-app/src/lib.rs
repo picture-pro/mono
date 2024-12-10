@@ -1,5 +1,8 @@
+//! Leptos application for PicturePro.
+
 mod components;
 // mod feature_checks;
+mod bridge_types;
 mod pages;
 
 use leptos::prelude::*;
@@ -11,14 +14,14 @@ use leptos_router::{
   path,
 };
 
+pub use self::bridge_types::*;
 use self::{
   components::{Header, PageContainer},
   pages::HomePage,
 };
 
+/// The main shell for the Leptos application.
 pub fn shell(options: LeptosOptions) -> impl IntoView {
-  provide_meta_context();
-
   view! {
     <!DOCTYPE html>
     <html lang="en">
@@ -41,8 +44,11 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
   }
 }
 
+/// The main application component.
 #[component]
 pub fn App() -> impl IntoView {
+  provide_meta_context();
+
   view! {
     <Title text="Welcome to Leptos"/>
 
