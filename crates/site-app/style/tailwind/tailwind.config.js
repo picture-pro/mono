@@ -7,6 +7,11 @@ module.exports = {
         sans: ["Roboto", "sans-serif"],
         serif: ["Aleo", "serif"],
       },
+      colors: {
+        // radix's `--color-surface`
+        surface: "#ffffffd9",
+        surfacedark: "#00000040",
+      },
     },
   },
   safelist: [ ],

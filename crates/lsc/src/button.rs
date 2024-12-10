@@ -219,7 +219,7 @@ impl ButtonStyleProps {
   fn class(&self) -> String {
     format!(
       "inline-flex items-center justify-center gap-1.5 shrink-0 transition \
-       text-center rounded border {} {}",
+       text-center rounded-md border {} {}",
       self.color_class(),
       self.size_class(),
     )

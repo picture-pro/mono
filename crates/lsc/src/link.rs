@@ -27,6 +27,8 @@ pub enum LinkSize {
   Medium,
   /// A large link.
   Large,
+  /// An extra-large link.
+  ExtraLarge,
 }
 
 /// The color of an `lsc` [`Link`].
@@ -94,6 +96,7 @@ impl LinkStyleProps {
       LinkSize::Small => "text-sm",
       LinkSize::Medium => "text-base",
       LinkSize::Large => "text-lg",
+      LinkSize::ExtraLarge => "text-xl",
     }
   }
 
