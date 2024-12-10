@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use lsc::*;
+use lsc::{button::*, link::*};
 
 use crate::AuthStatus;
 

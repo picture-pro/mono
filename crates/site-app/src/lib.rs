@@ -57,8 +57,8 @@ pub fn App() -> impl IntoView {
       <Router>
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=path!("/") view=HomePage/>
-          <Route path=path!("/component-testing/link") view=lsc::LinkMatrixTestPage/>
-          <Route path=path!("/component-testing/button") view=lsc::ButtonMatrixTestPage/>
+          <Route path=path!("/component-testing/link") view=lsc::link::LinkMatrixTestPage/>
+          <Route path=path!("/component-testing/button") view=lsc::button::ButtonMatrixTestPage/>
         </Routes>
       </Router>
     </PageContainer>

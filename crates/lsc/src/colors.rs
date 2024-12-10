@@ -1,3 +1,5 @@
+//! Named colors, inherited from Radix.
+
 use enum_iterator::Sequence;
 use serde::{Deserialize, Serialize};
 

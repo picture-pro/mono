@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use lsc::*;
+use lsc::{button::*, icons::*};
 
 use crate::components::Section;
 
@@ -21,7 +21,7 @@ pub fn HomePage() -> impl IntoView {
         <div class="h-8" />
         <Button href="/sign-up" color=ButtonColor::Primary size={ButtonSize::Large} {..} class=("mx-8", move || true)>
           "Get started"
-          <icons::ArrowRightIcon {..} class="size-5" />
+          <ArrowRightIcon {..} class="size-5" />
         </Button>
       </div>
     </Section>

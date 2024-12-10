@@ -1,8 +1,10 @@
+//! Link component and supporting types.
+
 use enum_iterator::Sequence;
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::NamedColor;
+use crate::colors::NamedColor;
 
 /// The size of an `lsc` [`Link`].
 #[derive(

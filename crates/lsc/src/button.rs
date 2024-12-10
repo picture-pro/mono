@@ -1,8 +1,10 @@
+//! Button component and supporting types.
+
 use enum_iterator::Sequence;
 use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::NamedColor;
+use crate::colors::NamedColor;
 
 /// The color of an `lsc` [`Button`].
 #[derive(
