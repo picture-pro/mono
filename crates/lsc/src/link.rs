@@ -163,9 +163,6 @@ impl LinkStyleProps {
 /// A link component.
 #[component]
 pub fn Link(
-  /// The href of the link.
-  #[prop(into)]
-  href: Signal<String>,
   /// The color of the link.
   #[prop(into, optional)]
   color: Signal<LinkColor>,
@@ -190,7 +187,7 @@ pub fn Link(
   let class = Memo::new(move |_| style_props().class());
 
   view! {
-    <a href=href class=class>
+    <a class=class>
       { children() }
     </a>
   }
@@ -215,10 +212,10 @@ pub fn LinkMatrixTestPage() -> impl IntoView {
                     each={move || enum_iterator::all::<LinkUnderline>()}
                     key=move |u| *u
                     children=move |underline| view! {
-                      <Link color=color size=size underline=underline high_contrast=false href="#">
+                      <Link color=color size=size underline=underline high_contrast=false {..} href="#">
                         { format!("{:?} {:?} {:?}", color, size, underline) }
                       </Link>
-                      <Link color=color size=size underline=underline high_contrast=true href="#">
+                      <Link color=color size=size underline=underline high_contrast=true {..} href="#">
                         { format!("{:?} {:?} {:?} (high contrast)", color, size, underline) }
                       </Link>
                     }

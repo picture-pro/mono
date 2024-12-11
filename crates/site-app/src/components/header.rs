@@ -13,7 +13,11 @@ pub fn Header() -> impl IntoView {
   view! {
     <header class=class>
       <span class="font-serif font-semibold tracking-tight">
-        <Link href="/" color=LinkColor::Base size=LinkSize::ExtraLarge underline=LinkUnderline::Hover high_contrast=true>
+        <Link
+          color=LinkColor::Base size=LinkSize::ExtraLarge underline=LinkUnderline::Always high_contrast=true
+          {..}
+          href="/"
+        >
           "PicturePro"
         </Link>
       </span>
