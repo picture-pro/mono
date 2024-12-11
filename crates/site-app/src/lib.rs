@@ -1,9 +1,9 @@
 //! Leptos application for PicturePro.
 
-mod components;
-// mod feature_checks;
 mod bridge_types;
+mod components;
 mod pages;
+mod utils;
 
 use leptos::prelude::*;
 use leptos_meta::{
@@ -58,6 +58,7 @@ pub fn App() -> impl IntoView {
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=path!("/") view=HomePage/>
           <Route path=path!("/sign-up") view=SignupPage/>
+          <Route path=path!("/log-out") view=LogoutPage/>
           <Route path=path!("/component-testing/link") view=lsc::link::LinkMatrixTestPage/>
           <Route path=path!("/component-testing/button") view=lsc::button::ButtonMatrixTestPage/>
           <Route path=path!("/component-testing/field") view=lsc::field::FieldMatrixTestPage/>

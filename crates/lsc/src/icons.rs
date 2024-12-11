@@ -15,4 +15,5 @@ macro_rules! radix_icon {
   };
 }
 
+radix_icon!(ArrowLeftIcon, "crates/lsc/src/radix-icons/arrow-left.svg");
 radix_icon!(ArrowRightIcon, "crates/lsc/src/radix-icons/arrow-right.svg");

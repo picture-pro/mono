@@ -3141,6 +3141,7 @@ dependencies = [
  "models",
  "prime-domain",
  "tracing",
+ "web-sys",
 ]
 
 [[package]]

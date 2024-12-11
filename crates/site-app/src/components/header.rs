@@ -54,7 +54,7 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
 #[component]
 fn LoggedInUserAuthActions(user: PublicUser) -> impl IntoView {
   view! {
-    <span class="text-sm text-basea-11 dark:text-basedarka-11">
+    <span class="text-sm text-base-dim">
       "Welcome, "
       <Link size=LinkSize::Small underline={LinkUnderline::Always} {..} href="/account">
         { user.name.to_string() }

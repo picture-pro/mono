@@ -10,6 +10,7 @@ leptos.workspace = true
 leptos_meta.workspace = true
 leptos_router.workspace = true
 leptos_axum = { workspace = true, optional = true }
+web-sys = { workspace = true, features = [ "Window" ] }
 
 lsc = { path = "../lsc" }
 models = { path = "../models" }
