@@ -63,6 +63,12 @@ pub fn SignupPage() -> impl IntoView {
     })
   };
 
+  Effect::new(move |_| {
+    if matches!(action_value(), Some(Ok(_))) {
+      crate::utils::navigation::navigate_to("/");
+    }
+  });
+
   // error messages
   let error_message_class = "text-sm text-dangera-11 dark:text-dangerdarka-11";
   let warning_message_class =
@@ -169,9 +175,9 @@ pub fn SignupPage() -> impl IntoView {
         </Button>
       </div>
 
-      <div class="self-center mt-4">
-        { action_value_view }
-      </div>
+      { move || action_value_view().map(|v| view! {
+        <div class="self-center mt-4">{ v }</div>
+      })}
     </FloatingBoxSection>
   }
 }
