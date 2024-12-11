@@ -17,7 +17,7 @@ use leptos_router::{
 pub use self::bridge_types::*;
 use self::{
   components::{Header, PageContainer},
-  pages::HomePage,
+  pages::*,
 };
 
 /// The main shell for the Leptos application.
@@ -37,7 +37,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
         <MetaTags/>
       </head>
-      <body class="bg-base-app text-base-normal">
+      <body class="bg-base-app text-base-normal w-full min-h-screen flex flex-col items-stretch justify-stretch">
         <App/>
       </body>
     </html>
@@ -57,6 +57,7 @@ pub fn App() -> impl IntoView {
       <Router>
         <Routes fallback=|| "Page not found.".into_view()>
           <Route path=path!("/") view=HomePage/>
+          <Route path=path!("/sign-up") view=SignupPage/>
           <Route path=path!("/component-testing/link") view=lsc::link::LinkMatrixTestPage/>
           <Route path=path!("/component-testing/button") view=lsc::button::ButtonMatrixTestPage/>
           <Route path=path!("/component-testing/field") view=lsc::field::FieldMatrixTestPage/>

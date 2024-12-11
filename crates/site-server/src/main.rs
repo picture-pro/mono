@@ -3,7 +3,7 @@ mod file_and_error_handler;
 
 use std::sync::Arc;
 
-use auth_domain::DynAuthDomainService;
+use auth_domain::AuthSession;
 use axum::{
   body::Body,
   extract::{Request, State},
@@ -24,8 +24,6 @@ use self::app_state::AppState;
 type TowerSessionsBackend = Arc<
   prime_domain::hex::retryable::Retryable<kv::tikv::TikvClient, miette::Report>,
 >;
-
-type AuthSession = axum_login::AuthSession<DynAuthDomainService>;
 
 #[axum::debug_handler]
 async fn leptos_routes_handler(
@@ -99,12 +97,9 @@ async fn main() {
     let app_state = app_state.clone();
     move |req: Request| {
       leptos_axum::handle_server_fns_with_context(
-        {
-          let app_state = app_state.clone();
-          move || {
-            provide_context(app_state.prime_domain_service.clone());
-            provide_context(app_state.auth_domain_service.clone());
-          }
+        move || {
+          provide_context(app_state.prime_domain_service.clone());
+          provide_context(app_state.auth_domain_service.clone());
         },
         req,
       )

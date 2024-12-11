@@ -4,13 +4,17 @@
 use core::fmt;
 use std::sync::Arc;
 
-use axum_login::{AuthUser, AuthnBackend};
+use axum_login::AuthUser;
+pub use axum_login::AuthnBackend;
 use hex::{health, Hexagonal};
 use miette::IntoDiagnostic;
 use models::{
   EitherSlug, LaxSlug, PublicUser, User, UserAuthCredentials, UserCreateRequest,
 };
 use repos::{FetchModelByIndexError, FetchModelError, ModelRepository};
+
+/// The authentication session type.
+pub type AuthSession = axum_login::AuthSession<DynAuthDomainService>;
 
 /// A dynamic [`AuthDomainService`] trait object.
 #[derive(Clone)]

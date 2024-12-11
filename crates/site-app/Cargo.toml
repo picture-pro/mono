@@ -12,15 +12,20 @@ leptos_router.workspace = true
 leptos_axum = { workspace = true, optional = true }
 
 lsc = { path = "../lsc" }
-prime-domain = { path = "../prime-domain", optional = true }
 models = { path = "../models" }
+auth-domain = { path = "../auth-domain", optional = true }
+prime-domain = { path = "../prime-domain", optional = true }
+
+tracing = { workspace = true, optional = true }
+either = "1.13.0"
 
 [features]
 default = [ ]
 hydrate = [ "leptos/hydrate", "lsc/hydrate" ]
 ssr = [
   "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
-  "lsc/ssr", "dep:leptos_axum", "dep:prime-domain"
+  "lsc/ssr", "dep:leptos_axum", "dep:auth-domain", "dep:prime-domain",
+  "dep:tracing",
 ]
 
 [lints]

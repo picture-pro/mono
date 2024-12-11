@@ -14,7 +14,7 @@ pub fn HomePage() -> impl IntoView {
           "."
         </p>
         <p class="max-w-prose text-base-dim">
-          "Sharing candids is now easier than ever. Cute moment at the park? Done. Posing at the Grand Canyon? Done. "
+          "Sharing candids is now easier than ever. Cute moment at the park? Done. Posing at the Grand Canyon? Easy. "
           <span class="font-semibold">"PicturePro"</span>
           " is the best way to share your photos with friends and family."
         </p>

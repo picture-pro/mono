@@ -3132,6 +3132,7 @@ name = "site-app"
 version = "0.1.0"
 dependencies = [
  "auth-domain",
+ "either",
  "leptos",
  "leptos_axum",
  "leptos_meta",
@@ -3139,6 +3140,7 @@ dependencies = [
  "lsc",
  "models",
  "prime-domain",
+ "tracing",
 ]
 
 [[package]]

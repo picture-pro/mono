@@ -8,3 +8,16 @@ pub fn Section(children: Children) -> impl IntoView {
     </section>
   }
 }
+
+#[component]
+pub fn FloatingBoxSection(children: Children) -> impl IntoView {
+  let class = "my-24 mx-auto max-w-md w-full rounded-md bg-base-subtle border \
+               border-base-7 dark:border-basedark-7 p-6 flex flex-col gap-4 \
+               shadow-md";
+
+  view! {
+    <section class=class>
+      { children() }
+    </section>
+  }
+}

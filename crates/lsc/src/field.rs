@@ -110,7 +110,8 @@ impl FieldStyleProps {
 
   fn class(&self) -> String {
     format!(
-      "rounded-md pb-[0.5px] flex items-center transition {} {} {}",
+      "w-full rounded-md pb-[0.5px] flex items-center transition \
+       placeholder:text-basea-10 placeholder:dark:text-basedarka-10 {} {} {}",
       self.color_class(),
       self.size_class(),
       self.outline_class(),
@@ -130,9 +131,6 @@ pub fn Field(
   /// The hint for the field.
   #[prop(into, optional)]
   hint: Signal<Option<FieldHint>>,
-  /// The placeholder text for the field.
-  #[prop(into, optional)]
-  placeholder: Signal<String>,
 ) -> impl IntoView {
   let props = move || FieldStyleProps {
     variant: variant.get(),
@@ -143,7 +141,7 @@ pub fn Field(
   let class = Memo::new(move |_| props().class());
 
   view! {
-    <input class=class placeholder=placeholder />
+    <input class=class />
   }
 }
 
@@ -169,7 +167,8 @@ pub fn FieldMatrixTestPage() -> impl IntoView {
                       <Field
                         size=size
                         variant=variant
-                        hint=hint
+                        hint={hint}
+                        {..}
                         placeholder=format!("{:?} {:?} {:?}", size, variant, hint)
                       />
                     }
