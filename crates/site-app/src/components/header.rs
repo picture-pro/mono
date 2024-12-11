@@ -56,9 +56,9 @@ fn LoggedInUserAuthActions(user: PublicUser) -> impl IntoView {
   view! {
     <span class="text-sm text-basea-11 dark:text-basedarka-11">
       "Welcome, "
-      <span class="text-primarya-11 dark:text-primarydarka-11">
+      <Link size=LinkSize::Small underline={LinkUnderline::Always} {..} href="/account">
         { user.name.to_string() }
-      </span>
+      </Link>
     </span>
     <Button href="/log-out" color=ButtonColor::Base>
       "Log Out"
