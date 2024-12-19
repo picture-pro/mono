@@ -238,9 +238,9 @@ pub fn Button(
   /// The variant of the button.
   #[prop(into, optional)]
   variant: Signal<ButtonVariant>,
-  /// The button's HREF (optional).
-  #[prop(into, optional)]
-  href: Signal<Option<String>>,
+  /// Whether the button is a `<link>`.
+  #[prop(into, default = false.into())]
+  is_link: Signal<bool>,
   /// The button's children.
   children: Children,
 ) -> impl IntoView {
@@ -251,13 +251,13 @@ pub fn Button(
   };
   let class = Memo::new(move |_| style_props().class());
 
-  match href.get() {
-    Some(href) => Either::Left(view! {
-      <a href=href class=class>
+  match is_link.get() {
+    true => Either::Left(view! {
+      <a class=class>
         { children() }
       </a>
     }),
-    None => Either::Right(view! {
+    false => Either::Right(view! {
       <button class=class>
         { children() }
       </button>
