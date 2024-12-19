@@ -55,7 +55,7 @@ pub fn App() -> impl IntoView {
     <Header/>
     <PageContainer>
       <Router>
-        <Routes fallback=|| "Page not found.".into_view()>
+        <Routes fallback=NotFoundPage>
           <Route path=path!("/") view=HomePage/>
           <Route path=path!("/sign-up") view=SignupPage/>
           <Route path=path!("/log-out") view=LogoutPage/>
