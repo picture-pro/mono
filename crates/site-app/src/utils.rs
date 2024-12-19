@@ -23,3 +23,18 @@ pub mod navigation {
     }
   }
 }
+
+pub mod inputs {
+  use leptos::{ev::Event, prelude::*};
+
+  pub(crate) fn touched_input_bindings(
+    s: RwSignal<Option<String>>,
+  ) -> (impl Fn() -> String, impl Fn(Event)) {
+    (
+      move || s.get().unwrap_or_default(),
+      move |e| {
+        s.set(Some(event_target_value(&e)));
+      },
+    )
+  }
+}

@@ -1,20 +1,11 @@
 use either::Either;
-use leptos::{ev::Event, prelude::*};
+use leptos::prelude::*;
 use lsc::{button::*, field::*};
 use models::{EmailAddress, HumanName, HumanNameError, UserRecordId};
 
-use crate::components::FloatingBoxSection;
-
-fn touched_input_bindings(
-  s: RwSignal<Option<String>>,
-) -> (impl Fn() -> String, impl Fn(Event)) {
-  (
-    move || s.get().unwrap_or_default(),
-    move |e| {
-      s.set(Some(event_target_value(&e)));
-    },
-  )
-}
+use crate::{
+  components::FloatingBoxSection, utils::inputs::touched_input_bindings,
+};
 
 #[island]
 pub fn SignupPage() -> impl IntoView {
