@@ -82,9 +82,10 @@ pub enum ButtonVariant {
 }
 
 struct ButtonStyleProps {
-  color:   ButtonColor,
-  size:    ButtonSize,
-  variant: ButtonVariant,
+  color:    ButtonColor,
+  size:     ButtonSize,
+  variant:  ButtonVariant,
+  disabled: bool,
 }
 
 const BUTTON_SOLID_ACTIVE_FILTER: &str =
@@ -96,6 +97,10 @@ use ButtonVariant::*;
 
 impl ButtonStyleProps {
   fn text_color_class(&self) -> String {
+    if self.disabled {
+      return "text-graya-8 dark:text-graydarka-8".into();
+    }
+
     match self.variant {
       Solid => match self.color {
         Warning => "text-sand-12".into(),
@@ -113,6 +118,13 @@ impl ButtonStyleProps {
   }
 
   fn bg_color_class(&self) -> String {
+    if self.disabled {
+      return match self.variant {
+        Solid | Soft => "bg-graya-3 dark:bg-graydarka-3".into(),
+        _ => "".into(),
+      };
+    }
+
     let normal = match self.variant {
       Solid => match self.color {
         Base => "bg-base-9 dark:bg-basedark-9".into(),
@@ -188,14 +200,20 @@ impl ButtonStyleProps {
     match self.variant {
       Solid => "border-transparent".into(),
       Soft => "border-transparent".into(),
-      Outline => match self.color {
-        Base => "border-base-11 dark:border-basedark-11".into(),
-        Primary => "border-primary-11 dark:border-primarydark-11".into(),
-        Danger => "border-danger-11 dark:border-dangerdark-11".into(),
-        Success => "border-success-11 dark:border-successdark-11".into(),
-        Warning => "border-warning-11 dark:border-warningdark-11".into(),
-        Named(col) => col.border_class(11),
-      },
+      Outline => {
+        if self.disabled {
+          return "border-graya-7 dark:border-graydarka-7".into();
+        }
+
+        match self.color {
+          Base => "border-basea-11 dark:border-basedarka-11".into(),
+          Primary => "border-primarya-11 dark:border-primarydarka-11".into(),
+          Danger => "border-dangera-11 dark:border-dangerdarka-11".into(),
+          Success => "border-successa-11 dark:border-successdarka-11".into(),
+          Warning => "border-warninga-11 dark:border-warningdarka-11".into(),
+          Named(col) => col.border_class_a(11),
+        }
+      }
     }
   }
 
@@ -208,20 +226,28 @@ impl ButtonStyleProps {
     .join(" ")
   }
 
-  fn size_class(&self) -> String {
+  fn size_class(&self) -> &'static str {
     match self.size {
-      Small => "text-xs h-6 px-2".into(),
-      Medium => "text-sm h-8 px-3".into(),
-      Large => "text-base h-10 px-4".into(),
+      Small => "text-xs h-6 px-2",
+      Medium => "text-sm h-8 px-3",
+      Large => "text-base h-10 px-4",
+    }
+  }
+
+  fn extra_disabled_class(&self) -> &'static str {
+    match self.disabled {
+      true => "cursor-not-allowed",
+      false => "",
     }
   }
 
   fn class(&self) -> String {
     format!(
       "inline-flex items-center justify-center gap-1.5 shrink-0 transition \
-       text-center rounded-md border {} {}",
+       text-center rounded-md border {} {} {}",
       self.color_class(),
       self.size_class(),
+      self.extra_disabled_class(),
     )
   }
 }
@@ -241,13 +267,17 @@ pub fn Button(
   /// Whether the button is a `<link>`.
   #[prop(into, default = false.into())]
   is_link: Signal<bool>,
+  /// Whether the button is disabled.
+  #[prop(into, default = false.into())]
+  disabled: Signal<bool>,
   /// The button's children.
   children: Children,
 ) -> impl IntoView {
   let style_props = move || ButtonStyleProps {
-    color:   color.get(),
-    size:    size.get(),
-    variant: variant.get(),
+    color:    color.get(),
+    size:     size.get(),
+    variant:  variant.get(),
+    disabled: disabled.get(),
   };
   let class = Memo::new(move |_| style_props().class());
 
@@ -258,7 +288,7 @@ pub fn Button(
       </a>
     }),
     false => Either::Right(view! {
-      <button class=class>
+      <button class=class disabled=disabled>
         { children() }
       </button>
     }),
@@ -269,24 +299,32 @@ pub fn Button(
 #[component]
 pub fn ButtonMatrixTestPage() -> impl IntoView {
   view! {
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-row gap-4">
       <For
-        each={move || enum_iterator::all::<ButtonSize>()}
-        key={move |s| *s}
-        children=move |size| view!{
-          <div class="flex flex-col gap-2">
+        each={move || [false, true].into_iter()}
+        key={move |d| *d}
+        children=move |disabled| view!{
+          <div class="flex flex-col gap-4">
             <For
-              each={move || enum_iterator::all::<ButtonColor>()}
-              key={move |c| *c}
-              children=move |color| view!{
-                <div class="flex flex-row gap-2">
+              each={move || enum_iterator::all::<ButtonSize>()}
+              key={move |s| *s}
+              children=move |size| view!{
+                <div class="flex flex-col gap-2">
                   <For
-                    each={move || enum_iterator::all::<ButtonVariant>()}
-                    key={move |v| *v}
-                    children=move |variant| view!{
-                      <Button color=color variant=variant size=size>
-                        { format!("{:?} {:?}", color, variant) }
-                      </Button>
+                    each={move || enum_iterator::all::<ButtonColor>()}
+                    key={move |c| *c}
+                    children=move |color| view!{
+                      <div class="flex flex-row gap-2">
+                        <For
+                          each={move || enum_iterator::all::<ButtonVariant>()}
+                          key={move |v| *v}
+                          children=move |variant| view!{
+                            <Button color=color variant=variant size=size disabled=disabled>
+                              { format!("{:?} {:?} disabled={disabled}", color, variant) }
+                            </Button>
+                          }
+                        />
+                      </div>
                     }
                   />
                 </div>

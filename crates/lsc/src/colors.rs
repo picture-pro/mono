@@ -63,9 +63,9 @@ impl NamedColor {
     )
   }
 
-  pub(crate) fn border_class(&self, shade: u8) -> String {
+  pub(crate) fn border_class_a(&self, shade: u8) -> String {
     format!(
-      "border-{name}-{shade} dark:border-{name}dark-{shade}",
+      "border-{name}a-{shade} dark:border-{name}darka-{shade}",
       name = self.base_name()
     )
   }
