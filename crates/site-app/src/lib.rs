@@ -36,6 +36,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
         <HashedStylesheet options id="leptos"/>
         <Style>{include_str!("../style/fonts.css")}</Style>
         <Link rel="preload" href="/fonts/roboto/Roboto-Regular.ttf" as_="font" type_="font/ttf" crossorigin="anonymous" />
+        <Link rel="preload" href="/fonts/aleo/Aleo.ttf" as_="font" type_="font/ttf" crossorigin="anonymous" />
 
         <MetaTags/>
       </head>
