@@ -55,6 +55,7 @@ localFlake: { ... }: {
         cargo-leptos # leptos build tool
         dart-sass tailwindcss yarn # css build tools
         binaryen # wasm tools
+        opentofu flyctl terraform
 
         # dependencies for local rust builds
         pkg-config
