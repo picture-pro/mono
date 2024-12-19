@@ -1,3 +1,5 @@
+#![expect(unexpected_cfgs)]
+
 //! Leptos application for PicturePro.
 
 mod bridge_types;

@@ -1,3 +1,5 @@
+#![expect(unexpected_cfgs)]
+
 //! Leptos Styled Components
 
 pub mod button;
