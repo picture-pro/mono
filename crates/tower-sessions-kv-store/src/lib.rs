@@ -1,6 +1,7 @@
 //! A key-value store backend for the tower-sessions crate.
 
 use std::{
+  borrow::Borrow,
   fmt,
   sync::{Arc, LazyLock},
 };
@@ -39,15 +40,15 @@ fn session_id_to_key(id: &Id) -> Key {
 #[async_trait::async_trait]
 impl<KV: KvTransactional> SessionStore for TowerSessionsKvStore<KV> {
   async fn save(&self, session_record: &Record) -> Result<(), Error> {
-    let mut txn =
-      self.kv.begin_pessimistic_transaction().await.map_err(|e| {
-        Error::Backend(format!("Failed to start pessimistic transaction: {e}"))
-      })?;
-
     let key = session_id_to_key(&session_record.id);
     let value = Value::serialize(session_record).map_err(|e| {
       Error::Encode(format!("Failed to serialize session record: {e}"))
     })?;
+
+    let mut txn =
+      self.kv.begin_pessimistic_transaction().await.map_err(|e| {
+        Error::Backend(format!("Failed to start pessimistic transaction: {e}"))
+      })?;
 
     let mut txn = {
       if let Err(e) = txn.put(&key, value).await.map_err(|e| {
@@ -71,6 +72,10 @@ impl<KV: KvTransactional> SessionStore for TowerSessionsKvStore<KV> {
     }
 
     Ok(())
+  }
+
+  async fn create(&self, session_record: &mut Record) -> Result<(), Error> {
+    self.save(session_record.borrow()).await
   }
 
   async fn load(&self, session_id: &Id) -> Result<Option<Record>, Error> {
