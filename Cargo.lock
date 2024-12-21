@@ -3141,6 +3141,7 @@ dependencies = [
  "lsc",
  "models",
  "prime-domain",
+ "tokio",
  "tracing",
  "web-sys",
 ]
