@@ -7,6 +7,81 @@ use crate::{
   components::FloatingBoxSection, utils::inputs::touched_input_bindings,
 };
 
+#[derive(Clone, PartialEq)]
+enum SignupFormState {
+  Untouched,
+  ValidationFailed,
+  ReadyToSubmit,
+  Pending,
+  Succeeded,
+}
+
+#[component]
+fn SubmitButton(#[prop(into)] state: Signal<SignupFormState>) -> impl IntoView {
+  use SignupFormState::*;
+
+  let disabled = Signal::derive(move || {
+    matches!(state(), ValidationFailed | Pending | Succeeded)
+  });
+
+  let icon_fragment = move || match state() {
+    Pending => leptos::either::Either::Left(view! {
+      <lsc::icons::ArrowRightIcon {..} class="size-5 animate-spin" />
+    }),
+    _ => leptos::either::Either::Right(view! {
+      <lsc::icons::ArrowRightIcon {..} class="size-5" />
+    }),
+  };
+
+  view! {
+    <Button size=ButtonSize::Large disabled=disabled>
+      "Sign up"
+      { icon_fragment }
+    </Button>
+  }
+}
+
+#[component]
+fn FieldErrorText(text: &'static str) -> impl IntoView {
+  view! {
+    <p class="text-sm text-dangera-11 dark:text-dangerdarka-11">
+      { text }
+    </p>
+  }
+}
+
+#[component]
+fn FieldWarningText(text: &'static str) -> impl IntoView {
+  view! {
+    <p class="text-sm text-warninga-11 dark:text-warningdarka-11">
+      { text }
+    </p>
+  }
+}
+
+#[component]
+fn FormField(
+  field_id: &'static str,
+  placeholder: &'static str,
+  #[prop(optional)] field_type: Option<&'static str>,
+  field_label: &'static str,
+  #[prop(into)] hint: Signal<Option<FieldHint>>,
+  signal: RwSignal<Option<String>>,
+  children: Children,
+) -> impl IntoView {
+  let (read, write) = touched_input_bindings(signal);
+  view! {
+    <div class="flex flex-col gap-1">
+      <label class="" for=field_id>{ field_label }</label>
+      <Field size={FieldSize::Large} hint={hint} {..}
+        placeholder=placeholder id=field_id type=field_type
+        on:input=write prop:value=read
+      />
+      { children() }
+    </div>
+  }
+}
+
 #[island]
 pub fn SignupPage() -> impl IntoView {
   // the actual input values
@@ -15,13 +90,6 @@ pub fn SignupPage() -> impl IntoView {
   let name = RwSignal::new(None::<String>);
   let email = RwSignal::new(None::<String>);
   let confirm_email = RwSignal::new(None::<String>);
-
-  // bindings for the input values
-  let (read_name_callback, write_name_callback) = touched_input_bindings(name);
-  let (read_email_callback, write_email_callback) =
-    touched_input_bindings(email);
-  let (read_confirm_email_callback, write_confirm_email_callback) =
-    touched_input_bindings(confirm_email);
 
   // validated versions of the input values
   let validated_name =
@@ -43,6 +111,8 @@ pub fn SignupPage() -> impl IntoView {
     )
   });
   let action_value = action.value();
+  let action_pending = action.pending();
+  let action_succeeded = move || matches!(action_value(), Some(Ok(_)));
   let action_value_view = move || {
     action_value().map(|v| match v {
       Ok(id) => leptos::either::Either::Left(view! {
@@ -55,21 +125,10 @@ pub fn SignupPage() -> impl IntoView {
   };
 
   Effect::new(move |_| {
-    if matches!(action_value(), Some(Ok(_))) {
+    if action_succeeded() {
       crate::utils::navigation::navigate_to("/");
     }
   });
-
-  // error messages
-  let error_message_class = "text-sm text-dangera-11 dark:text-dangerdarka-11";
-  let warning_message_class =
-    "text-sm text-warninga-11 dark:text-warningdarka-11";
-  let error_view = move |e: &'static str| {
-    view! { <p class=error_message_class>{ e }</p> }
-  };
-  let warning_view = move |e: &'static str| {
-    view! { <p class=warning_message_class>{ e }</p> }
-  };
 
   // error signals
   let name_error = Memo::new(move |_| {
@@ -101,11 +160,38 @@ pub fn SignupPage() -> impl IntoView {
     validated_confirm_email().and_then(|r| r.then_some("Emails do not match"))
   });
 
+  let state = Memo::new(move |_| {
+    if name().is_none() && email().is_none() && confirm_email().is_none() {
+      return SignupFormState::Untouched;
+    }
+    if name_error().is_some()
+      || email_error().is_some()
+      || confirm_email_error().is_some()
+    {
+      return SignupFormState::ValidationFailed;
+    }
+    if action_pending() {
+      return SignupFormState::Pending;
+    }
+    if action_succeeded() {
+      return SignupFormState::Succeeded;
+    }
+    SignupFormState::ReadyToSubmit
+  });
+
   // views for input errors
-  let name_error_view = move || name_error().map(error_view);
-  let email_error_view =
-    move || email_error().map(|e| e.either(warning_view, error_view));
-  let confirm_email_error_view = move || confirm_email_error().map(error_view);
+  let name_error_view =
+    move || name_error().map(|t| view! { <FieldErrorText text=t /> });
+  let email_error_view = move || {
+    email_error().map(|e| {
+      e.either(
+        |t| view! { <FieldWarningText text=t /> }.into_any(),
+        |t| view! { <FieldErrorText text=t /> }.into_any(),
+      )
+    })
+  };
+  let confirm_email_error_view =
+    move || confirm_email_error().map(|t| view! { <FieldErrorText text=t /> });
 
   // hint values for the input fields
   let name_input_hint =
@@ -130,40 +216,36 @@ pub fn SignupPage() -> impl IntoView {
       </p>
 
       <form class="mt-2 mb-4 flex flex-col gap-4">
-        <div class="flex flex-col gap-1">
-          <label class="" for="name">"Full Name"</label>
-          <Field size={FieldSize::Large} hint={name_input_hint} {..}
-            placeholder="Enter your full name" id="name"
-            on:input=write_name_callback prop:value=read_name_callback
-          />
+        <FormField
+          field_id="name" placeholder="Enter your full name" hint=name_input_hint
+          field_label="Full Name" signal=name
+        >
           { name_error_view }
-        </div>
+        </FormField>
 
-        <div class="flex flex-col gap-1">
-          <label class="" for="email">"Email"</label>
-          <Field size={FieldSize::Large} hint={email_input_hint} {..}
-            placeholder="Enter your email" type="email" id="email"
-            on:input=write_email_callback prop:value=read_email_callback
-          />
+        <FormField
+          field_id="email" placeholder="Enter your email" hint=email_input_hint
+          field_label="Email" signal=email field_type="email"
+        >
           { email_error_view }
-        </div>
+        </FormField>
 
-        <div class="flex flex-col gap-1">
-          <label class="" for="confirm_email">"Confirm Email"</label>
-          <Field size={FieldSize::Large} hint={confirm_email_input_hint} {..}
-            placeholder="Enter your email again" type="email" id="confirm_email"
-            on:input=write_confirm_email_callback prop:value=read_confirm_email_callback
-          />
+        <FormField
+          field_id="confirm_email" placeholder="Enter your email again"
+          hint=confirm_email_input_hint field_label="Confirm Email" signal=confirm_email
+          field_type="email"
+        >
           { confirm_email_error_view }
-        </div>
+        </FormField>
       </form>
 
       <div class="flex flex-row">
         <div class="flex-1" />
-        <Button size={ButtonSize::Large} {..} on:click={move |_| {action.dispatch(());}}>
-          "Sign up"
-          <lsc::icons::ArrowRightIcon {..} class="size-5" />
-        </Button>
+        // <Button size={ButtonSize::Large} {..} on:click={move |_| {action.dispatch(());}}>
+        //   "Sign up"
+        //   <lsc::icons::ArrowRightIcon {..} class="size-5" />
+        // </Button>
+        <SubmitButton state={state} {..} on:click={move |_| {action.dispatch(());}} />
       </div>
 
       { move || action_value_view().map(|v| view! {
