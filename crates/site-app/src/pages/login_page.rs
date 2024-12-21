@@ -31,7 +31,7 @@ pub fn LoginPage() -> impl IntoView {
 
   Effect::new(move |_| {
     if matches!(action_value(), Some(Ok(true))) {
-      crate::utils::navigation::navigate_to("/");
+      crate::utils::navigation::navigate_to("/profile");
     }
   });
 

@@ -63,6 +63,7 @@ pub fn App() -> impl IntoView {
           <Route path=path!("/sign-up") view=SignupPage/>
           <Route path=path!("/log-in") view=LoginPage />
           <Route path=path!("/log-out") view=LogoutPage/>
+          <Route path=path!("/profile") view=ProfilePage/>
           <Route path=path!("/component-testing/link") view=lsc::link::LinkMatrixTestPage/>
           <Route path=path!("/component-testing/button") view=lsc::button::ButtonMatrixTestPage/>
           <Route path=path!("/component-testing/field") view=lsc::field::FieldMatrixTestPage/>

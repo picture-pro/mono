@@ -56,7 +56,7 @@ fn LoggedInUserAuthActions(user: PublicUser) -> impl IntoView {
   view! {
     <span class="text-sm text-base-dim">
       "Welcome, "
-      <Link size=LinkSize::Small underline={LinkUnderline::Always} {..} href="/account">
+      <Link size=LinkSize::Small underline={LinkUnderline::Always} {..} href="/profile">
         { user.name.to_string() }
       </Link>
     </span>

@@ -126,7 +126,7 @@ pub fn SignupPage() -> impl IntoView {
 
   Effect::new(move |_| {
     if action_succeeded() {
-      crate::utils::navigation::navigate_to("/");
+      crate::utils::navigation::navigate_to("/profile");
     }
   });
 
