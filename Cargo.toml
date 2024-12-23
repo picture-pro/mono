@@ -45,6 +45,17 @@ web-sys = { version = "0.3" }
 console_error_panic_hook = "0.1"
 console_log = "1"
 
+# improve dev compile times
+[profile.dev]
+opt-level = 0
+debug = 1
+incremental = true
+[profile.dev.package."*"]
+opt-level = 3
+debug = 2
+[profile.dev.build-override]
+opt-level = 3
+
 # only for client-side wasm builds
 [profile.wasm-release]
 inherits = "release"
@@ -53,6 +64,7 @@ lto = true
 codegen-units = 1
 strip = true
 
+# leptos metadata
 [[workspace.metadata.leptos]]
 name = "site"
 hash-files = false

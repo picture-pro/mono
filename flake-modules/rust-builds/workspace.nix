@@ -24,7 +24,7 @@
 
       # inputs assumed to be relevant for all crates
       nativeBuildInputs = with pkgs; [
-        pkg-config clang lld
+        pkg-config clang lld mold
       ];
       buildInputs = [ ];
     };

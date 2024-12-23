@@ -29,7 +29,7 @@
       nativeBuildInputs = (with pkgs; [
         pkg-config
         binaryen # provides wasm-opt for cargo-leptos
-        clang lld
+        clang lld mold
       ]) ++ pkgs.lib.optionals (system == "x86_64-linux") [
         pkgs.nasm # wasm compiler only for x86_64-linux
       ];

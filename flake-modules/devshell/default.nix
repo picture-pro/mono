@@ -60,7 +60,7 @@ localFlake: { ... }: {
         # dependencies for local rust builds
         pkg-config
         openssl
-        clang lld # faster linking + gcc for some crates
+        clang lld mold # faster linking + gcc for some crates
       ];
 
       motd = "\n  Welcome to the {2}picturepro{reset} dev shell. Run {1}menu{reset} for commands.\n";
