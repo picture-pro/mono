@@ -73,20 +73,20 @@ impl FieldStyleProps {
   fn outline_class(&self) -> &'static str {
     match self.hint {
       Some(Error) => {
-        "outline-none outline-2 outline-offset-[-1px] outline-danger-8 \
+        "outline outline-2 outline-offset-[-1px] outline-danger-8 \
          dark:outline-dangerdark-8"
       }
       Some(Warning) => {
-        "outline-none outline-2 outline-offset-[-1px] outline-warning-8 \
+        "outline outline-2 outline-offset-[-1px] outline-warning-8 \
          dark:outline-warningdark-8"
       }
       Some(Success) => {
-        "outline-none outline-2 outline-offset-[-1px] outline-success-8 \
+        "outline outline-2 outline-offset-[-1px] outline-success-8 \
          dark:outline-successdark-8"
       }
       None => {
-        "outline-none focus:outline-2 focus:outline-offset-[-1px] \
-         focus:outline-primary-8 focus:dark:outline-primarydark-8"
+        "outline-none outline-offset-[-1px] focus:outline-primary-8 \
+         focus:dark:outline-primarydark-8"
       }
     }
   }
@@ -111,7 +111,8 @@ impl FieldStyleProps {
   fn class(&self) -> String {
     format!(
       "w-full rounded-md pb-[0.5px] flex items-center transition \
-       placeholder:text-basea-10 placeholder:dark:text-basedarka-10 {} {} {}",
+       transition-[outline] placeholder:text-basea-10 \
+       placeholder:dark:text-basedarka-10 {} {} {}",
       self.color_class(),
       self.size_class(),
       self.outline_class(),
