@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{str::FromStr, sync::Arc, time::Duration};
 
 use auth_domain::{AuthDomainServiceCanonical, DynAuthDomainService};
 use axum::extract::FromRef;
@@ -7,7 +7,7 @@ use miette::Result;
 use prime_domain::{
   hex::retryable::Retryable,
   models::{User, UserCreateRequest},
-  repos::{db::kv, CreateModelError},
+  repos::{db::kv, storage::StorageClientGenerator, CreateModelError},
   DynPrimeDomainService, PrimeDomainService, PrimeDomainServiceCanonical,
 };
 
@@ -48,8 +48,25 @@ impl AppState {
       kv_db_adapter.clone(),
     )));
 
-    let prime_domain_service: Arc<Box<dyn PrimeDomainService>> =
-      Arc::new(Box::new(PrimeDomainServiceCanonical::new(photo_repo)));
+    let artifact_model_repo =
+      prime_domain::repos::BaseModelRepository::new(kv_db_adapter.clone());
+    let storage_credentials = prime_domain::models::StorageCredentials::Local(
+      prime_domain::models::LocalStorageCredentials(
+        std::path::PathBuf::from_str("/tmp/picturepro-store").unwrap(),
+      ),
+    );
+    let artifact_storage_repo = storage_credentials
+      .client()
+      .await
+      .expect("failed to create local artifact storage repo");
+    let artifact_repo = prime_domain::repos::ArtifactRepositoryCanonical::new(
+      artifact_model_repo,
+      artifact_storage_repo,
+    );
+
+    let prime_domain_service: Arc<Box<dyn PrimeDomainService>> = Arc::new(
+      Box::new(PrimeDomainServiceCanonical::new(photo_repo, artifact_repo)),
+    );
     let auth_domain_service: DynAuthDomainService = DynAuthDomainService::new(
       Arc::new(Box::new(AuthDomainServiceCanonical::new(user_repo))),
     );

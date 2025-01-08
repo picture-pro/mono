@@ -1,7 +1,7 @@
 use hex::health;
 use miette::Result;
-use models::{Photo, PhotoCreateRequest, PhotoRecordId};
-use repos::FetchModelError;
+use models::{Artifact, Photo, PhotoCreateRequest, PhotoRecordId};
+use repos::{belt::Belt, CreateArtifactError, FetchModelError};
 
 use crate::PrimeDomainService;
 
@@ -12,31 +12,40 @@ pub struct PrimeDomainServiceCanonical<
     ModelCreateRequest = PhotoCreateRequest,
     CreateError = repos::CreateModelError,
   >,
+  AR: repos::ArtifactRepository,
 > {
-  photo_repo: PR,
+  photo_repo:    PR,
+  artifact_repo: AR,
 }
 
-impl<PR> PrimeDomainServiceCanonical<PR>
+impl<PR, AR> PrimeDomainServiceCanonical<PR, AR>
 where
   PR: repos::ModelRepository<
     Model = Photo,
     ModelCreateRequest = PhotoCreateRequest,
     CreateError = repos::CreateModelError,
   >,
+  AR: repos::ArtifactRepository,
 {
   /// Creates a new [`PrimeDomainServiceCanonical`] with the given photo
   /// repository.
-  pub fn new(photo_repo: PR) -> Self { Self { photo_repo } }
+  pub fn new(photo_repo: PR, artifact_repo: AR) -> Self {
+    Self {
+      photo_repo,
+      artifact_repo,
+    }
+  }
 }
 
 #[async_trait::async_trait]
-impl<PR> PrimeDomainService for PrimeDomainServiceCanonical<PR>
+impl<PR, AR> PrimeDomainService for PrimeDomainServiceCanonical<PR, AR>
 where
   PR: repos::ModelRepository<
     Model = Photo,
     ModelCreateRequest = PhotoCreateRequest,
     CreateError = repos::CreateModelError,
   >,
+  AR: repos::ArtifactRepository,
 {
   async fn fetch_photo_by_id(
     &self,
@@ -48,22 +57,31 @@ where
   async fn enumerate_photos(&self) -> Result<Vec<Photo>> {
     self.photo_repo.enumerate_models().await
   }
+
+  async fn create_artifact(
+    &self,
+    data: Belt,
+  ) -> Result<Artifact, CreateArtifactError> {
+    self.artifact_repo.create_artifact(data).await
+  }
 }
 
 #[async_trait::async_trait]
-impl<PR> health::HealthReporter for PrimeDomainServiceCanonical<PR>
+impl<PR, AR> health::HealthReporter for PrimeDomainServiceCanonical<PR, AR>
 where
   PR: repos::ModelRepository<
     Model = Photo,
     ModelCreateRequest = PhotoCreateRequest,
     CreateError = repos::CreateModelError,
   >,
+  AR: repos::ArtifactRepository,
 {
   fn name(&self) -> &'static str { stringify!(PrimeDomainServiceCanonical) }
   async fn health_check(&self) -> health::ComponentHealth {
-    health::AdditiveComponentHealth::from_futures(vec![self
-      .photo_repo
-      .health_report()])
+    health::AdditiveComponentHealth::from_futures(vec![
+      self.photo_repo.health_report(),
+      self.artifact_repo.health_report(),
+    ])
     .await
     .into()
   }

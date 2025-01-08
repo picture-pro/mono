@@ -8,6 +8,7 @@ pub use db::{self, CreateModelError, FetchModelByIndexError, FetchModelError};
 use hex::Hexagonal;
 use miette::Result;
 use models::EitherSlug;
+pub use storage::{self, belt};
 
 pub use self::{artifact::*, base::BaseModelRepository, mock::*};
 

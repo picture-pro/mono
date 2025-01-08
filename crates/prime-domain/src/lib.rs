@@ -9,9 +9,9 @@ pub use hex;
 use hex::Hexagonal;
 use miette::Result;
 pub use models;
-use models::{Photo, PhotoRecordId};
+use models::{Artifact, Photo, PhotoRecordId};
 pub use repos;
-use repos::FetchModelError;
+use repos::{belt::Belt, CreateArtifactError, FetchModelError};
 
 pub use self::canonical::*;
 
@@ -28,6 +28,12 @@ pub trait PrimeDomainService: Hexagonal {
   ) -> Result<Option<Photo>, FetchModelError>;
   /// Produce a list of all [`Photo`]s.
   async fn enumerate_photos(&self) -> Result<Vec<Photo>>;
+
+  /// Create an artifact.
+  async fn create_artifact(
+    &self,
+    data: Belt,
+  ) -> Result<Artifact, CreateArtifactError>;
 }
 
 #[async_trait::async_trait]
@@ -45,5 +51,12 @@ where
 
   async fn enumerate_photos(&self) -> Result<Vec<Photo>> {
     self.deref().enumerate_photos().await
+  }
+
+  async fn create_artifact(
+    &self,
+    data: Belt,
+  ) -> Result<Artifact, CreateArtifactError> {
+    self.deref().create_artifact(data).await
   }
 }
