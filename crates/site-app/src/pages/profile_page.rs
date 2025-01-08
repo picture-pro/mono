@@ -11,8 +11,8 @@ pub fn ProfilePage() -> impl IntoView {
       </p>
     </Section>
     <Section>
-      <pre><code>
-      </code></pre>
+      <p class="max-w-prose text-base-dim">"We've got nothing else to display here right now."</p>
+      <p class="max-w-prose text-base-dim">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."</p>
     </Section>
   }
 }
