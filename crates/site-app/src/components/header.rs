@@ -7,8 +7,8 @@ use crate::AuthStatus;
 #[component]
 pub fn Header() -> impl IntoView {
   let class = "sticky top-0 container bg-base-subtle h-12 mx-auto px-3 flex \
-               flex-row items-center rounded-b-xl border border-t-0 \
-               border-base-7 dark:border-basedark-7";
+               flex-row items-center justify-between gap-2 rounded-b-xl \
+               border border-t-0 border-base-7 dark:border-basedark-7";
 
   view! {
     <header class=class>
@@ -21,7 +21,6 @@ pub fn Header() -> impl IntoView {
           "PicturePro"
         </Link>
       </span>
-      <div class="flex-1" />
       <div class="flex flex-row items-center gap-2">
         <HeaderUserArea />
       </div>
@@ -54,7 +53,7 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
 #[component]
 fn LoggedInUserAuthActions(user: PublicUser) -> impl IntoView {
   view! {
-    <span class="text-sm text-base-dim">
+    <span class="text-sm text-base-dim leading-none text-right">
       "Welcome, "
       <Link size=LinkSize::Small underline={LinkUnderline::Always} {..} href="/profile">
         { user.name.to_string() }
