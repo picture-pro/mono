@@ -1,9 +1,10 @@
 use std::{collections::HashMap, ops::Deref};
 
-use gloo::file::{Blob, File, ObjectUrl};
-use leptos::prelude::*;
+use gloo::file::{Blob, File, FileList, ObjectUrl};
+use leptos::{logging::debug_warn, prelude::*};
 use reactive_stores::Store;
 use send_wrapper::SendWrapper;
+use web_sys::Event;
 
 use crate::components::Section;
 
@@ -16,18 +17,16 @@ pub fn UploadPhotoPage() -> impl IntoView {
     <UploadContextProvider>
       <Section>
         <p class="text-6xl font-serif font-light tracking-tight mb-4">
-          "Upload Photo"
+          "Upload Photos"
+        </p>
+        <p class="text-base-dim">
+          { desc_text }
         </p>
       </Section>
 
-      <div class="flex flex-row justify-between gap-4">
-        <div>
-          <p class="text-base-dim max-w-prose">
-            { desc_text }
-          </p>
-        </div>
+      <Section>
         <UploadArea />
-      </div>
+      </Section>
 
       <Section>
         <ImagePreviewer />
@@ -75,9 +74,15 @@ fn UploadContextProvider(children: Children) -> impl IntoView {
 fn ImagePreviewer() -> impl IntoView {
   let context: Store<UploadContext> = expect_context();
 
+  let sorted_entries_iter = move || {
+    let mut entries = context.files().get().into_iter().collect::<Vec<_>>();
+    entries.sort_unstable_by_key(|e| e.0);
+    entries.into_iter()
+  };
+
   view! {
     <For
-      each=move || context.files().get().into_iter()
+      each=sorted_entries_iter
       key=move |entry| entry.0
       children=move |entry| view! {
         <ImagePreview name={entry.1.name.clone()} object_url={entry.1.url.clone().take()} />
@@ -95,52 +100,80 @@ fn ImagePreview(name: String, object_url: ObjectUrl) -> impl IntoView {
   }
 }
 
+fn accept_image_from_input(ev: Event) {
+  let context: Store<UploadContext> = expect_context();
+
+  // get file list
+  let element: web_sys::HtmlInputElement = event_target(&ev);
+  let Some(file_list) = element.files() else {
+    debug_warn!("failed to get file list of event target");
+    return;
+  };
+
+  // extract each image in file list
+  for file in FileList::from(file_list).iter() {
+    let last_index = context.last_index().get();
+
+    context.files().update(|files| {
+      files.insert(last_index, QueuedUploadFile::new(file.clone()));
+    });
+
+    context.last_index().update(|last_index| {
+      *last_index += 1;
+    });
+  }
+
+  // reset input
+  element.set_value("");
+}
+
 #[island]
 fn UploadArea() -> impl IntoView {
   use lsc::icons::*;
 
-  let class = "aspect-square justify-self-center w-[24rem] bg-base-2 \
-               dark:bg-basedark-2 border-2 border-dashed border-base-8 \
-               dark:border-basedark-8 rounded-xl flex flex-col justify-center \
-               items-center gap-4 cursor-pointer";
+  let class = "w-full bg-base-2 dark:bg-basedark-2 border-2 border-dashed \
+               border-base-8 dark:border-basedark-8 rounded-xl flex flex-row \
+               items-stretch";
+
   let icon_class = "size-24 text-basea-11 dark:text-basedarka-11";
-  let input_class = "hidden";
-
-  let input_callback = move |ev| {
-    let input_element: web_sys::HtmlInputElement = event_target(&ev);
-    let Some(file_list) = input_element.files() else {
-      return;
-    };
-    let file_list = gloo::file::FileList::from(file_list);
-
-    let context: Store<UploadContext> = expect_context();
-
-    for file in file_list.iter() {
-      let last_index_lock = context.last_index();
-      let last_index = last_index_lock.get();
-
-      let files_lock = context.files();
-      files_lock.update(|files| {
-        files.insert(last_index, QueuedUploadFile::new(file.clone()));
-      });
-
-      let last_index_lock = context.last_index();
-      last_index_lock.update(|last_index| {
-        *last_index += 1;
-      });
-    }
-  };
 
   view! {
-    <label class=class for="file-input">
-      <UploadIcon {..} class=icon_class />
-      <div class="flex flex-col items-center gap-1 text-base-dim text-sm">
-        <p>"Click here to upload."</p>
-        <input
-          type="file" class=input_class id="file-input" accept="image/*"
-          capture="camera" multiple="multiple" on:change=input_callback
-        />
-      </div>
-    </label>
+    <div class=class>
+
+      <label
+        class="flex-1 flex flex-row justify-center items-center p-8 cursor-pointer"
+        for="camera-input"
+      >
+        <div class="flex flex-col items-center gap-4">
+          <CameraIcon {..} class=icon_class />
+          <div class="flex flex-col items-center gap-1 text-base-dim text-sm">
+            <p>"Take a photo with your camera."</p>
+            <input
+              type="file" class="hidden" id="camera-input" accept="image/*"
+              capture="environment" multiple="multiple" on:change=accept_image_from_input
+            />
+          </div>
+        </div>
+      </label>
+
+      <div class="my-4 w-[1px] border-l-2 border-dashed border-base-8 dark:border-basedark-8" />
+
+      <label
+        class="flex-1 flex flex-row justify-center items-center p-8 cursor-pointer"
+        for="file-input"
+      >
+        <div class="flex flex-col items-center gap-4">
+          <UploadIcon {..} class=icon_class />
+          <div class="flex flex-col items-center gap-1 text-base-dim text-sm">
+            <p>"Upload a photo from your device."</p>
+            <input
+              type="file" class="hidden" id="file-input" accept="image/*"
+              multiple="multiple" on:change=accept_image_from_input
+            />
+          </div>
+        </div>
+      </label>
+
+    </div>
   }
 }
