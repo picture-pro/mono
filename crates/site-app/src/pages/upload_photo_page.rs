@@ -74,29 +74,68 @@ fn UploadContextProvider(children: Children) -> impl IntoView {
 fn ImagePreviewer() -> impl IntoView {
   let context: Store<UploadContext> = expect_context();
 
-  let sorted_entries_iter = move || {
-    let mut entries = context.files().get().into_iter().collect::<Vec<_>>();
-    entries.sort_unstable_by_key(|e| e.0);
-    entries.into_iter()
+  let sorted_indices_iter = move || {
+    let files_lock = context.files().read();
+    let mut indices = files_lock.keys().copied().collect::<Vec<_>>();
+    indices.sort_unstable();
+    indices.into_iter()
   };
 
+  let grid_class = "grid sm:grid-cols-[repeat(auto-fit,12rem)] \
+                    grid-cols-[repeat(auto-fit,8rem)] gap-4";
+
   view! {
-    <For
-      each=sorted_entries_iter
-      key=move |entry| entry.0
-      children=move |entry| view! {
-        <ImagePreview name={entry.1.name.clone()} object_url={entry.1.url.clone().take()} />
-      }
-    />
+    <div class=grid_class>
+      <For
+        each=sorted_indices_iter
+        key=move |index| *index
+        children=move |index| view! {
+          <ImagePreview index=index />
+        }
+      />
+    </div>
   }
 }
 
 #[component]
-fn ImagePreview(name: String, object_url: ObjectUrl) -> impl IntoView {
-  let url = object_url.to_string();
-  view! {
-    <p>{ name }</p>
-    <img src={url} />
+fn ImagePreview(index: usize) -> impl IntoView {
+  use lsc::icons::*;
+
+  let context: Store<UploadContext> = expect_context();
+
+  let url = move || {
+    let files_lock = context.files().read();
+    files_lock
+      .get(&index)
+      .map(|f| f.url.clone().take().to_string())
+  };
+
+  let image_class = "w-auto sm:max-h-[12rem] max-h-[8rem] border-2 \
+                     border-base-8 dark:border-basedark-8 rounded-lg";
+  let delete_button_class =
+    "absolute top-0 right-0 size-8 flex flex-col justify-center items-center \
+     bg-base-2 dark:bg-basedark-2 border-2 border-base-8 \
+     dark:border-basedark-8 rounded-bl-lg rounded-tr-lg cursor-pointer";
+
+  let delete_handler = move |_| {
+    context.files().update(|files| {
+      files.remove(&index);
+    })
+  };
+
+  move || {
+    url().map(|url| {
+      view! {
+        <div class="sm:size-48 size-32 flex flex-col justify-center items-center">
+          <div class="relative">
+            <img src={url} class=image_class />
+            <div class=delete_button_class on:click=delete_handler>
+              <TrashIcon {..} class="size-6 text-base-dim" />
+            </div>
+          </div>
+        </div>
+      }
+    })
   }
 }
 

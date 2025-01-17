@@ -17,6 +17,7 @@ models = { path = "../models" }
 auth-domain = { path = "../auth-domain", optional = true }
 prime-domain = { path = "../prime-domain", optional = true }
 
+serde.workspace = true
 tracing.workspace = true
 tokio = { workspace = true, optional = true }
 either = "1.13.0"

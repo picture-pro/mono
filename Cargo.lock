@@ -3251,6 +3251,7 @@ dependencies = [
  "prime-domain",
  "reactive_stores",
  "send_wrapper",
+ "serde",
  "tokio",
  "tracing",
  "web-sys",
