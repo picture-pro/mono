@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ops::Deref};
+use std::collections::HashMap;
 
 use gloo::file::{Blob, File, FileList, ObjectUrl};
 use leptos::{logging::debug_warn, prelude::*};
@@ -56,30 +56,59 @@ impl QueuedUploadFile {
 }
 
 #[derive(Clone, Store, Default)]
-struct UploadContext {
+struct UploadContextStore {
   last_index: usize,
   /// Map from filename to file
   files:      HashMap<usize, QueuedUploadFile>,
 }
 
+#[derive(Clone, Copy)]
+struct UploadContext(Store<UploadContextStore>);
+
+impl UploadContext {
+  fn new() -> Self { UploadContext(Store::new(UploadContextStore::default())) }
+
+  fn add_file(&self, file: QueuedUploadFile) {
+    let last_index = self.0.last_index().get();
+
+    self.0.files().update(|files| {
+      files.insert(last_index, file);
+    });
+    self.0.last_index().update(|last_index| {
+      *last_index += 1;
+    });
+  }
+  fn get_file(&self, index: usize) -> Option<QueuedUploadFile> {
+    let files_lock = self.0.files().read();
+    files_lock.get(&index).cloned()
+  }
+  fn delete_file(&self, index: usize) {
+    self.0.files().update(|files| {
+      files.remove(&index);
+    })
+  }
+
+  fn iter_file_indices(&self) -> impl Iterator<Item = usize> {
+    let files_lock = self.0.files().read();
+    let mut indices = files_lock.keys().copied().collect::<Vec<_>>();
+    drop(files_lock);
+    indices.sort_unstable();
+    indices.into_iter()
+  }
+}
+
 #[island]
 fn UploadContextProvider(children: Children) -> impl IntoView {
-  let context = Store::new(UploadContext::default());
-  provide_context(context);
+  provide_context(UploadContext::new());
 
   children()
 }
 
 #[island]
 fn ImagePreviewer() -> impl IntoView {
-  let context: Store<UploadContext> = expect_context();
+  let context: UploadContext = expect_context();
 
-  let sorted_indices_iter = move || {
-    let files_lock = context.files().read();
-    let mut indices = files_lock.keys().copied().collect::<Vec<_>>();
-    indices.sort_unstable();
-    indices.into_iter()
-  };
+  let indices_iter = move || context.iter_file_indices();
 
   let grid_class = "grid sm:grid-cols-[repeat(auto-fit,12rem)] \
                     grid-cols-[repeat(auto-fit,8rem)] gap-4";
@@ -87,7 +116,7 @@ fn ImagePreviewer() -> impl IntoView {
   view! {
     <div class=grid_class>
       <For
-        each=sorted_indices_iter
+        each=indices_iter
         key=move |index| *index
         children=move |index| view! {
           <ImagePreview index=index />
@@ -101,12 +130,11 @@ fn ImagePreviewer() -> impl IntoView {
 fn ImagePreview(index: usize) -> impl IntoView {
   use lsc::icons::*;
 
-  let context: Store<UploadContext> = expect_context();
+  let context: UploadContext = expect_context();
 
   let url = move || {
-    let files_lock = context.files().read();
-    files_lock
-      .get(&index)
+    context
+      .get_file(index)
       .map(|f| f.url.clone().take().to_string())
   };
 
@@ -118,9 +146,7 @@ fn ImagePreview(index: usize) -> impl IntoView {
      dark:border-basedark-8 rounded-bl-lg rounded-tr-lg cursor-pointer";
 
   let delete_handler = move |_| {
-    context.files().update(|files| {
-      files.remove(&index);
-    })
+    context.delete_file(index);
   };
 
   move || {
@@ -140,7 +166,7 @@ fn ImagePreview(index: usize) -> impl IntoView {
 }
 
 fn accept_image_from_input(ev: Event) {
-  let context: Store<UploadContext> = expect_context();
+  let context: UploadContext = expect_context();
 
   // get file list
   let element: web_sys::HtmlInputElement = event_target(&ev);
@@ -151,15 +177,7 @@ fn accept_image_from_input(ev: Event) {
 
   // extract each image in file list
   for file in FileList::from(file_list).iter() {
-    let last_index = context.last_index().get();
-
-    context.files().update(|files| {
-      files.insert(last_index, QueuedUploadFile::new(file.clone()));
-    });
-
-    context.last_index().update(|last_index| {
-      *last_index += 1;
-    });
+    context.add_file(QueuedUploadFile::new(file.clone()));
   }
 
   // reset input
