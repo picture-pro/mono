@@ -10,13 +10,19 @@ pub fn Header() -> impl IntoView {
                flex-row items-center justify-between gap-2 rounded-b-xl \
                border border-t-0 border-base-7 dark:border-basedark-7";
 
+  let auth_status = use_context::<AuthStatus>().and_then(|as_| as_.0);
+  let logo_link_dest = match auth_status.is_some() {
+    true => "/profile",
+    false => "/",
+  };
+
   view! {
     <header class=class>
       <span class="font-serif font-semibold tracking-tight">
         <Link
           color=LinkColor::Base size=LinkSize::ExtraLarge underline=LinkUnderline::Always high_contrast=true
           {..}
-          href="/"
+          href=logo_link_dest
         >
           "PicturePro"
         </Link>
