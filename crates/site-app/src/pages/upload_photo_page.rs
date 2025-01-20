@@ -1,11 +1,10 @@
-use std::collections::HashMap;
+mod context;
 
-use gloo::file::{Blob, File, FileList, ObjectUrl};
+use gloo::file::FileList;
 use leptos::{logging::debug_warn, prelude::*};
-use reactive_stores::Store;
-use send_wrapper::SendWrapper;
 use web_sys::Event;
 
+use self::context::{QueuedUploadFile, UploadContext, UploadContextProvider};
 use crate::components::Section;
 
 #[component]
@@ -33,75 +32,6 @@ pub fn UploadPhotoPage() -> impl IntoView {
       </Section>
     </UploadContextProvider>
   }
-}
-
-#[derive(Clone)]
-struct QueuedUploadFile {
-  name: String,
-  blob: SendWrapper<Blob>,
-  url:  SendWrapper<ObjectUrl>,
-}
-
-impl QueuedUploadFile {
-  fn new(file: File) -> Self {
-    let name = file.name();
-    let blob = Blob::from(file);
-    let url = ObjectUrl::from(blob.clone());
-    Self {
-      name,
-      blob: SendWrapper::new(blob),
-      url: SendWrapper::new(url),
-    }
-  }
-}
-
-#[derive(Clone, Store, Default)]
-struct UploadContextStore {
-  last_index: usize,
-  /// Map from filename to file
-  files:      HashMap<usize, QueuedUploadFile>,
-}
-
-#[derive(Clone, Copy)]
-struct UploadContext(Store<UploadContextStore>);
-
-impl UploadContext {
-  fn new() -> Self { UploadContext(Store::new(UploadContextStore::default())) }
-
-  fn add_file(&self, file: QueuedUploadFile) {
-    let last_index = self.0.last_index().get();
-
-    self.0.files().update(|files| {
-      files.insert(last_index, file);
-    });
-    self.0.last_index().update(|last_index| {
-      *last_index += 1;
-    });
-  }
-  fn get_file(&self, index: usize) -> Option<QueuedUploadFile> {
-    let files_lock = self.0.files().read();
-    files_lock.get(&index).cloned()
-  }
-  fn delete_file(&self, index: usize) {
-    self.0.files().update(|files| {
-      files.remove(&index);
-    })
-  }
-
-  fn iter_file_indices(&self) -> impl Iterator<Item = usize> {
-    let files_lock = self.0.files().read();
-    let mut indices = files_lock.keys().copied().collect::<Vec<_>>();
-    drop(files_lock);
-    indices.sort_unstable();
-    indices.into_iter()
-  }
-}
-
-#[island]
-fn UploadContextProvider(children: Children) -> impl IntoView {
-  provide_context(UploadContext::new());
-
-  children()
 }
 
 #[island]
@@ -132,11 +62,7 @@ fn ImagePreview(index: usize) -> impl IntoView {
 
   let context: UploadContext = expect_context();
 
-  let url = move || {
-    context
-      .get_file(index)
-      .map(|f| f.url.clone().take().to_string())
-  };
+  let url = move || context.get_file(index).map(|f| f.url().to_string());
 
   let image_class = "w-auto sm:max-h-[12rem] max-h-[8rem] border-2 \
                      border-base-8 dark:border-basedark-8 rounded-lg";
