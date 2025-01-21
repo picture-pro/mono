@@ -5,25 +5,38 @@ use leptos::prelude::*;
 use reactive_stores::Store;
 use send_wrapper::SendWrapper;
 
+use super::MAX_UPLOAD_SIZE;
+
 #[derive(Clone)]
 pub(super) struct QueuedUploadFile {
-  name: String,
-  blob: SendWrapper<Blob>,
-  url:  SendWrapper<ObjectUrl>,
+  name:      String,
+  blob:      SendWrapper<Blob>,
+  url:       SendWrapper<ObjectUrl>,
+  oversized: bool,
 }
 
 impl QueuedUploadFile {
   pub(super) fn new(file: File) -> Self {
     let name = file.name();
+
     let blob = Blob::from(file);
+    let blob_size = blob.size();
+    let oversized = blob_size > MAX_UPLOAD_SIZE;
+    if oversized {
+      leptos::logging::log!("File {} is too large", name);
+    }
     let url = ObjectUrl::from(blob.clone());
+
     Self {
       name,
       blob: SendWrapper::new(blob),
       url: SendWrapper::new(url),
+      oversized,
     }
   }
+  pub(super) fn blob(&self) -> Blob { self.blob.clone().take() }
   pub(super) fn url(&self) -> ObjectUrl { self.url.clone().take() }
+  pub(super) fn oversized(&self) -> bool { self.oversized }
 }
 
 #[derive(Clone, Store, Default)]

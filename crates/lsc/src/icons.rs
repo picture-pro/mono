@@ -14,6 +14,10 @@ macro_rules! radix_icon {
 
 radix_icon!(ArrowLeftIcon, "crates/lsc/src/radix-icons/arrow-left.svg");
 radix_icon!(ArrowRightIcon, "crates/lsc/src/radix-icons/arrow-right.svg");
+radix_icon!(
+  ExclamationTriangleIcon,
+  "crates/lsc/src/radix-icons/exclamation-triangle.svg"
+);
 radix_icon!(CameraIcon, "crates/lsc/src/radix-icons/camera.svg");
 radix_icon!(TrashIcon, "crates/lsc/src/radix-icons/trash.svg");
 radix_icon!(UploadIcon, "crates/lsc/src/radix-icons/upload.svg");
