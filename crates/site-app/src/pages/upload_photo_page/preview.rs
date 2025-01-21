@@ -43,10 +43,10 @@ fn ImagePreview(index: usize) -> impl IntoView {
                      border-base-8 dark:border-basedark-8 rounded-lg";
 
   let oversized_overlay_class =
-    "absolute inset-0 bg-base-1 dark:bg-basedark-1 opacity-85";
-  let oversized_overlay_inner_class =
-    "absolute inset-0 flex flex-col justify-center gap-2 items-center \
-     text-center text-base-12 dark:text-basedark-12";
+    "absolute inset-0 flex flex-col gap-2 items-center justify-center \
+     bg-base-1/[.8] dark:bg-basedark-1/[.8] rounded-lg border-2 \
+     border-warning-8 dark:border-warningdark-8 text-center text-warning-12 \
+     dark:text-warningdark-12 backdrop-blur-sm";
   let file_size = move || {
     context
       .get_file(index)
@@ -55,17 +55,15 @@ fn ImagePreview(index: usize) -> impl IntoView {
   let oversized_overlay_element = move || {
     is_oversized().then_some(view! {
       <div class=oversized_overlay_class>
-        <div class=oversized_overlay_inner_class>
-          <ExclamationTriangleIcon {..} class="size-10" />
-          <div>
-            <p class="text-xl">"Oversized"</p>
-            <p class="text-sm">
-              "This image is too large to upload. File: "
-              { move || file_size().map(|fs| fs.to_string()) }
-              ", max: "
-              { FileSize::new(MAX_UPLOAD_SIZE).to_string() }
-            </p>
-          </div>
+        <ExclamationTriangleIcon {..} class="size-10" />
+        <div>
+          <p class="text-xl font-bold">"Oversized"</p>
+          <p class="text-sm text-warning-dim">
+            "This image is too large to upload. File: "
+            { move || file_size().map(|fs| fs.to_string()) }
+            ", max: "
+            { FileSize::new(MAX_UPLOAD_SIZE).to_string() }
+          </p>
         </div>
       </div>
     })
