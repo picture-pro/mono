@@ -4,6 +4,7 @@ use gloo::file::{Blob, File, ObjectUrl};
 use leptos::prelude::*;
 use reactive_stores::Store;
 use send_wrapper::SendWrapper;
+use serde::{Deserialize, Serialize};
 
 use super::MAX_UPLOAD_SIZE;
 
@@ -39,11 +40,18 @@ impl QueuedUploadFile {
   pub(super) fn oversized(&self) -> bool { self.oversized }
 }
 
+#[derive(Clone, Default, Serialize, Deserialize, PartialEq)]
+pub(super) enum UploadStage {
+  #[default]
+  PhotosStage,
+  SettingsStage,
+}
+
 #[derive(Clone, Store, Default)]
 pub(super) struct UploadContextStore {
   last_index: usize,
-  /// Map from filename to file
   files:      HashMap<usize, QueuedUploadFile>,
+  stage:      UploadStage,
 }
 
 #[derive(Clone, Copy)]
@@ -52,6 +60,14 @@ pub(super) struct UploadContext(Store<UploadContextStore>);
 impl UploadContext {
   pub(super) fn new() -> Self {
     UploadContext(Store::new(UploadContextStore::default()))
+  }
+
+  pub(super) fn set_stage(&self, stage: UploadStage) {
+    self.0.stage().set(stage);
+  }
+  pub(super) fn stage(&self) -> Signal<UploadStage> {
+    let subfield = self.0.stage();
+    Signal::derive(move || subfield.get())
   }
 
   pub(super) fn add_file(&self, file: QueuedUploadFile) {
@@ -84,7 +100,7 @@ impl UploadContext {
 }
 
 #[island]
-pub(super) fn UploadContextProvider(children: Children) -> impl IntoView {
+pub(super) fn ContextProvider(children: Children) -> impl IntoView {
   provide_context(UploadContext::new());
 
   children()
