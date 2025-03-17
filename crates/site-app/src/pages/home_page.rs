@@ -1,18 +1,18 @@
 use leptos::prelude::*;
 use lsc::{button::*, icons::*};
 
-use crate::components::Section;
+use crate::components::{Section, Title};
 
 #[component]
 pub fn HomePage() -> impl IntoView {
   view! {
     <Section>
       <div class="inline-flex flex-col items-start">
-        <p class="text-6xl font-serif font-light tracking-tight mb-4">
+        <Title>
           "Welcome to "
           <span class="font-semibold">"PicturePro"</span>
           "."
-        </p>
+        </Title>
         <p class="max-w-prose text-base-dim">
           "Sharing candids is now easier than ever. Cute moment at the park? Done. Posing at the Grand Canyon? Easy. "
           <span class="font-semibold">"PicturePro"</span>

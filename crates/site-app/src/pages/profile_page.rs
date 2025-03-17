@@ -1,14 +1,12 @@
 use leptos::prelude::*;
 
-use crate::components::Section;
+use crate::components::{Section, Title};
 
 #[component]
 pub fn ProfilePage() -> impl IntoView {
   view! {
     <Section>
-      <p class="text-6xl font-serif font-light tracking-tight mb-4">
-        "User Profile"
-      </p>
+      <Title>"User Profile"</Title>
     </Section>
     <Section>
       <div class="flex flex-row gap-2 justify-between">
