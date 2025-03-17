@@ -89,7 +89,7 @@ fn SettingsStageFooter() -> impl IntoView {
   view! {
     <div class="w-full flex flex-row px-4">
       <div class="flex-1" />
-      <Button size=ButtonSize::Large>
+      <Button color=ButtonColor::Success size=ButtonSize::Large>
         "Upload"
         <UploadIcon {..} class="size-6" />
       </Button>

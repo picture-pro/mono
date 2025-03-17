@@ -93,7 +93,7 @@ fn ImagePreview(index: usize) -> impl IntoView {
   move || {
     url().map(|url| {
       view! {
-        <div class="flex flex-col justify-center items-center group">
+        <div class="flex flex-col justify-center items-center group animate-fade-in">
           <div class="relative">
             <img src={url} class=image_class />
             { oversized_overlay_element }

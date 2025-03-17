@@ -10,7 +10,7 @@
     # get the style node_modules for the frontend
     js2nix = pkgs.callPackage (pkgs.fetchgit {
       url = "https://github.com/canva-public/js2nix";
-      hash = "sha256-Bmv0ERVeb6vjYzy4MuCDgSiz9fSm/Bhg+Xk3AxPisBw=";
+      hash = "sha256-udsxrWLtAaBkh++pqal3u5+hI0YhWI06O2UaC6IS5lY=";
     }) { };
     style-root = ../../crates/site-app/style/tailwind;
     style-node-env = (js2nix {
