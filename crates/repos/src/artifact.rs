@@ -2,7 +2,7 @@ mod canonical;
 
 use db::{CreateModelError, FetchModelByIndexError, FetchModelError};
 use hex::Hexagonal;
-use models::{Artifact, ArtifactPath, ArtifactRecordId};
+use models::{Artifact, ArtifactPath, ArtifactRecordId, UserRecordId};
 use storage::{
   belt::Belt, ReadError as StorageReadError, WriteError as StorageWriteError,
 };
@@ -59,6 +59,7 @@ pub trait ArtifactRepository: Hexagonal {
   async fn create_artifact(
     &self,
     data: Belt,
+    originator: UserRecordId,
   ) -> Result<Artifact, CreateArtifactError>;
 }
 
@@ -92,7 +93,8 @@ where
   async fn create_artifact(
     &self,
     data: Belt,
+    originator: UserRecordId,
   ) -> Result<Artifact, CreateArtifactError> {
-    I::create_artifact(self, data).await
+    I::create_artifact(self, data, originator).await
   }
 }

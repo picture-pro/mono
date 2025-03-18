@@ -9,7 +9,7 @@ pub use hex;
 use hex::Hexagonal;
 use miette::Result;
 pub use models;
-use models::{Artifact, Photo, PhotoRecordId};
+use models::{Artifact, Photo, PhotoRecordId, UserRecordId};
 pub use repos;
 use repos::{belt::Belt, CreateArtifactError, FetchModelError};
 
@@ -33,6 +33,7 @@ pub trait PrimeDomainService: Hexagonal {
   async fn create_artifact(
     &self,
     data: Belt,
+    originator: UserRecordId,
   ) -> Result<Artifact, CreateArtifactError>;
 }
 
@@ -56,7 +57,8 @@ where
   async fn create_artifact(
     &self,
     data: Belt,
+    originator: UserRecordId,
   ) -> Result<Artifact, CreateArtifactError> {
-    self.deref().create_artifact(data).await
+    self.deref().create_artifact(data, originator).await
   }
 }

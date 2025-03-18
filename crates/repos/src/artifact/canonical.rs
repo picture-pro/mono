@@ -2,7 +2,7 @@ use db::{CreateModelError, FetchModelByIndexError, FetchModelError};
 use hex::health;
 use models::{
   Artifact, ArtifactCreateRequest, ArtifactPath, ArtifactRecordId,
-  CompressionStatus, FileSize, StrictSlug,
+  CompressionStatus, FileSize, StrictSlug, UserRecordId,
 };
 use storage::{belt::Belt, StorageClient};
 
@@ -117,6 +117,7 @@ impl<
   async fn create_artifact(
     &self,
     data: Belt,
+    originator: UserRecordId,
   ) -> Result<Artifact, CreateArtifactError> {
     let pre_comp_counter = data.counter();
     let data = data.adapt_to_comp(storage::belt::CompressionAlgorithm::Zstd);
@@ -136,7 +137,11 @@ impl<
 
     let artifact = self
       .model_repo
-      .create_model(ArtifactCreateRequest { path, comp_status })
+      .create_model(ArtifactCreateRequest {
+        path,
+        originator,
+        comp_status,
+      })
       .await
       .map_err(CreateArtifactError::CreateModelError)?;
     Ok(artifact)

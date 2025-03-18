@@ -4,6 +4,8 @@ use dvf::slugger::{EitherSlug, StrictSlug};
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
+use crate::UserRecordId;
+
 /// The table name for [`Artifact`] records.
 pub const ARTIFACT_TABLE_NAME: &str = "artifact";
 
@@ -17,6 +19,8 @@ pub struct Artifact {
   pub id:          ArtifactRecordId,
   /// The artifact's path.
   pub path:        ArtifactPath,
+  /// The artifact's originator.
+  pub originator:  UserRecordId,
   /// The artifact's compression status.
   pub comp_status: dvf::CompressionStatus,
 }
@@ -62,6 +66,8 @@ impl Model for Artifact {
 pub struct ArtifactCreateRequest {
   /// The artifact's path.
   pub path:        ArtifactPath,
+  /// The artifact's originator.
+  pub originator:  UserRecordId,
   /// The artifact's compression status.
   pub comp_status: dvf::CompressionStatus,
 }
@@ -71,6 +77,7 @@ impl From<ArtifactCreateRequest> for Artifact {
     Self {
       id:          ArtifactRecordId::new(),
       path:        input.path,
+      originator:  input.originator,
       comp_status: input.comp_status,
     }
   }

@@ -1,6 +1,8 @@
 use hex::health;
 use miette::Result;
-use models::{Artifact, Photo, PhotoCreateRequest, PhotoRecordId};
+use models::{
+  Artifact, Photo, PhotoCreateRequest, PhotoRecordId, UserRecordId,
+};
 use repos::{belt::Belt, CreateArtifactError, FetchModelError};
 
 use crate::PrimeDomainService;
@@ -61,8 +63,9 @@ where
   async fn create_artifact(
     &self,
     data: Belt,
+    originator: UserRecordId,
   ) -> Result<Artifact, CreateArtifactError> {
-    self.artifact_repo.create_artifact(data).await
+    self.artifact_repo.create_artifact(data, originator).await
   }
 }
 
