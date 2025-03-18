@@ -13,11 +13,14 @@ leptos_axum = { workspace = true, optional = true }
 server_fn.workspace = true
 web-sys = { workspace = true, features = [ "Window" ] }
 
+belt = { workspace = true, optional = true }
 lsc = { path = "../lsc" }
 models = { path = "../models" }
 auth-domain = { path = "../auth-domain", optional = true }
 prime-domain = { path = "../prime-domain", optional = true }
 
+axum = { workspace = true, optional = true }
+futures.workspace = true
 serde.workspace = true
 tracing.workspace = true
 tokio = { workspace = true, optional = true }
@@ -31,8 +34,8 @@ default = [ ]
 hydrate = [ "leptos/hydrate", "lsc/hydrate" ]
 ssr = [
   "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
-  "lsc/ssr", "dep:leptos_axum", "dep:auth-domain", "dep:prime-domain",
-  "dep:tokio",
+  "lsc/ssr", "dep:leptos_axum", "dep:axum", "dep:belt", "dep:auth-domain",
+  "dep:prime-domain", "dep:tokio",
 ]
 
 [lints]

@@ -108,6 +108,10 @@ async fn main() {
 
   let app = Router::new()
     .leptos_routes_with_handler(routes.clone(), leptos_routes_handler)
+    .route(
+      "/api/upload_artifact",
+      post(site_app::server_fns::upload_artifact),
+    )
     .route("/api/*fn_name", post(server_fn_handler))
     .fallback_service(fallback_service)
     .with_state(app_state)

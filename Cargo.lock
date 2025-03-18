@@ -3241,7 +3241,10 @@ name = "site-app"
 version = "0.1.0"
 dependencies = [
  "auth-domain",
+ "axum 0.7.9",
+ "belt",
  "either",
+ "futures",
  "gloo",
  "leptos",
  "leptos_axum",

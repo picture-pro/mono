@@ -5,6 +5,7 @@
 mod bridge_types;
 mod components;
 mod pages;
+pub mod server_fns;
 mod utils;
 
 use leptos::prelude::*;
