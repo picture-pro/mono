@@ -14,13 +14,8 @@ pub(super) fn ConfiguringGroupStep() -> impl IntoView {
 
   view! {
     <p>"Configuring Group"</p>
-    <Button {..} on:click={move |_| {state.ready().set(true);} }>
-      "Test"
-    </Button>
   }
 }
 
 #[derive(Debug, Store)]
-pub(super) struct ConfiguringGroupState {
-  pub ready: bool,
-}
+pub(super) struct ConfiguringGroupState {}

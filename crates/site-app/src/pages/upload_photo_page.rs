@@ -1,11 +1,15 @@
 mod configuring_group;
+mod photo;
 mod selecting_photos;
 mod upload_finished;
 
-use std::ops::Deref;
+use std::{collections::HashMap, ops::Deref};
 
 use leptos::{either::EitherOf3, prelude::*};
+use photo::PhotoUploadState;
 use reactive_stores::Store;
+
+pub const MAX_UPLOAD_SIZE: u64 = 50 * 1000 * 1000; // 50MB
 
 use self::{
   configuring_group::{
@@ -39,21 +43,6 @@ pub fn UploadPhotoWizard() -> impl IntoView {
     let guard = overall_context.read();
     leptos::logging::log!("{:#?}", guard.deref());
   });
-  Effect::new(move || {
-    leptos::logging::log!("firing `advance_state` effect");
-    if overall_context.selecting_photos()
-      && overall_context.selecting_photos_0().unwrap().ready().get()
-    {
-      overall_context.set(UploadState::ConfiguringGroup(
-        ConfiguringGroupState { ready: false },
-      ));
-    }
-    if overall_context.configuring_group()
-      && overall_context.configuring_group_0().unwrap().ready().get()
-    {
-      overall_context.set(UploadState::UploadFinished(UploadFinishedState {}));
-    }
-  });
 
   move || {
     if overall_context.selecting_photos() {
@@ -77,6 +66,8 @@ enum UploadState {
 
 impl Default for UploadState {
   fn default() -> Self {
-    UploadState::SelectingPhotos(SelectingPhotosState { ready: false })
+    UploadState::SelectingPhotos(SelectingPhotosState {
+      photos: HashMap::new(),
+    })
   }
 }
