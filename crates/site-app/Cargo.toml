@@ -25,7 +25,7 @@ serde.workspace = true
 tracing.workspace = true
 tokio = { workspace = true, optional = true }
 either = "1.13.0"
-gloo = { version = "0.11.0", features = ["file", "futures"], default-features = false }
+gloo = { version = "0.11.0", features = ["file", "futures", "net"], default-features = false }
 send_wrapper = "0.6.0"
 reactive_stores = "0.1.3"
 
