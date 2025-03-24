@@ -93,21 +93,8 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
     })
   };
 
-  let delete_button_class =
-    "absolute top-0 right-0 size-8 flex flex-col justify-center items-center \
-     bg-base-2 dark:bg-basedark-2 border-2 border-base-8 \
-     dark:border-basedark-8 hover:border-danger-8 \
-     hover:dark:border-dangerdark-8 rounded-bl-lg rounded-tr-lg \
-     cursor-pointer text-base-dim hover:text-danger-dim transition-colors";
   let delete_handler = move |_| {
     photos.write().remove(&id);
-  };
-  let delete_button_element = move || {
-    view! {
-      <div class=delete_button_class on:click=delete_handler>
-        <TrashIcon {..} class="size-6" />
-      </div>
-    }
   };
 
   move || {
@@ -117,10 +104,28 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
           <div class="relative">
             <img src={url} class=image_class />
             { oversized_overlay_element }
-            { delete_button_element }
+            <DeleteButtonOverlay {..} on:click=delete_handler />
           </div>
         </div>
       }
     })
+  }
+}
+
+#[component]
+fn DeleteButtonOverlay() -> impl IntoView {
+  use lsc::icons::*;
+
+  let delete_button_class =
+    "absolute top-0 right-0 size-8 flex flex-col justify-center items-center \
+     bg-base-2 dark:bg-basedark-2 border-2 border-base-8 \
+     dark:border-basedark-8 hover:border-danger-8 \
+     hover:dark:border-dangerdark-8 rounded-bl-lg rounded-tr-lg \
+     cursor-pointer text-base-dim hover:text-danger-dim transition-colors";
+
+  view! {
+    <div class=delete_button_class>
+      <TrashIcon {..} class="size-6" />
+    </div>
   }
 }
