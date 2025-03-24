@@ -39,7 +39,7 @@ pub(super) fn PhotoPreviewer() -> impl IntoView {
   }
 }
 
-#[component]
+#[island]
 fn PhotoPreview(id: Ulid) -> impl IntoView {
   use lsc::icons::*;
 
@@ -54,7 +54,7 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
     photos
       .read()
       .get(&id)
-      .map(|f| f.oversized())
+      .map(|f| f.oversized()())
       .is_some_and(|v| v)
   };
 

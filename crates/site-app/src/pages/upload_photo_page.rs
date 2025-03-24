@@ -6,7 +6,6 @@ mod upload_finished;
 use std::{collections::HashMap, ops::Deref};
 
 use leptos::{either::EitherOf3, prelude::*};
-use photo::PhotoUploadState;
 use reactive_stores::Store;
 
 pub const MAX_UPLOAD_SIZE: u64 = 50 * 1000 * 1000; // 50MB

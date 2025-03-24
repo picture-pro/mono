@@ -1,7 +1,7 @@
-use std::{fmt, sync::Arc};
+use std::fmt;
 
 use gloo::file::{Blob, File, ObjectUrl};
-use leptos::prelude::{Action, LocalStorage};
+use leptos::prelude::{Action, LocalStorage, Signal};
 use models::{ArtifactRecordId, Ulid};
 use reactive_stores::Store;
 use send_wrapper::SendWrapper;
@@ -13,7 +13,7 @@ pub(super) struct Photo {
   id:           Ulid,
   blob:         SendWrapper<Blob>,
   url:          SendWrapper<ObjectUrl>,
-  upload_state: PhotoUploadState,
+  action_state: PhotoActionState,
 }
 
 impl Photo {
@@ -21,31 +21,29 @@ impl Photo {
     let id = Ulid::new();
 
     let blob = Blob::from(file);
-    let blob_size = blob.size();
     let url = ObjectUrl::from(blob.clone());
     let blob = SendWrapper::new(blob);
-    let upload_state = match blob_size > MAX_UPLOAD_SIZE {
-      true => {
-        leptos::logging::warn!("photo {id} is too large ({blob_size})");
-        PhotoUploadState::Oversized
-      }
-      false => PhotoUploadState::UploadQueued(blob.clone()),
-    };
+    let action_state = PhotoActionState::new(&blob);
 
     Self {
       id,
       blob,
       url: SendWrapper::new(url),
-      upload_state,
+      action_state,
     }
   }
   pub(super) fn id(&self) -> Ulid { self.id }
   pub(super) fn blob(&self) -> Blob { self.blob.clone().take() }
   pub(super) fn url(&self) -> ObjectUrl { self.url.clone().take() }
-  pub(super) fn oversized(&self) -> bool {
-    matches!(self.upload_state, PhotoUploadState::Oversized)
+  pub(super) fn oversized(&self) -> Signal<bool> {
+    let upload_status = self.upload_status();
+    Signal::derive(move || {
+      matches!(upload_status(), PhotoUploadStatus::Oversized)
+    })
   }
-  pub(super) fn upload_state(&self) -> &PhotoUploadState { &self.upload_state }
+  pub(super) fn upload_status(&self) -> Signal<PhotoUploadStatus> {
+    self.action_state.status()
+  }
 }
 
 impl fmt::Debug for Photo {
@@ -54,52 +52,62 @@ impl fmt::Debug for Photo {
       .field("id", &self.id)
       .field("blob", &self.blob)
       .field("url", &self.url.to_string())
-      .field("upload_state", &self.upload_state)
+      .field("action_state", &self.action_state)
       .finish()
   }
 }
 
-pub(super) enum PhotoUploadState {
-  UploadQueued(SendWrapper<Blob>),
-  UploadInProgress(
+pub enum PhotoActionState {
+  Started(
     Action<SendWrapper<Blob>, Result<ArtifactRecordId, String>, LocalStorage>,
   ),
-  UploadFinished(Result<ArtifactRecordId, String>),
   Oversized,
 }
 
-impl fmt::Debug for PhotoUploadState {
+impl fmt::Debug for PhotoActionState {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Self::UploadQueued(_) => write!(f, "UploadQueued"),
-      Self::UploadInProgress(_) => f.debug_tuple("UploadInProgress").finish(),
-      Self::UploadFinished(arg0) => {
-        f.debug_tuple("UploadFinished").field(arg0).finish()
-      }
+      Self::Started(_) => f.debug_tuple("Started").finish(),
       Self::Oversized => write!(f, "Oversized"),
     }
   }
 }
 
-impl PhotoUploadState {
-  pub(super) fn advance(&mut self) {
-    match &*self {
-      PhotoUploadState::UploadQueued(blob) => {
-        let action = Action::new_local(move |blob| {
-          upload_action_fn(SendWrapper::clone(blob))
-        });
-        action.dispatch_local(blob.clone());
-        *self = PhotoUploadState::UploadInProgress(action);
+impl PhotoActionState {
+  fn new(blob: &SendWrapper<Blob>) -> Self {
+    if blob.size() > MAX_UPLOAD_SIZE {
+      return PhotoActionState::Oversized;
+    };
+    let action =
+      Action::new_local(move |blob| upload_action_fn(SendWrapper::clone(blob)));
+    action.dispatch_local(blob.clone());
+    PhotoActionState::Started(action)
+  }
+
+  fn status(&self) -> Signal<PhotoUploadStatus> {
+    match self {
+      PhotoActionState::Started(action) => {
+        let value = action.value();
+        Signal::derive(move || {
+          if value().is_some() {
+            PhotoUploadStatus::UploadFinished
+          } else {
+            PhotoUploadStatus::UploadInProgress
+          }
+        })
       }
-      PhotoUploadState::UploadInProgress(action) => {
-        if let Some(value) = action.value()() {
-          *self = PhotoUploadState::UploadFinished(value);
-        }
+      PhotoActionState::Oversized => {
+        Signal::stored(PhotoUploadStatus::Oversized)
       }
-      PhotoUploadState::UploadFinished(_) => {}
-      PhotoUploadState::Oversized => {}
     }
   }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(super) enum PhotoUploadStatus {
+  UploadInProgress,
+  UploadFinished,
+  Oversized,
 }
 
 async fn upload_action_fn(
