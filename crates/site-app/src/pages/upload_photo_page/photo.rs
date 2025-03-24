@@ -58,6 +58,7 @@ impl fmt::Debug for Photo {
   }
 }
 
+#[derive(Clone)]
 pub enum PhotoActionState {
   Started(
     Action<SendWrapper<Blob>, Result<ArtifactRecordId, String>, LocalStorage>,

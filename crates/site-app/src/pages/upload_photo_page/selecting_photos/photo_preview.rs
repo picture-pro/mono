@@ -1,9 +1,10 @@
-use leptos::prelude::*;
+use leptos::{either::EitherOf3, prelude::*};
 use models::{FileSize, Ulid};
 use reactive_stores::Store;
 
 use crate::{
   pages::upload_photo_page::{
+    photo::PhotoUploadStatus,
     selecting_photos::SelectingPhotosStateStoreFields, UploadStateStoreFields,
   },
   MAX_UPLOAD_SIZE,
@@ -39,10 +40,8 @@ pub(super) fn PhotoPreviewer() -> impl IntoView {
   }
 }
 
-#[island]
+#[component]
 fn PhotoPreview(id: Ulid) -> impl IntoView {
-  use lsc::icons::*;
-
   let context: Store<super::super::UploadState> = expect_context();
   let state = context
     .selecting_photos_0()
@@ -50,13 +49,6 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
   let photos = state.photos();
 
   let url = move || photos.read().get(&id).map(|f| f.url().to_string());
-  let is_oversized = move || {
-    photos
-      .read()
-      .get(&id)
-      .map(|f| f.oversized()())
-      .is_some_and(|v| v)
-  };
 
   let image_class = "w-full sm:max-h-48 max-h-40 border-2 border-base-8 \
                      dark:border-basedark-8 group-hover:border-primary-8 \
@@ -65,36 +57,20 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
                      group-hover:dark:ring-primarydark-8 transition-colors \
                      rounded-lg";
 
-  let oversized_overlay_class =
-    "absolute inset-0 flex flex-col sm:gap-2 gap-1 p-2 items-center \
-     justify-center bg-base-1/[.8] dark:bg-basedark-1/[.8] rounded-lg \
-     border-2 border-warning-8 dark:border-warningdark-8 text-center \
-     text-warning-12 dark:text-warningdark-12 backdrop-blur-sm";
-  let file_size = move || {
-    photos
-      .read()
-      .get(&id)
-      .map(|f| FileSize::new(f.blob().size()))
-  };
-  let oversized_overlay_element = move || {
-    is_oversized().then_some(view! {
-      <div class=oversized_overlay_class>
-        <ExclamationTriangleIcon {..} class="sm:size-10 size-8" />
-        <div>
-          <p class="sm:text-lg font-bold">"Oversized"</p>
-          <p class="sm:text-sm text-xs text-warning-dim">
-            "Image is too large to upload. File: "
-            { move || file_size().map(|fs| fs.to_string()) }
-            ", max: "
-            { FileSize::new(MAX_UPLOAD_SIZE).to_string() }
-          </p>
-        </div>
-      </div>
-    })
-  };
-
   let delete_handler = move |_| {
     photos.write().remove(&id);
+  };
+
+  let status_overlay_element = move || {
+    move || match photos.read().get(&id).map(|f| f.upload_status()()) {
+      Some(PhotoUploadStatus::UploadInProgress) => EitherOf3::A(view! {
+        <ProgressOverlay />
+      }),
+      Some(PhotoUploadStatus::Oversized(file_size)) => EitherOf3::B(view! {
+        <OversizedAlertOverlay size=file_size />
+      }),
+      _ => EitherOf3::C(()),
+    }
   };
 
   move || {
@@ -103,7 +79,7 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
         <div class="flex flex-col justify-center items-center group">
           <div class="relative">
             <img src={url} class=image_class />
-            { oversized_overlay_element }
+            { status_overlay_element }
             <DeleteButtonOverlay {..} on:click=delete_handler />
           </div>
         </div>
@@ -126,6 +102,52 @@ fn DeleteButtonOverlay() -> impl IntoView {
   view! {
     <div class=delete_button_class>
       <TrashIcon {..} class="size-6" />
+    </div>
+  }
+}
+
+#[component]
+fn SpinnerVector() -> impl IntoView {
+  view! {
+    <svg class="mr-3 -ml-1 size-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+  }
+}
+
+#[component]
+fn ProgressOverlay() -> impl IntoView {
+  let progress_overlay_class = "absolute inset-0 flex flex-col items-center \
+                                justify-center bg-base-1/[.8] \
+                                dark:bg-basedark-1/[.8] text-center";
+
+  view! {
+    <div class=progress_overlay_class>
+      <SpinnerVector {..} class="size-12 animate-spin" />
+    </div>
+  }
+}
+
+#[component]
+fn OversizedAlertOverlay(size: FileSize) -> impl IntoView {
+  use lsc::icons::*;
+
+  let oversized_overlay_class =
+    "absolute inset-0 flex flex-col sm:gap-2 gap-1 p-2 items-center \
+     justify-center bg-base-1/[.8] dark:bg-basedark-1/[.8] rounded-lg \
+     border-2 border-warning-8 dark:border-warningdark-8 text-center \
+     text-warning-12 dark:text-warningdark-12 backdrop-blur-sm";
+
+  view! {
+    <div class=oversized_overlay_class>
+      <ExclamationTriangleIcon {..} class="sm:size-10 size-8" />
+      <div>
+        <p class="sm:text-lg font-bold">"Oversized"</p>
+        <p class="sm:text-sm text-xs text-warning-dim">
+          "Image is too large to upload. File: "
+          { size.to_string() }
+          ", max: "
+          { FileSize::new(MAX_UPLOAD_SIZE).to_string() }
+        </p>
+      </div>
     </div>
   }
 }
