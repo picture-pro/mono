@@ -11,13 +11,8 @@ use reactive_stores::Store;
 pub const MAX_UPLOAD_SIZE: u64 = 50 * 1000 * 1000; // 50MB
 
 use self::{
-  configuring_group::{
-    ConfiguringGroupState, ConfiguringGroupStateStoreFields,
-    ConfiguringGroupStep,
-  },
-  selecting_photos::{
-    SelectingPhotosState, SelectingPhotosStateStoreFields, SelectingPhotosStep,
-  },
+  configuring_group::{ConfiguringGroupState, ConfiguringGroupStep},
+  selecting_photos::{SelectingPhotosState, SelectingPhotosStep},
   upload_finished::{UploadFinishedState, UploadFinishedStep},
 };
 use crate::components::{Section, Title};
@@ -43,16 +38,22 @@ pub fn UploadPhotoWizard() -> impl IntoView {
     leptos::logging::log!("{:#?}", guard.deref());
   });
 
-  move || {
+  let memoized_top_level_switch = Memo::new(move |_| {
     if overall_context.selecting_photos() {
-      EitherOf3::A(view! { <SelectingPhotosStep /> })
+      EitherOf3::A(())
     } else if overall_context.configuring_group() {
-      EitherOf3::B(view! { <ConfiguringGroupStep /> })
+      EitherOf3::B(())
     } else if overall_context.upload_finished() {
-      EitherOf3::C(view! { <UploadFinishedStep /> })
+      EitherOf3::C(())
     } else {
       unreachable!("UploadContext not in any state")
     }
+  });
+
+  move || match memoized_top_level_switch() {
+    EitherOf3::A(_) => EitherOf3::A(view! { <SelectingPhotosStep /> }),
+    EitherOf3::B(_) => EitherOf3::B(view! { <ConfiguringGroupStep /> }),
+    EitherOf3::C(_) => EitherOf3::C(view! { <UploadFinishedStep /> }),
   }
 }
 

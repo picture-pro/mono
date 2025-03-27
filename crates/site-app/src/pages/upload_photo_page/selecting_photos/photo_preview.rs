@@ -10,7 +10,7 @@ use crate::{
   MAX_UPLOAD_SIZE,
 };
 
-#[island]
+#[component]
 pub(super) fn PhotoPreviewer() -> impl IntoView {
   let context: Store<super::super::UploadState> = expect_context();
   let state = context

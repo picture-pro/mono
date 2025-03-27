@@ -9,7 +9,7 @@ use send_wrapper::SendWrapper;
 use super::MAX_UPLOAD_SIZE;
 
 #[derive(Store)]
-pub(super) struct Photo {
+pub struct Photo {
   id:           Ulid,
   blob:         SendWrapper<Blob>,
   url:          SendWrapper<ObjectUrl>,
@@ -44,6 +44,15 @@ impl Photo {
   }
   pub(super) fn upload_status(&self) -> Signal<PhotoUploadStatus> {
     self.action_state.status()
+  }
+  pub(super) fn artifact_id(&self) -> Signal<Option<ArtifactRecordId>> {
+    match self.action_state {
+      PhotoActionState::Started(action) => {
+        let value = action.value();
+        Signal::derive(move || value().and_then(|r| r.ok()))
+      }
+      PhotoActionState::Oversized(_) => Signal::stored(None),
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+mod next_step_button;
 mod photo_preview;
 mod upload_area;
 
@@ -7,7 +8,9 @@ use leptos::prelude::*;
 use models::Ulid;
 use reactive_stores::Store;
 
-use self::{photo_preview::*, upload_area::*};
+use self::{
+  next_step_button::NextStepButton, photo_preview::*, upload_area::*,
+};
 use super::photo::Photo;
 use crate::components::Section;
 
@@ -24,6 +27,12 @@ pub(super) fn SelectingPhotosStep() -> impl IntoView {
 
     <Section>
       <PhotoPreviewer />
+    </Section>
+
+    <Section>
+      <div class="w-full flex flex-row justify-end">
+        <NextStepButton />
+      </div>
     </Section>
   }
 }
