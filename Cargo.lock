@@ -365,7 +365,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "belt"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "async-compression",
  "bytes",
@@ -660,7 +660,7 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "async-trait",
  "hex",
@@ -746,7 +746,7 @@ checksum = "669a445ee724c5c69b1b06fe0b63e70a1c84bc9bb7d9696cd4f4e3ec45050408"
 [[package]]
 name = "dvf"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "email_address",
  "nutype",
@@ -1200,7 +1200,7 @@ checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 [[package]]
 name = "health"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "async-trait",
  "futures",
@@ -1222,7 +1222,7 @@ checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 [[package]]
 name = "hex"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "health",
  "tokio",
@@ -1695,7 +1695,7 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "async-trait",
  "hex",
@@ -2107,7 +2107,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "dvf",
  "serde",
@@ -3338,7 +3338,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "deunicode",
  "nutype",
@@ -3398,12 +3398,12 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starc"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 
 [[package]]
 name = "storage"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=6202762#6202762c820ea393348dd1e34f44cb6876c74655"
+source = "git+https://github.com/rambit-systems/rambit?rev=6e26706#6e26706210d46510e19e14e3bf6a3a426406b203"
 dependencies = [
  "async-trait",
  "belt",
