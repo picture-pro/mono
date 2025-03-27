@@ -5,7 +5,7 @@ use hex::health;
 use models::EitherSlug;
 use tokio::sync::Mutex;
 
-use crate::ModelRepository;
+use crate::ModelRepositoryLike;
 
 /// A mock model repository for testing purposes.
 #[derive(Debug)]
@@ -49,7 +49,7 @@ impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static>
 
 #[async_trait::async_trait]
 impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static>
-  ModelRepository for MockModelRepository<M, MCR>
+  ModelRepositoryLike for MockModelRepository<M, MCR>
 {
   type Model = M;
   type ModelCreateRequest = MCR;
@@ -82,8 +82,10 @@ impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static>
     &self,
     index_name: String,
     index_value: EitherSlug,
-  ) -> Result<Option<<Self as ModelRepository>::Model>, FetchModelByIndexError>
-  {
+  ) -> Result<
+    Option<<Self as ModelRepositoryLike>::Model>,
+    FetchModelByIndexError,
+  > {
     if !M::UNIQUE_INDICES.iter().any(|i| i.0 == index_name) {
       return Err(FetchModelByIndexError::IndexDoesNotExistOnModel {
         index_name: index_name.clone(),
