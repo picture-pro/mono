@@ -1,86 +1,53 @@
-use std::{fmt::Debug, marker::PhantomData};
-
 pub use db::CreateModelError;
-pub(crate) use db::{DatabaseAdapter, FetchModelByIndexError, FetchModelError};
-use hex::health;
+pub(crate) use db::{Database, FetchModelByIndexError, FetchModelError};
+use hex::health::{self, HealthAware};
 use miette::Result;
 use tracing::instrument;
 
-use crate::ModelRepository;
+use crate::ModelRepositoryLike;
 
 /// Provides a base repository implementation for any model.
-pub struct BaseModelRepository<
-  M: models::Model,
-  MCR: Debug + Into<M> + Send + Sync + 'static,
-  DB: DatabaseAdapter,
-> {
-  db_adapter: DB,
-  _phantom:   PhantomData<M>,
-  _phantom2:  PhantomData<MCR>,
+///
+/// This is private and cannot be used directly. Each model's implementation
+/// of `ModelRepository` needs to be a concrete type, even if it's just a
+/// shell for this type, so that extra logic can be added later if needed.
+pub(crate) struct BaseRepository<M: models::Model> {
+  db: Database<M>,
 }
 
-impl<
-    M: models::Model,
-    MCR: Debug + Into<M> + Send + Sync + 'static,
-    DB: DatabaseAdapter + Clone,
-  > Clone for BaseModelRepository<M, MCR, DB>
-{
+impl<M: models::Model> Clone for BaseRepository<M> {
   fn clone(&self) -> Self {
     Self {
-      db_adapter: self.db_adapter.clone(),
-      _phantom:   PhantomData,
-      _phantom2:  PhantomData,
+      db: self.db.clone(),
     }
   }
 }
 
-impl<
-    M: models::Model,
-    MCR: Debug + Into<M> + Send + Sync + 'static,
-    DB: DatabaseAdapter,
-  > BaseModelRepository<M, MCR, DB>
-{
-  /// Creates a new `BaseRepository` instance.
-  pub fn new(db_adapter: DB) -> Self {
+impl<M: models::Model> BaseRepository<M> {
+  pub fn new(db: Database<M>) -> Self {
     tracing::info!(
       "creating new `BaseRepository<{:?}>` instance",
       M::TABLE_NAME
     );
 
-    Self {
-      db_adapter,
-      _phantom: PhantomData,
-      _phantom2: PhantomData,
-    }
+    Self { db }
   }
 }
 
 #[async_trait::async_trait]
-impl<
-    M: models::Model,
-    MCR: Debug + Into<M> + Send + Sync + 'static,
-    DB: DatabaseAdapter,
-  > health::HealthReporter for BaseModelRepository<M, MCR, DB>
-{
-  fn name(&self) -> &'static str { stringify!(BaseRepository<M, DB>) }
+impl<M: models::Model> health::HealthReporter for BaseRepository<M> {
+  fn name(&self) -> &'static str { stringify!(BaseRepository<M>) }
   async fn health_check(&self) -> health::ComponentHealth {
-    health::AdditiveComponentHealth::from_futures(Some(
-      self.db_adapter.health_report(),
-    ))
-    .await
-    .into()
+    health::AdditiveComponentHealth::from_futures(Some(self.db.health_report()))
+      .await
+      .into()
   }
 }
 
 #[async_trait::async_trait]
-impl<
-    M: models::Model,
-    MCR: Debug + Into<M> + Send + Sync + 'static,
-    DB: DatabaseAdapter,
-  > ModelRepository for BaseModelRepository<M, MCR, DB>
-{
+impl<M: models::Model> ModelRepositoryLike for BaseRepository<M> {
   type Model = M;
-  type ModelCreateRequest = MCR;
+  type ModelCreateRequest = M;
   type CreateError = CreateModelError;
 
   #[instrument(skip(self))]
@@ -88,10 +55,7 @@ impl<
     &self,
     input: Self::ModelCreateRequest,
   ) -> Result<Self::Model, CreateModelError> {
-    self
-      .db_adapter
-      .create_model::<Self::Model>(input.into())
-      .await
+    self.db.create_model(input).await
   }
 
   #[instrument(skip(self))]
@@ -99,7 +63,7 @@ impl<
     &self,
     id: models::RecordId<Self::Model>,
   ) -> Result<Option<Self::Model>, FetchModelError> {
-    self.db_adapter.fetch_model_by_id(id).await
+    self.db.fetch_model_by_id(id).await
   }
 
   #[instrument(skip(self))]
@@ -108,14 +72,11 @@ impl<
     index_name: String,
     index_value: models::EitherSlug,
   ) -> Result<Option<Self::Model>, FetchModelByIndexError> {
-    self
-      .db_adapter
-      .fetch_model_by_index(index_name, index_value)
-      .await
+    self.db.fetch_model_by_index(index_name, index_value).await
   }
 
   #[instrument(skip(self))]
   async fn enumerate_models(&self) -> Result<Vec<Self::Model>> {
-    self.db_adapter.enumerate_models::<Self::Model>().await
+    self.db.enumerate_models().await
   }
 }
