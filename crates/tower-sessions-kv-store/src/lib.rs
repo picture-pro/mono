@@ -1,12 +1,8 @@
 //! A key-value store backend for the tower-sessions crate.
 
-use std::{
-  borrow::Borrow,
-  fmt,
-  sync::{Arc, LazyLock},
-};
+use std::{borrow::Borrow, sync::LazyLock};
 
-use kv::prelude::*;
+use kv::{Key, KeyValueStore, KvPrimitive, KvTransaction, StrictSlug, Value};
 use tower_sessions::{
   session::{Id, Record},
   session_store::Error,
@@ -14,20 +10,14 @@ use tower_sessions::{
 };
 
 /// A key-value store backend for the tower-sessions crate.
-#[derive(Clone)]
-pub struct TowerSessionsKvStore<KV: KvTransactional> {
-  kv: Arc<KV>,
+#[derive(Clone, Debug)]
+pub struct TowerSessionsKvStore {
+  kv: KeyValueStore,
 }
 
-impl<KV: KvTransactional> fmt::Debug for TowerSessionsKvStore<KV> {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("TowerSessionsKvStore").finish()
-  }
-}
-
-impl<KV: KvTransactional> TowerSessionsKvStore<KV> {
+impl TowerSessionsKvStore {
   /// Create a new key-value store backend.
-  pub fn new(kv: KV) -> Self { Self { kv: kv.into() } }
+  pub fn new(kv: KeyValueStore) -> Self { Self { kv } }
 }
 
 static SESSION_NS_SEGMENT: LazyLock<StrictSlug> =
@@ -38,7 +28,7 @@ fn session_id_to_key(id: &Id) -> Key {
 }
 
 #[async_trait::async_trait]
-impl<KV: KvTransactional> SessionStore for TowerSessionsKvStore<KV> {
+impl SessionStore for TowerSessionsKvStore {
   async fn save(&self, session_record: &Record) -> Result<(), Error> {
     let key = session_id_to_key(&session_record.id);
     let value = Value::serialize(session_record).map_err(|e| {
