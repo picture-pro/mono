@@ -53,7 +53,7 @@ impl health::HealthReporter for PhotoRepository {
 
 impl PhotoRepository {
   #[instrument(skip(self))]
-  pub async fn create_model(
+  pub async fn create_photo(
     &self,
     input: models::PhotoCreateRequest,
   ) -> Result<Photo, CreateModelError> {
@@ -61,7 +61,7 @@ impl PhotoRepository {
   }
 
   #[instrument(skip(self))]
-  pub async fn fetch_model_by_id(
+  pub async fn fetch_photo_by_id(
     &self,
     id: models::PhotoRecordId,
   ) -> Result<Option<Photo>, FetchModelError> {
@@ -69,7 +69,7 @@ impl PhotoRepository {
   }
 
   #[instrument(skip(self))]
-  pub async fn enumerate_models(&self) -> Result<Vec<Photo>> {
+  pub async fn enumerate_photos(&self) -> Result<Vec<Photo>> {
     self.model_repo.enumerate_models().await
   }
 }
