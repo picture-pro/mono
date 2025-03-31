@@ -1,33 +1,26 @@
 //! Provides the [`AuthDomainService`], the entry point for users,
 //! authentication, and authorization logic.
 
-use core::fmt;
-use std::sync::Arc;
-
 use axum_login::AuthUser;
 pub use axum_login::AuthnBackend;
-use hex::{health, Hexagonal};
+use hex::health::{self, HealthAware};
 use miette::IntoDiagnostic;
-use models::{
-  EitherSlug, LaxSlug, PublicUser, User, UserAuthCredentials, UserCreateRequest,
-};
-use repos::{FetchModelByIndexError, FetchModelError, ModelRepository};
+use models::{PublicUser, User, UserAuthCredentials, UserCreateRequest};
+use repos::{FetchModelByIndexError, FetchModelError, UserRepository};
+use tracing::instrument;
 
 /// The authentication session type.
-pub type AuthSession = axum_login::AuthSession<DynAuthDomainService>;
+pub type AuthSession = axum_login::AuthSession<AuthDomainService>;
 
 /// A dynamic [`AuthDomainService`] trait object.
-#[derive(Clone)]
-pub struct DynAuthDomainService(Arc<Box<dyn AuthDomainService>>);
-
-impl std::ops::Deref for DynAuthDomainService {
-  type Target = dyn AuthDomainService;
-  fn deref(&self) -> &Self::Target { &self.0 }
+#[derive(Clone, Debug)]
+pub struct AuthDomainService {
+  user_repo: UserRepository,
 }
 
-impl DynAuthDomainService {
-  /// Creates a new dynamic [`AuthDomainService`] from the given service.
-  pub fn new(inner: Arc<Box<dyn AuthDomainService>>) -> Self { Self(inner) }
+impl AuthDomainService {
+  /// Creates a new [`AuthDomainService`].
+  pub fn new(user_repo: UserRepository) -> Self { Self { user_repo } }
 }
 
 /// An error that occurs during user creation.
@@ -55,126 +48,28 @@ pub enum AuthenticationError {
   FetchByIndexError(#[from] FetchModelByIndexError),
 }
 
-/// The authentication service trait.
-#[async_trait::async_trait]
-pub trait AuthDomainService: Hexagonal {
-  /// Fetches a user by their ID.
-  async fn fetch_user_by_id(
-    &self,
-    id: models::UserRecordId,
-  ) -> Result<Option<User>, FetchModelError>;
-  /// Fetches a user by their email address.
-  async fn fetch_user_by_email(
-    &self,
-    email: models::EmailAddress,
-  ) -> Result<Option<User>, FetchModelByIndexError>;
-
-  /// Creates a new user.
-  async fn user_signup(
-    &self,
-    req: UserCreateRequest,
-  ) -> Result<User, CreateUserError>;
-
-  /// Authenticates a user.
-  async fn user_authenticate(
-    &self,
-    creds: UserAuthCredentials,
-  ) -> Result<Option<User>, AuthenticationError>;
-}
-
-// smart pointer impl
-#[async_trait::async_trait]
-impl<T, I> AuthDomainService for T
-where
-  T: std::ops::Deref<Target = I> + Hexagonal + Sized,
-  I: AuthDomainService + ?Sized,
-{
-  async fn fetch_user_by_id(
+impl AuthDomainService {
+  /// Fetch a [`User`] by ID.
+  #[instrument(skip(self))]
+  pub async fn fetch_user_by_id(
     &self,
     id: models::UserRecordId,
   ) -> Result<Option<User>, FetchModelError> {
-    I::fetch_user_by_id(self, id).await
+    self.user_repo.fetch_user_by_id(id).await
   }
 
-  async fn fetch_user_by_email(
+  /// Fetch a [`User`] by [`EmailAddress`](models::EmailAddress).
+  #[instrument(skip(self))]
+  pub async fn fetch_user_by_email(
     &self,
     email: models::EmailAddress,
   ) -> Result<Option<User>, FetchModelByIndexError> {
-    I::fetch_user_by_email(self, email).await
+    self.user_repo.fetch_user_by_email(email).await
   }
 
-  async fn user_signup(
-    &self,
-    req: UserCreateRequest,
-  ) -> Result<User, CreateUserError> {
-    I::user_signup(self, req).await
-  }
-
-  async fn user_authenticate(
-    &self,
-    creds: UserAuthCredentials,
-  ) -> Result<Option<User>, AuthenticationError> {
-    I::user_authenticate(self, creds).await
-  }
-}
-
-/// The canonical implementation of the [`AuthDomainService`].
-pub struct AuthDomainServiceCanonical<
-  UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
-> {
-  user_repo: UR,
-}
-
-impl<
-    UR: Clone
-      + ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
-  > Clone for AuthDomainServiceCanonical<UR>
-{
-  fn clone(&self) -> Self {
-    Self {
-      user_repo: self.user_repo.clone(),
-    }
-  }
-}
-
-impl<
-    UR: fmt::Debug
-      + ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
-  > fmt::Debug for AuthDomainServiceCanonical<UR>
-{
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct(stringify!(AuthDomainServiceCanonical))
-      .field("user_repo", &self.user_repo)
-      .finish()
-  }
-}
-
-#[async_trait::async_trait]
-impl<
-    UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
-  > AuthDomainService for AuthDomainServiceCanonical<UR>
-{
-  async fn fetch_user_by_id(
-    &self,
-    id: models::UserRecordId,
-  ) -> Result<Option<User>, FetchModelError> {
-    self.user_repo.fetch_model_by_id(id).await
-  }
-
-  async fn fetch_user_by_email(
-    &self,
-    email: models::EmailAddress,
-  ) -> Result<Option<User>, FetchModelByIndexError> {
-    self
-      .user_repo
-      .fetch_model_by_index(
-        "email".to_string(),
-        EitherSlug::Lax(LaxSlug::new(email.as_ref())),
-      )
-      .await
-  }
-
-  async fn user_signup(
+  /// Sign up a [`User`].
+  #[instrument(skip(self))]
+  pub async fn user_signup(
     &self,
     req: UserCreateRequest,
   ) -> Result<User, CreateUserError> {
@@ -185,13 +80,15 @@ impl<
 
     self
       .user_repo
-      .create_model(req)
+      .create_user(req)
       .await
       .into_diagnostic()
       .map_err(CreateUserError::CreateError)
   }
 
-  async fn user_authenticate(
+  /// Authenticate a [`User`].
+  #[instrument(skip(self))]
+  pub async fn user_authenticate(
     &self,
     creds: UserAuthCredentials,
   ) -> Result<Option<User>, AuthenticationError> {
@@ -204,21 +101,9 @@ impl<
   }
 }
 
-impl<
-    UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
-  > AuthDomainServiceCanonical<UR>
-{
-  /// Creates a new [`AuthDomainServiceCanonical`] with the given user
-  /// repository.
-  pub fn new(user_repo: UR) -> Self { Self { user_repo } }
-}
-
 #[async_trait::async_trait]
-impl<
-    UR: ModelRepository<Model = User, ModelCreateRequest = UserCreateRequest>,
-  > health::HealthReporter for AuthDomainServiceCanonical<UR>
-{
-  fn name(&self) -> &'static str { stringify!(AuthDomainServiceCanonical) }
+impl health::HealthReporter for AuthDomainService {
+  fn name(&self) -> &'static str { stringify!(AuthDomainService) }
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(vec![self
       .user_repo
@@ -229,7 +114,7 @@ impl<
 }
 
 #[async_trait::async_trait]
-impl AuthnBackend for DynAuthDomainService {
+impl AuthnBackend for AuthDomainService {
   type User = PublicUser;
   type Credentials = UserAuthCredentials;
   type Error = AuthenticationError;
@@ -260,14 +145,16 @@ mod tests {
   use std::sync::Arc;
 
   use models::{EmailAddress, HumanName};
-  use repos::MockModelRepository;
+  use repos::{CreateModelError, MockModelRepository};
 
   use super::*;
 
   #[tokio::test]
   async fn test_user_signup() {
-    let user_repo = MockModelRepository::<User, UserCreateRequest>::new();
-    let service = AuthDomainServiceCanonical::new(Arc::new(user_repo));
+    let mock_repo =
+      MockModelRepository::<User, UserCreateRequest, CreateModelError>::new();
+    let user_repo = UserRepository::new(Arc::new(mock_repo));
+    let service = AuthDomainService::new(user_repo);
 
     let email = EmailAddress::try_new("test@example.com").unwrap();
     let user_1_req = UserCreateRequest {
@@ -292,8 +179,10 @@ mod tests {
 
   #[tokio::test]
   async fn test_user_authenticate() {
-    let user_repo = MockModelRepository::<User, UserCreateRequest>::new();
-    let service = AuthDomainServiceCanonical::new(Arc::new(user_repo));
+    let mock_repo =
+      MockModelRepository::<User, UserCreateRequest, CreateModelError>::new();
+    let user_repo = UserRepository::new(Arc::new(mock_repo));
+    let service = AuthDomainService::new(user_repo);
 
     let email = EmailAddress::try_new("test@example.com").unwrap();
     let user_1_req = UserCreateRequest {
