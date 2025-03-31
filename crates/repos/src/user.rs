@@ -53,6 +53,19 @@ impl health::HealthReporter for UserRepository {
 }
 
 impl UserRepository {
+  /// Create a new [`UserRepository`].
+  pub fn new(
+    model_repo: Arc<
+      dyn ModelRepositoryLike<
+        Model = User,
+        ModelCreateRequest = UserCreateRequest,
+        CreateError = CreateModelError,
+      >,
+    >,
+  ) -> Self {
+    Self { model_repo }
+  }
+
   /// Create a [`User`] model.
   #[instrument(skip(self))]
   pub async fn create_user(

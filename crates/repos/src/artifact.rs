@@ -85,6 +85,23 @@ impl health::HealthReporter for ArtifactRepository {
 }
 
 impl ArtifactRepository {
+  /// Create a new [`ArtifactRepository`].
+  pub fn new(
+    storage_repo: StorageClient,
+    model_repo: Arc<
+      dyn ModelRepositoryLike<
+        Model = Artifact,
+        ModelCreateRequest = ArtifactCreateRequest,
+        CreateError = CreateArtifactError,
+      >,
+    >,
+  ) -> Self {
+    Self {
+      storage_repo,
+      model_repo,
+    }
+  }
+
   /// Fetch an [`Artifact`] by id.
   pub async fn fetch_artifact_by_id(
     &self,

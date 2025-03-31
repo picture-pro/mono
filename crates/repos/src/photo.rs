@@ -53,6 +53,19 @@ impl health::HealthReporter for PhotoRepository {
 }
 
 impl PhotoRepository {
+  /// Create a new [`PhotoRepository`].
+  pub fn new(
+    model_repo: Arc<
+      dyn ModelRepositoryLike<
+        Model = Photo,
+        ModelCreateRequest = PhotoCreateRequest,
+        CreateError = CreateModelError,
+      >,
+    >,
+  ) -> Self {
+    Self { model_repo }
+  }
+
   /// Create a [`Photo`] model.
   #[instrument(skip(self))]
   pub async fn create_photo(
