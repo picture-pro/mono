@@ -151,8 +151,7 @@ mod tests {
 
   #[tokio::test]
   async fn test_user_signup() {
-    let mock_repo =
-      MockModelRepository::<User, UserCreateRequest, CreateModelError>::new();
+    let mock_repo = MockModelRepository::<User, User, CreateModelError>::new();
     let user_repo = UserRepository::new(Arc::new(mock_repo));
     let service = AuthDomainService::new(user_repo);
 
@@ -179,8 +178,7 @@ mod tests {
 
   #[tokio::test]
   async fn test_user_authenticate() {
-    let mock_repo =
-      MockModelRepository::<User, UserCreateRequest, CreateModelError>::new();
+    let mock_repo = MockModelRepository::<User, User, CreateModelError>::new();
     let user_repo = UserRepository::new(Arc::new(mock_repo));
     let service = AuthDomainService::new(user_repo);
 

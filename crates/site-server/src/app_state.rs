@@ -1,75 +1,58 @@
-use std::{str::FromStr, sync::Arc, time::Duration};
+use std::{str::FromStr, time::Duration};
 
-use auth_domain::{AuthDomainServiceCanonical, DynAuthDomainService};
+use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
 use leptos::prelude::*;
 use miette::Result;
 use prime_domain::{
-  hex::retryable::Retryable,
-  models::{User, UserCreateRequest},
-  repos::{db::kv, storage::StorageClientGenerator, CreateModelError},
-  DynPrimeDomainService, PrimeDomainService, PrimeDomainServiceCanonical,
+  repos::{
+    db::{kv, Database},
+    storage::StorageClient,
+  },
+  PrimeDomainService,
 };
 
 #[derive(Clone, FromRef)]
 pub struct AppState {
-  pub prime_domain_service: DynPrimeDomainService,
-  pub auth_domain_service:  DynAuthDomainService,
-  pub session_store:
-    tower_sessions_kv_store::TowerSessionsKvStore<super::TowerSessionsBackend>,
+  pub prime_domain_service: PrimeDomainService,
+  pub auth_domain_service:  AuthDomainService,
+  pub session_store:        tower_sessions_kv_store::TowerSessionsKvStore,
   pub leptos_options:       LeptosOptions,
 }
 
 impl AppState {
   pub async fn new(l_opts: LeptosOptions) -> Result<Self> {
-    let tikv_store_init =
-      move || async move { kv::tikv::TikvClient::new_from_env().await };
-    let retryable_tikv_store = Arc::new(
-      Retryable::init(5, Duration::from_secs(2), tikv_store_init).await,
-    );
+    let retryable_kv_store =
+      kv::KeyValueStore::new_retryable_tikv_from_env(5, Duration::from_secs(2))
+        .await;
+
     let session_store = tower_sessions_kv_store::TowerSessionsKvStore::new(
-      retryable_tikv_store.clone(),
-    );
-    let kv_db_adapter = Arc::new(
-      prime_domain::repos::db::KvDatabaseAdapter::new(retryable_tikv_store),
+      retryable_kv_store.clone(),
     );
 
-    let photo_repo =
-      prime_domain::repos::BaseModelRepository::new(kv_db_adapter.clone());
-    let user_repo: Arc<
-      Box<
-        dyn prime_domain::repos::ModelRepository<
-          Model = User,
-          ModelCreateRequest = UserCreateRequest,
-          CreateError = CreateModelError,
-        >,
-      >,
-    > = Arc::new(Box::new(prime_domain::repos::BaseModelRepository::new(
-      kv_db_adapter.clone(),
-    )));
+    let photo_repo = prime_domain::repos::PhotoRepository::new_from_base(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
+    let user_repo = prime_domain::repos::UserRepository::new_from_base(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
 
-    let artifact_model_repo =
-      prime_domain::repos::BaseModelRepository::new(kv_db_adapter.clone());
     let storage_credentials = prime_domain::models::StorageCredentials::Local(
       prime_domain::models::LocalStorageCredentials(
         std::path::PathBuf::from_str("/tmp/picturepro-store").unwrap(),
       ),
     );
-    let artifact_storage_repo = storage_credentials
-      .client()
-      .await
-      .expect("failed to create local artifact storage repo");
-    let artifact_repo = prime_domain::repos::ArtifactRepositoryCanonical::new(
-      artifact_model_repo,
-      artifact_storage_repo,
-    );
+    let artifact_storage_client =
+      StorageClient::new_from_storage_creds(storage_credentials).await?;
+    let artifact_repo =
+      prime_domain::repos::ArtifactRepository::new_from_base_and_storage_client(
+        Database::new_from_kv(retryable_kv_store),
+        artifact_storage_client,
+      );
 
-    let prime_domain_service: Arc<Box<dyn PrimeDomainService>> = Arc::new(
-      Box::new(PrimeDomainServiceCanonical::new(photo_repo, artifact_repo)),
-    );
-    let auth_domain_service: DynAuthDomainService = DynAuthDomainService::new(
-      Arc::new(Box::new(AuthDomainServiceCanonical::new(user_repo))),
-    );
+    let prime_domain_service =
+      PrimeDomainService::new(photo_repo, artifact_repo);
+    let auth_domain_service = AuthDomainService::new(user_repo);
 
     Ok(Self {
       prime_domain_service,

@@ -2,7 +2,6 @@ mod uploaded_photo;
 mod uploaded_photo_preview;
 
 mod group_configurator {
-  use std::num::ParseFloatError;
 
   use leptos::prelude::*;
   use models::{UsdPriceNaive, PHOTO_GROUP_USAGE_RIGHTS_MINIMUM_PRICE};

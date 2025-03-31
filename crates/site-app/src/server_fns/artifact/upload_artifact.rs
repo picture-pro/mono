@@ -9,7 +9,7 @@ use models::ArtifactRecordId;
 /// Uploads an artifact from the HTTP stream. Requires authentication.
 #[axum::debug_handler]
 pub async fn upload_artifact(
-  State(prime_domain): State<prime_domain::DynPrimeDomainService>,
+  State(prime_domain): State<prime_domain::PrimeDomainService>,
   auth_session: AuthSession,
   body: Body,
 ) -> Result<Json<ArtifactRecordId>, String> {

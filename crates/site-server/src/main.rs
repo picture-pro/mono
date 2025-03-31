@@ -1,8 +1,6 @@
 mod app_state;
 mod file_and_error_handler;
 
-use std::sync::Arc;
-
 use auth_domain::AuthSession;
 use axum::{
   body::Body,
@@ -14,16 +12,11 @@ use axum::{
 use axum_login::AuthManagerLayerBuilder;
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
-use prime_domain::repos::db::kv;
 use site_app::*;
 use tower::ServiceBuilder;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
 use self::app_state::AppState;
-
-type TowerSessionsBackend = Arc<
-  prime_domain::hex::retryable::Retryable<kv::tikv::TikvClient, miette::Report>,
->;
 
 #[axum::debug_handler]
 async fn leptos_routes_handler(

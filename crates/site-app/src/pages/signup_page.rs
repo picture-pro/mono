@@ -261,14 +261,13 @@ async fn signup(
   email: String,
   confirm_email: String,
 ) -> Result<UserRecordId, ServerFnError> {
-  use auth_domain::{AuthDomainService, AuthSession, DynAuthDomainService};
+  use auth_domain::{AuthDomainService, AuthSession};
   use models::{UserAuthCredentials, UserCreateRequest};
 
-  let auth_service =
-    use_context::<DynAuthDomainService>().ok_or_else(|| {
-      tracing::error!("auth service not found");
-      ServerFnError::new("Internal error")
-    })?;
+  let auth_service = use_context::<AuthDomainService>().ok_or_else(|| {
+    tracing::error!("auth service not found");
+    ServerFnError::new("Internal error")
+  })?;
   let mut auth_session =
     leptos_axum::extract::<AuthSession>().await.map_err(|_| {
       tracing::error!("auth session not found");
