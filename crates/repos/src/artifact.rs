@@ -1,6 +1,6 @@
 use std::{fmt, sync::Arc};
 
-use db::{CreateModelError, FetchModelByIndexError, FetchModelError};
+use db::{CreateModelError, Database, FetchModelByIndexError, FetchModelError};
 use hex::health::{self, HealthAware};
 use models::{
   Artifact, ArtifactCreateRequest, ArtifactPath, ArtifactRecordId,
@@ -11,7 +11,7 @@ use storage::{
   WriteError as StorageWriteError,
 };
 
-use crate::ModelRepositoryLike;
+use crate::{base::BaseRepository, ModelRepositoryLike};
 
 /// An error that occurs when reading the data of an [`Artifact`].
 #[derive(Debug, thiserror::Error, miette::Diagnostic)]
@@ -45,8 +45,8 @@ pub struct ArtifactRepository {
   model_repo: Arc<
     dyn ModelRepositoryLike<
       Model = Artifact,
-      ModelCreateRequest = ArtifactCreateRequest,
-      CreateError = CreateArtifactError,
+      ModelCreateRequest = Artifact,
+      CreateError = CreateModelError,
     >,
   >,
 }
@@ -61,8 +61,8 @@ impl fmt::Debug for ArtifactRepository {
           Arc<
             dyn ModelRepositoryLike<
               Model = Artifact,
-              ModelCreateRequest = ArtifactCreateRequest,
-              CreateError = CreateArtifactError,
+              ModelCreateRequest = Artifact,
+              CreateError = CreateModelError,
             >,
           >
         ),
@@ -91,8 +91,8 @@ impl ArtifactRepository {
     model_repo: Arc<
       dyn ModelRepositoryLike<
         Model = Artifact,
-        ModelCreateRequest = ArtifactCreateRequest,
-        CreateError = CreateArtifactError,
+        ModelCreateRequest = Artifact,
+        CreateError = CreateModelError,
       >,
     >,
   ) -> Self {
@@ -100,6 +100,14 @@ impl ArtifactRepository {
       storage_repo,
       model_repo,
     }
+  }
+
+  /// Create a new [`ArtifactRepository`], backed by `BaseRepository`.
+  pub fn new_from_base_and_storage_client(
+    db: Database<Artifact>,
+    storage: StorageClient,
+  ) -> Self {
+    Self::new(storage, Arc::new(BaseRepository::new(db)))
   }
 
   /// Fetch an [`Artifact`] by id.
@@ -171,12 +179,16 @@ impl ArtifactRepository {
 
     let artifact = self
       .model_repo
-      .create_model(ArtifactCreateRequest {
-        path,
-        originator,
-        comp_status,
-      })
-      .await?;
+      .create_model(
+        ArtifactCreateRequest {
+          path,
+          originator,
+          comp_status,
+        }
+        .into(),
+      )
+      .await
+      .map_err(CreateArtifactError::CreateModelError)?;
     Ok(artifact)
   }
 }

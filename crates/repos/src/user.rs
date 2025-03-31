@@ -1,13 +1,13 @@
 use core::fmt;
 use std::sync::Arc;
 
-use db::{CreateModelError, FetchModelByIndexError, FetchModelError};
+use db::{CreateModelError, Database, FetchModelByIndexError, FetchModelError};
 use hex::health;
 use miette::Result;
-use models::{EitherSlug, LaxSlug, User, UserCreateRequest};
+use models::{EitherSlug, LaxSlug, User};
 use tracing::instrument;
 
-use crate::ModelRepositoryLike;
+use crate::{base::BaseRepository, ModelRepositoryLike};
 
 /// Stores and retrieves [`User`]s.
 #[derive(Clone)]
@@ -15,7 +15,7 @@ pub struct UserRepository {
   model_repo: Arc<
     dyn ModelRepositoryLike<
       Model = User,
-      ModelCreateRequest = UserCreateRequest,
+      ModelCreateRequest = User,
       CreateError = CreateModelError,
     >,
   >,
@@ -30,7 +30,7 @@ impl fmt::Debug for UserRepository {
           Arc<
             dyn ModelRepositoryLike<
               Model = User,
-              ModelCreateRequest = UserCreateRequest,
+              ModelCreateRequest = User,
               CreateError = CreateModelError,
             >,
           >
@@ -58,12 +58,17 @@ impl UserRepository {
     model_repo: Arc<
       dyn ModelRepositoryLike<
         Model = User,
-        ModelCreateRequest = UserCreateRequest,
+        ModelCreateRequest = User,
         CreateError = CreateModelError,
       >,
     >,
   ) -> Self {
     Self { model_repo }
+  }
+
+  /// Create a new [`UserRepository`], backed by `BaseRepository`.
+  pub fn new_from_base(db: Database<User>) -> Self {
+    Self::new(Arc::new(BaseRepository::new(db)))
   }
 
   /// Create a [`User`] model.
@@ -72,7 +77,7 @@ impl UserRepository {
     &self,
     input: models::UserCreateRequest,
   ) -> Result<User, CreateModelError> {
-    self.model_repo.create_model(input).await
+    self.model_repo.create_model(input.into()).await
   }
 
   /// Fetch a [`User`] by id.
