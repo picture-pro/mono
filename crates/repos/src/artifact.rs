@@ -1,7 +1,7 @@
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
 use db::{CreateModelError, FetchModelByIndexError, FetchModelError};
-use hex::health;
+use hex::health::{self, HealthAware};
 use models::{
   Artifact, ArtifactCreateRequest, ArtifactPath, ArtifactRecordId,
   CompressionStatus, FileSize, StrictSlug, UserRecordId,
@@ -38,6 +38,7 @@ pub enum CreateArtifactError {
   StorageWriteError(StorageWriteError),
 }
 
+#[derive(Clone)]
 pub struct ArtifactRepository {
   storage_repo: StorageClient,
   model_repo: Arc<
@@ -49,9 +50,29 @@ pub struct ArtifactRepository {
   >,
 }
 
+impl fmt::Debug for ArtifactRepository {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("ArtifactRepository")
+      .field("storage_repo", &self.storage_repo)
+      .field(
+        "model_repo",
+        &stringify!(
+          Arc<
+            dyn ModelRepositoryLike<
+              Model = Artifact,
+              ModelCreateRequest = ArtifactCreateRequest,
+              CreateError = CreateArtifactError,
+            >,
+          >
+        ),
+      )
+      .finish()
+  }
+}
+
 #[async_trait::async_trait]
 impl health::HealthReporter for ArtifactRepository {
-  fn name(&self) -> &'static str { stringify!(TempStorageRepositoryCanonical) }
+  fn name(&self) -> &'static str { stringify!(ArtifactRepository) }
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(vec![
       self.model_repo.health_report(),
