@@ -84,14 +84,14 @@ impl health::HealthReporter for ArtifactRepository {
 }
 
 impl ArtifactRepository {
-  async fn fetch_artifact_by_id(
+  pub async fn fetch_artifact_by_id(
     &self,
     id: ArtifactRecordId,
   ) -> Result<Option<Artifact>, FetchModelError> {
     self.model_repo.fetch_model_by_id(id).await
   }
 
-  async fn fetch_artifact_by_path(
+  pub async fn fetch_artifact_by_path(
     &self,
     path: ArtifactPath,
   ) -> Result<Option<Artifact>, FetchModelByIndexError> {
@@ -104,7 +104,7 @@ impl ArtifactRepository {
       .await
   }
 
-  async fn read_artifact_by_id(
+  pub async fn read_artifact_by_id(
     &self,
     id: ArtifactRecordId,
   ) -> Result<Option<Belt>, ReadArtifactError> {
@@ -126,7 +126,7 @@ impl ArtifactRepository {
     }
   }
 
-  async fn create_artifact(
+  pub async fn create_artifact(
     &self,
     data: Belt,
     originator: UserRecordId,
