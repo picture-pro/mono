@@ -1,4 +1,6 @@
-use std::{collections::HashMap, fmt::Debug, marker::PhantomData};
+use std::{
+  collections::HashMap, error::Error, fmt::Debug, marker::PhantomData,
+};
 
 use db::{FetchModelByIndexError, FetchModelError};
 use hex::health;
@@ -12,14 +14,18 @@ use crate::ModelRepositoryLike;
 pub struct MockModelRepository<
   M: models::Model,
   MCR: Debug + Into<M> + Send + Sync + 'static,
+  CE: Error + Send + Sync + 'static,
 > {
   models:  Mutex<HashMap<models::RecordId<M>, M>>,
   indices: Mutex<HashMap<String, HashMap<EitherSlug, models::RecordId<M>>>>,
-  phantom: PhantomData<MCR>,
+  phantom: PhantomData<(MCR, CE)>,
 }
 
-impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static> Default
-  for MockModelRepository<M, MCR>
+impl<
+    M: models::Model,
+    MCR: Debug + Into<M> + Send + Sync + 'static,
+    CE: Error + Send + Sync + 'static,
+  > Default for MockModelRepository<M, MCR, CE>
 {
   fn default() -> Self {
     Self {
@@ -30,16 +36,22 @@ impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static> Default
   }
 }
 
-impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static>
-  MockModelRepository<M, MCR>
+impl<
+    M: models::Model,
+    MCR: Debug + Into<M> + Send + Sync + 'static,
+    CE: Error + Send + Sync + 'static,
+  > MockModelRepository<M, MCR, CE>
 {
   /// Creates a new `MockModelRepository` instance.
   pub fn new() -> Self { Self::default() }
 }
 
 #[async_trait::async_trait]
-impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static>
-  health::HealthReporter for MockModelRepository<M, MCR>
+impl<
+    M: models::Model,
+    MCR: Debug + Into<M> + Send + Sync + 'static,
+    CE: Error + Send + Sync + 'static,
+  > health::HealthReporter for MockModelRepository<M, MCR, CE>
 {
   fn name(&self) -> &'static str { stringify!(MockModelRepository) }
   async fn health_check(&self) -> health::ComponentHealth {
@@ -48,12 +60,15 @@ impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static>
 }
 
 #[async_trait::async_trait]
-impl<M: models::Model, MCR: Debug + Into<M> + Send + Sync + 'static>
-  ModelRepositoryLike for MockModelRepository<M, MCR>
+impl<
+    M: models::Model,
+    MCR: Debug + Into<M> + Send + Sync + 'static,
+    CE: Error + Send + Sync + 'static,
+  > ModelRepositoryLike for MockModelRepository<M, MCR, CE>
 {
   type Model = M;
   type ModelCreateRequest = MCR;
-  type CreateError = std::convert::Infallible;
+  type CreateError = CE;
 
   async fn create_model(
     &self,
