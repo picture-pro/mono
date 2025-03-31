@@ -12,7 +12,7 @@ use miette::Result;
 use models::EitherSlug;
 pub use storage::{self, belt};
 
-pub use self::{artifact::*, photo::*, user::*};
+pub use self::{artifact::*, mock::*, photo::*, user::*};
 
 /// Defines a repository interface for models.
 #[async_trait::async_trait]
