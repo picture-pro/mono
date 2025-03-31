@@ -1,21 +1,18 @@
 //! Provides prime-domain Services, the entry points for domain-specific
 //! business logic.
 
-mod canonical;
-
-use std::sync::Arc;
-
 pub use hex;
-use hex::Hexagonal;
+use hex::health::{self, HealthAware};
 use miette::Result;
 pub use models;
-use models::{Artifact, Photo, PhotoRecordId, UserRecordId};
+use models::{Artifact, UserRecordId};
 pub use repos;
 use repos::{
-  belt::Belt, ArtifactRepository, CreateArtifactError, FetchModelError,
-  PhotoRepository,
+  belt::Belt, ArtifactRepository, CreateArtifactError, PhotoRepository,
 };
+use tracing::instrument;
 
+/// The prime domain service.
 #[derive(Debug, Clone)]
 pub struct PrimeDomainService {
   photo_repo:    PhotoRepository,
@@ -36,12 +33,24 @@ impl health::HealthReporter for PrimeDomainService {
 }
 
 impl PrimeDomainService {
+  /// Create a new [`PrimeDomainService`].
+  pub fn new(
+    photo_repo: PhotoRepository,
+    artifact_repo: ArtifactRepository,
+  ) -> Self {
+    Self {
+      photo_repo,
+      artifact_repo,
+    }
+  }
+
+  /// Create an [`Artifact`].
   #[instrument(skip(self))]
   pub async fn create_artifact(
     &self,
     data: Belt,
     originator: UserRecordId,
-  ) -> Result<Artiact, CreateArtifactError> {
+  ) -> Result<Artifact, CreateArtifactError> {
     self.artifact_repo.create_artifact(data, originator).await
   }
 }
