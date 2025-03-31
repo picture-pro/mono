@@ -11,6 +11,8 @@ use miette::Result;
 use models::EitherSlug;
 pub use storage::{self, belt};
 
+pub use self::{artifact::*, photo::*};
+
 /// Defines a repository interface for models.
 #[async_trait::async_trait]
 pub trait ModelRepositoryLike: Hexagonal {
