@@ -91,18 +91,10 @@ use self::{
   group_configurator::GroupConfigurator,
   uploaded_photo_preview::UploadedPhotoPreviewer,
 };
-use crate::{
-  components::Section, pages::upload_photo_page::UploadStateStoreFields,
-};
+use crate::components::Section;
 
 #[component]
 pub(super) fn ConfiguringGroupStep() -> impl IntoView {
-  let context: Store<super::UploadState> = expect_context();
-  let state = context
-    .configuring_group_0()
-    .expect("`UploadContext` not in state `ConfiguringGroup`");
-  let photos = state.photos();
-
   view! {
     <Section>
       <p>"Configuring Group"</p>

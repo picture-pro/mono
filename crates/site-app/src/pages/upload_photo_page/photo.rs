@@ -35,13 +35,6 @@ impl Photo {
   pub(super) fn id(&self) -> Ulid { self.id }
   pub(super) fn blob(&self) -> Blob { self.blob.clone().take() }
   pub(super) fn url(&self) -> ObjectUrl { self.url.clone().take() }
-  pub(super) fn oversized(&self) -> Signal<Option<FileSize>> {
-    let upload_status = self.upload_status();
-    Signal::derive(move || match upload_status() {
-      PhotoUploadStatus::Oversized(file_size) => Some(file_size),
-      _ => None,
-    })
-  }
   pub(super) fn upload_status(&self) -> Signal<PhotoUploadStatus> {
     self.action_state.status()
   }

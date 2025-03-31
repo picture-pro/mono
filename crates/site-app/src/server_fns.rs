@@ -2,4 +2,5 @@
 
 mod artifact;
 
+#[cfg(feature = "ssr")]
 pub use self::artifact::*;
