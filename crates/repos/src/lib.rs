@@ -4,6 +4,7 @@ mod artifact;
 mod base;
 mod mock;
 mod photo;
+mod user;
 
 pub use db::{self, CreateModelError, FetchModelByIndexError, FetchModelError};
 use hex::Hexagonal;
@@ -11,7 +12,7 @@ use miette::Result;
 use models::EitherSlug;
 pub use storage::{self, belt};
 
-pub use self::{artifact::*, photo::*};
+pub use self::{artifact::*, photo::*, user::*};
 
 /// Defines a repository interface for models.
 #[async_trait::async_trait]
