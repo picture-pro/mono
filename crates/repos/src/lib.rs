@@ -3,6 +3,7 @@
 mod artifact;
 mod base;
 mod mock;
+mod photo;
 
 pub use db::{self, CreateModelError, FetchModelByIndexError, FetchModelError};
 use hex::Hexagonal;
