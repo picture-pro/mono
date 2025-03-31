@@ -9,6 +9,7 @@ use tracing::instrument;
 
 use crate::ModelRepositoryLike;
 
+/// Stores and retrieves [`Photo`]s.
 #[derive(Clone)]
 pub struct PhotoRepository {
   model_repo: Arc<
@@ -52,6 +53,7 @@ impl health::HealthReporter for PhotoRepository {
 }
 
 impl PhotoRepository {
+  /// Create a [`Photo`] model.
   #[instrument(skip(self))]
   pub async fn create_photo(
     &self,
@@ -60,6 +62,7 @@ impl PhotoRepository {
     self.model_repo.create_model(input).await
   }
 
+  /// Fetch a [`Photo`] by id.
   #[instrument(skip(self))]
   pub async fn fetch_photo_by_id(
     &self,
@@ -68,6 +71,7 @@ impl PhotoRepository {
     self.model_repo.fetch_model_by_id(id).await
   }
 
+  /// Produce a list of all [`Photo`]s.
   #[instrument(skip(self))]
   pub async fn enumerate_photos(&self) -> Result<Vec<Photo>> {
     self.model_repo.enumerate_models().await

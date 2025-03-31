@@ -38,6 +38,7 @@ pub enum CreateArtifactError {
   StorageWriteError(StorageWriteError),
 }
 
+/// Stores and retrieves [`Artifact`]s.
 #[derive(Clone)]
 pub struct ArtifactRepository {
   storage_repo: StorageClient,
@@ -84,6 +85,7 @@ impl health::HealthReporter for ArtifactRepository {
 }
 
 impl ArtifactRepository {
+  /// Fetch an [`Artifact`] by id.
   pub async fn fetch_artifact_by_id(
     &self,
     id: ArtifactRecordId,
@@ -91,6 +93,7 @@ impl ArtifactRepository {
     self.model_repo.fetch_model_by_id(id).await
   }
 
+  /// Find an [`Artifact`] based on its unique (and indexed) storage path.
   pub async fn fetch_artifact_by_path(
     &self,
     path: ArtifactPath,
@@ -104,6 +107,7 @@ impl ArtifactRepository {
       .await
   }
 
+  /// Read an [`Artifact`]'s data, identified by its id.
   pub async fn read_artifact_by_id(
     &self,
     id: ArtifactRecordId,
@@ -126,6 +130,7 @@ impl ArtifactRepository {
     }
   }
 
+  /// Create and write an [`Artifact`] to storage.
   pub async fn create_artifact(
     &self,
     data: Belt,
