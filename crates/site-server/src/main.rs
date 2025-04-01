@@ -89,10 +89,18 @@ async fn main() {
   let server_fn_handler = {
     let app_state = app_state.clone();
     move |req: Request| {
+      let auth_session = req
+        .extensions()
+        .get::<AuthSession>()
+        .expect(
+          "request in server fn handler didn't have `AuthSession` extension",
+        )
+        .clone();
       leptos_axum::handle_server_fns_with_context(
         move || {
           provide_context(app_state.prime_domain_service.clone());
           provide_context(app_state.auth_domain_service.clone());
+          provide_context(site_app::AuthStatus(auth_session.user.clone()));
         },
         req,
       )

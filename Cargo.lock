@@ -3279,6 +3279,7 @@ dependencies = [
  "send_wrapper",
  "serde",
  "server_fn",
+ "thiserror 2.0.8",
  "tokio",
  "tracing",
  "web-sys",

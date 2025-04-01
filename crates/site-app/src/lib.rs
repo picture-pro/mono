@@ -1,4 +1,5 @@
 #![expect(unexpected_cfgs)]
+#![feature(iterator_try_collect)]
 
 //! Leptos application for PicturePro.
 

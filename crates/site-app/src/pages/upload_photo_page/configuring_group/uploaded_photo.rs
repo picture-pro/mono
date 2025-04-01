@@ -41,6 +41,7 @@ impl UploadedPhoto {
 
   pub fn id(&self) -> Ulid { self.id }
   pub fn url(&self) -> ObjectUrl { self.url.clone().take() }
+  pub fn artifact_id(&self) -> ArtifactRecordId { self.artifact_id }
 
   pub fn from_photo(photo: &Photo) -> Option<Self> {
     match photo.upload_status()() {

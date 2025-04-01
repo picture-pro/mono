@@ -5,18 +5,23 @@ pub use hex;
 use hex::health::{self, HealthAware};
 use miette::Result;
 pub use models;
-use models::{Artifact, UserRecordId};
+use models::{
+  Artifact, ArtifactRecordId, Photo, PhotoCreateRequest, PhotoGroup,
+  PhotoGroupCreateRequest, UserRecordId,
+};
 pub use repos;
 use repos::{
-  belt::Belt, ArtifactRepository, CreateArtifactError, PhotoRepository,
+  belt::Belt, ArtifactRepository, CreateArtifactError, CreateModelError,
+  FetchModelError, PhotoGroupRepository, PhotoRepository,
 };
 use tracing::instrument;
 
 /// The prime domain service.
 #[derive(Debug, Clone)]
 pub struct PrimeDomainService {
-  photo_repo:    PhotoRepository,
-  artifact_repo: ArtifactRepository,
+  photo_repo:       PhotoRepository,
+  photo_group_repo: PhotoGroupRepository,
+  artifact_repo:    ArtifactRepository,
 }
 
 #[async_trait::async_trait]
@@ -36,10 +41,12 @@ impl PrimeDomainService {
   /// Create a new [`PrimeDomainService`].
   pub fn new(
     photo_repo: PhotoRepository,
+    photo_group_repo: PhotoGroupRepository,
     artifact_repo: ArtifactRepository,
   ) -> Self {
     Self {
       photo_repo,
+      photo_group_repo,
       artifact_repo,
     }
   }
@@ -52,5 +59,32 @@ impl PrimeDomainService {
     originator: UserRecordId,
   ) -> Result<Artifact, CreateArtifactError> {
     self.artifact_repo.create_artifact(data, originator).await
+  }
+
+  /// Create a [`Photo`].
+  #[instrument(skip(self))]
+  pub async fn create_photo(
+    &self,
+    input: PhotoCreateRequest,
+  ) -> Result<Photo, CreateModelError> {
+    self.photo_repo.create_photo(input).await
+  }
+
+  /// Create a [`PhotoGroup`].
+  #[instrument(skip(self))]
+  pub async fn create_photo_group(
+    &self,
+    input: PhotoGroupCreateRequest,
+  ) -> Result<PhotoGroup, CreateModelError> {
+    self.photo_group_repo.create_photo_group(input).await
+  }
+
+  /// Fetch an [`Artifact`].
+  #[instrument(skip(self))]
+  pub async fn fetch_artifact(
+    &self,
+    id: ArtifactRecordId,
+  ) -> Result<Option<Artifact>, FetchModelError> {
+    self.artifact_repo.fetch_artifact_by_id(id).await
   }
 }

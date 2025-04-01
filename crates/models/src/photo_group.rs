@@ -1,7 +1,7 @@
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
-use crate::{price::UsdPriceNaive, PhotoRecordId};
+use crate::{price::UsdPriceNaive, PhotoRecordId, UserRecordId};
 
 /// The table name for [`PhotoGroup`] records.
 pub const PHOTO_GROUP_TABLE_NAME: &str = "photo_group";
@@ -17,9 +17,18 @@ pub type PhotoGroupRecordId = RecordId<PhotoGroup>;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PhotoGroup {
   /// The photo group's id.
-  pub id:                 PhotoGroupRecordId,
+  pub id:     PhotoGroupRecordId,
+  /// The photo group's owner.
+  pub owner:  UserRecordId,
   /// The photos included in the group.
-  pub photos:             Vec<PhotoRecordId>,
+  pub photos: Vec<PhotoRecordId>,
+  /// The configuration for the group.
+  pub config: PhotoGroupConfig,
+}
+
+/// Configuration for a [`PhotoGroup`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PhotoGroupConfig {
   /// The USD price of usage rights for all photos in the group.
   pub usage_rights_price: UsdPriceNaive,
 }
@@ -37,18 +46,21 @@ impl Model for PhotoGroup {
 /// A request to create a new [`PhotoGroup`].
 #[derive(Debug)]
 pub struct PhotoGroupCreateRequest {
+  /// The photo group's owner.
+  pub owner:  UserRecordId,
   /// The photos included in the group.
-  pub photos:             Vec<PhotoRecordId>,
-  /// The USD price of usage rights for all photos in the group.
-  pub usage_rights_price: UsdPriceNaive,
+  pub photos: Vec<PhotoRecordId>,
+  /// The configuration for the group.
+  pub config: PhotoGroupConfig,
 }
 
 impl From<PhotoGroupCreateRequest> for PhotoGroup {
   fn from(input: PhotoGroupCreateRequest) -> Self {
     Self {
-      id:                 PhotoGroupRecordId::default(),
-      photos:             input.photos,
-      usage_rights_price: input.usage_rights_price,
+      id:     PhotoGroupRecordId::default(),
+      owner:  input.owner,
+      photos: input.photos,
+      config: input.config,
     }
   }
 }

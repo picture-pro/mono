@@ -87,6 +87,7 @@ use std::collections::HashMap;
 
 use leptos::prelude::*;
 use models::{Ulid, UsdPriceNaive};
+use next_step_button::NextStepButton;
 use reactive_stores::Store;
 
 pub use self::uploaded_photo::UploadedPhoto;
@@ -109,6 +110,10 @@ pub(super) fn ConfiguringGroupStep() -> impl IntoView {
 
     <Section>
       <UploadedPhotoPreviewer />
+    </Section>
+
+    <Section>
+      <NextStepButton />
     </Section>
   }
 }

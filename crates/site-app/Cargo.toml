@@ -23,6 +23,7 @@ axum = { workspace = true, optional = true }
 futures.workspace = true
 serde.workspace = true
 tracing.workspace = true
+thiserror.workspace = true
 tokio = { workspace = true, optional = true }
 either = "1.13.0"
 gloo = { version = "0.11.0", features = ["file", "futures", "net"], default-features = false }
