@@ -1,3 +1,4 @@
+mod next_step_button;
 mod uploaded_photo;
 mod uploaded_photo_preview;
 
@@ -56,6 +57,9 @@ mod group_configurator {
       })
     };
 
+    // I know this is a sin to update a signal from an effect, but I need to
+    // downstream the validated_price into the store. We're explicitly
+    // specifying the watched signals, so no infinite loops.
     Effect::watch(
       move || validated_price.get(),
       move |vp, _, _| {
@@ -69,8 +73,7 @@ mod group_configurator {
     view! {
       <div class="flex flex-col gap-1">
         <label class="" for="price">"Price"</label>
-        <style>"#price::before { content: \"$\"; }"</style>
-        <Field size={FieldSize::Large}  {..}
+        <Field size={FieldSize::Large} {..} class=("max-w-md", true)
           placeholder="1.00" id="price" type="text"
           on:input=write_price prop:value=read_price
         />
