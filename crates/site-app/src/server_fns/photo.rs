@@ -1,11 +1,6 @@
 use leptos::prelude::*;
-use models::{
-  ArtifactRecordId, PhotoArtifacts, PhotoCreateRequest, PhotoGroupConfig,
-  PhotoGroupCreateRequest, PhotoGroupRecordId,
-};
+use models::{ArtifactRecordId, PhotoGroupConfig, PhotoGroupRecordId};
 use serde::{Deserialize, Serialize};
-
-use crate::AuthStatus;
 
 /// The possible errors of [`create_photo_group_from_artifacts`].
 #[derive(Debug, Clone, thiserror::Error, Serialize, Deserialize)]
@@ -21,8 +16,8 @@ pub enum CreatePhotoGroupFromArtifactsError {
   MissingArtifact(ArtifactRecordId),
 }
 
-/// Create a [`PhotoGroup`] from a list of [`Artifact`]s and a
-/// [`PhotoGroupConfig`].
+/// Create a [`PhotoGroup`](models::PhotoGroup) from a list of
+/// [`Artifact`](models::Artifact)s and a [`PhotoGroupConfig`].
 #[server]
 pub async fn create_photo_group_from_artifacts(
   /// The artifact IDs to use.
@@ -33,8 +28,10 @@ pub async fn create_photo_group_from_artifacts(
   Result<PhotoGroupRecordId, CreatePhotoGroupFromArtifactsError>,
   ServerFnError,
 > {
-  use auth_domain::AuthSession;
+  use models::{PhotoArtifacts, PhotoCreateRequest, PhotoGroupCreateRequest};
   use prime_domain::PrimeDomainService;
+
+  use crate::AuthStatus;
 
   let auth_session: AuthStatus = expect_context();
   let Some(user) = auth_session.0 else {
