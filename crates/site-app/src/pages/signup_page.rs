@@ -1,4 +1,3 @@
-use either::Either;
 use leptos::prelude::*;
 use lsc::{button::*, field::*};
 use models::{EmailAddress, HumanName, HumanNameError, UserRecordId};
@@ -50,14 +49,14 @@ fn FieldErrorText(text: &'static str) -> impl IntoView {
   }
 }
 
-#[component]
-fn FieldWarningText(text: &'static str) -> impl IntoView {
-  view! {
-    <p class="text-sm text-warninga-11 dark:text-warningdarka-11">
-      { text }
-    </p>
-  }
-}
+// #[component]
+// fn FieldWarningText(text: &'static str) -> impl IntoView {
+//   view! {
+//     <p class="text-sm text-warninga-11 dark:text-warningdarka-11">
+//       { text }
+//     </p>
+//   }
+// }
 
 #[component]
 fn FormField(
@@ -139,22 +138,31 @@ pub fn SignupPage() -> impl IntoView {
       })
     })
   });
-  let email_error = Memo::new(move |_| {
-    validated_email().and_then(|r| {
-      match r.map(|e| models::validate_reasonable_email_address(e.as_ref())) {
-        Ok(true) => None,
-        Ok(false) => Some(Either::Left(
-          "Though technically valid, this email address is probably not \
-           correct",
-        )),
-        Err(models::EmailAddressError::PredicateViolated) => {
-          Some(Either::Right("Invalid email address"))
-        }
-        Err(models::EmailAddressError::LenCharMaxViolated) => {
-          Some(Either::Right("Email is too long"))
-        }
-      }
-    })
+  // let email_error = Memo::new(move |_| {
+  //   validated_email().and_then(|r| {
+  //     match r.map(|e| models::validate_compliant_email_address(e.as_ref())) {
+  //       Ok(true) => None,
+  //       Ok(false) => Some(Either::Left(
+  //         "Though technically valid, this email address is probably not \
+  //          correct",
+  //       )),
+  //       Err(models::EmailAddressError::PredicateViolated) => {
+  //         Some(Either::Right("Invalid email address"))
+  //       }
+  //       Err(models::EmailAddressError::LenCharMaxViolated) => {
+  //         Some(Either::Right("Email is too long"))
+  //       }
+  //     }
+  //   })
+  // });
+  let email_error = Memo::new(move |_| match validated_email() {
+    Some(Err(models::EmailAddressError::PredicateViolated)) => {
+      Some("Invalid email address")
+    }
+    Some(Err(models::EmailAddressError::LenCharMaxViolated)) => {
+      Some("Email is too long")
+    }
+    Some(Ok(_)) | None => None,
   });
   let confirm_email_error = Memo::new(move |_| {
     validated_confirm_email().and_then(|r| r.then_some("Emails do not match"))
@@ -184,10 +192,11 @@ pub fn SignupPage() -> impl IntoView {
     move || name_error().map(|t| view! { <FieldErrorText text=t /> });
   let email_error_view = move || {
     email_error().map(|e| {
-      e.either(
-        |t| view! { <FieldWarningText text=t /> }.into_any(),
-        |t| view! { <FieldErrorText text=t /> }.into_any(),
-      )
+      // e.either(
+      //   |t| view! { <FieldWarningText text=t /> }.into_any(),
+      //   |t| view! { <FieldErrorText text=t /> }.into_any(),
+      // )
+      view! { <FieldErrorText text=e /> }.into_any()
     })
   };
   let confirm_email_error_view =
@@ -197,9 +206,12 @@ pub fn SignupPage() -> impl IntoView {
   let name_input_hint =
     Signal::derive(move || name_error().map(|_| FieldHint::Error));
   let email_input_hint = Signal::derive(move || {
-    email_error().map(|e| match e {
-      Either::Left(_) => FieldHint::Warning,
-      Either::Right(_) => FieldHint::Error,
+    email_error().map(|_| {
+      // match e {
+      //   Either::Left(_) => FieldHint::Warning,
+      //   Either::Right(_) => FieldHint::Error,
+      // }
+      FieldHint::Error
     })
   });
   let confirm_email_input_hint =
@@ -282,9 +294,9 @@ async fn signup(
   })?;
   let email = EmailAddress::try_new(email)
     .map_err(|_| ServerFnError::new("Email address is invalid"))?;
-  if !models::validate_reasonable_email_address(email.as_ref()) {
-    return Err(ServerFnError::new("Email is unreasonable"));
-  }
+  // if !models::validate_reasonable_email_address(email.as_ref()) {
+  //   return Err(ServerFnError::new("Email is unreasonable"));
+  // }
   let confirm_email = EmailAddress::try_new(confirm_email)
     .map_err(|_| ServerFnError::new("Emails do not match"))?;
   if email != confirm_email {
