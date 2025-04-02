@@ -1,5 +1,6 @@
 #![expect(unexpected_cfgs)]
 #![feature(iterator_try_collect)]
+#![feature(impl_trait_in_fn_trait_return)]
 
 //! Leptos application for PicturePro.
 
@@ -64,9 +65,9 @@ pub fn App() -> impl IntoView {
           <Route path=path!("/") view=HomePage/>
           <Route path=path!("/sign-up") view=SignupPage/>
           <Route path=path!("/log-in") view=LoginPage />
-          <Route path=path!("/log-out") view=LogoutPage/>
-          <Route path=path!("/profile") view=ProfilePage/>
-          <Route path=path!("/upload-photo") view=UploadPhotoPage/>
+          <Route path=path!("/log-out") view=protect(LogoutPage) />
+          <Route path=path!("/profile") view=protect(ProfilePage)/>
+          <Route path=path!("/upload-photo") view=protect(UploadPhotoPage)/>
           <Route path=path!("/component-testing/link") view=lsc::link::LinkMatrixTestPage/>
           <Route path=path!("/component-testing/button") view=lsc::button::ButtonMatrixTestPage/>
           <Route path=path!("/component-testing/field") view=lsc::field::FieldMatrixTestPage/>
@@ -74,4 +75,13 @@ pub fn App() -> impl IntoView {
       </Router>
     </PageContainer>
   }
+}
+
+fn protect<
+  F: Fn() -> O + Send + Sync + Copy + 'static,
+  O: IntoView + 'static,
+>(
+  func: F,
+) -> impl Send + Clone + 'static + Fn() -> impl IntoAny {
+  move || view! { <ProtectedPage> { func() } </ProtectedPage> }
 }
