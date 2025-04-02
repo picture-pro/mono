@@ -61,7 +61,6 @@ pub fn UploadPhotoWizard() -> impl IntoView {
 enum UploadState {
   SelectingPhotos(SelectingPhotosState),
   ConfiguringGroup(ConfiguringGroupState),
-  #[allow(dead_code)]
   UploadFinished(UploadFinishedState),
 }
 
