@@ -30,7 +30,7 @@ fn accept_image_from_input(ev: Event) {
   element.set_value("");
 }
 
-#[island]
+#[component]
 pub(super) fn UploadArea() -> impl IntoView {
   use lsc::icons::*;
 
