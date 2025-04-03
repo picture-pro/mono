@@ -1,7 +1,6 @@
+use base_components::{Section, Title};
 use leptos::prelude::*;
 use lsc::link::*;
-
-use crate::components::{Section, Title};
 
 #[component]
 pub fn NotFoundPage() -> impl IntoView {

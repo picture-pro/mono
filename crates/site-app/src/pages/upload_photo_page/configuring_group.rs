@@ -85,6 +85,7 @@ mod group_configurator {
 
 use std::collections::HashMap;
 
+use base_components::Section;
 use leptos::prelude::*;
 use models::{Ulid, UsdPriceNaive};
 use next_step_button::NextStepButton;
@@ -95,7 +96,6 @@ use self::{
   group_configurator::GroupConfigurator,
   uploaded_photo_preview::UploadedPhotoPreviewer,
 };
-use crate::components::Section;
 
 #[component]
 pub(super) fn ConfiguringGroupStep() -> impl IntoView {

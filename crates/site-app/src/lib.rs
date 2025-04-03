@@ -10,6 +10,7 @@ mod pages;
 pub mod server_fns;
 mod utils;
 
+use base_components::PageContainer;
 use leptos::prelude::*;
 use leptos_meta::{
   provide_meta_context, HashedStylesheet, Link, MetaTags, Style, Title,
@@ -20,10 +21,7 @@ use leptos_router::{
 };
 
 pub use self::bridge_types::*;
-use self::{
-  components::{Header, PageContainer},
-  pages::*,
-};
+use self::{components::Header, pages::*};
 
 /// The main shell for the Leptos application.
 pub fn shell(options: LeptosOptions) -> impl IntoView {

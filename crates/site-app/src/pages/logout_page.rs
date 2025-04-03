@@ -1,7 +1,6 @@
+use base_components::FloatingBoxSection;
 use leptos::prelude::*;
 use lsc::{button::*, icons::*};
-
-use crate::components::FloatingBoxSection;
 
 #[component]
 pub fn LogoutPage() -> impl IntoView {

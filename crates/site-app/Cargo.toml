@@ -13,6 +13,7 @@ leptos_axum = { workspace = true, optional = true }
 server_fn.workspace = true
 web-sys = { workspace = true, features = [ "Window" ] }
 
+base-components = { path = "../base-components" }
 belt = { workspace = true, optional = true }
 lsc = { path = "../lsc" }
 models = { path = "../models" }

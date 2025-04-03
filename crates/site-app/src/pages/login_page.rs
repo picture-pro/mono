@@ -1,9 +1,8 @@
+use base_components::FloatingBoxSection;
 use leptos::prelude::*;
 use lsc::{button::*, field::*};
 
-use crate::{
-  components::FloatingBoxSection, utils::inputs::touched_input_bindings,
-};
+use crate::utils::inputs::touched_input_bindings;
 
 #[island]
 pub fn LoginPage() -> impl IntoView {

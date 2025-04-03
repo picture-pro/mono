@@ -1,6 +1,5 @@
+use base_components::{Section, Title};
 use leptos::prelude::*;
-
-use crate::components::{Section, Title};
 
 #[component]
 pub fn ProfilePage() -> impl IntoView {

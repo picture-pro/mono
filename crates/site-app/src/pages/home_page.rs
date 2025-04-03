@@ -1,7 +1,6 @@
+use base_components::{Section, Title};
 use leptos::prelude::*;
 use lsc::{button::*, icons::*};
-
-use crate::components::{Section, Title};
 
 #[component]
 pub fn HomePage() -> impl IntoView {

@@ -4,6 +4,7 @@ mod upload_area;
 
 use std::collections::HashMap;
 
+use base_components::Section;
 use leptos::prelude::*;
 use models::Ulid;
 use reactive_stores::Store;
@@ -12,7 +13,6 @@ use self::{
   next_step_button::NextStepButton, photo_preview::*, upload_area::*,
 };
 use super::photo::Photo;
-use crate::components::Section;
 
 #[component]
 pub(super) fn SelectingPhotosStep() -> impl IntoView {

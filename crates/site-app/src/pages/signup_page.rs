@@ -1,10 +1,9 @@
+use base_components::FloatingBoxSection;
 use leptos::prelude::*;
 use lsc::{button::*, field::*};
 use models::{EmailAddress, HumanName, HumanNameError, UserRecordId};
 
-use crate::{
-  components::FloatingBoxSection, utils::inputs::touched_input_bindings,
-};
+use crate::utils::inputs::touched_input_bindings;
 
 #[derive(Clone, PartialEq)]
 enum SignupFormState {

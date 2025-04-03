@@ -10,12 +10,13 @@ use reactive_stores::Store;
 
 pub const MAX_UPLOAD_SIZE: u64 = 50 * 1000 * 1000; // 50MB
 
+use base_components::{Section, Title};
+
 use self::{
   configuring_group::{ConfiguringGroupState, ConfiguringGroupStep},
   selecting_photos::{SelectingPhotosState, SelectingPhotosStep},
   upload_finished::{UploadFinishedState, UploadFinishedStep},
 };
-use crate::components::{Section, Title};
 
 #[component]
 pub fn UploadPhotoPage() -> impl IntoView {
