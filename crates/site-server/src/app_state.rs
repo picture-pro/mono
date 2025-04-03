@@ -30,14 +30,13 @@ impl AppState {
       retryable_kv_store.clone(),
     );
 
-    let photo_repo = prime_domain::repos::PhotoRepository::new_from_base(
+    let photo_repo = prime_domain::repos::PhotoRepository::new(
       Database::new_from_kv(retryable_kv_store.clone()),
     );
-    let photo_group_repo =
-      prime_domain::repos::PhotoGroupRepository::new_from_base(
-        Database::new_from_kv(retryable_kv_store.clone()),
-      );
-    let user_repo = prime_domain::repos::UserRepository::new_from_base(
+    let photo_group_repo = prime_domain::repos::PhotoGroupRepository::new(
+      Database::new_from_kv(retryable_kv_store.clone()),
+    );
+    let user_repo = prime_domain::repos::UserRepository::new(
       Database::new_from_kv(retryable_kv_store.clone()),
     );
 
@@ -48,11 +47,10 @@ impl AppState {
     );
     let artifact_storage_client =
       StorageClient::new_from_storage_creds(storage_credentials).await?;
-    let artifact_repo =
-      prime_domain::repos::ArtifactRepository::new_from_base_and_storage_client(
-        Database::new_from_kv(retryable_kv_store),
-        artifact_storage_client,
-      );
+    let artifact_repo = prime_domain::repos::ArtifactRepository::new(
+      artifact_storage_client,
+      Database::new_from_kv(retryable_kv_store),
+    );
 
     let prime_domain_service =
       PrimeDomainService::new(photo_repo, photo_group_repo, artifact_repo);

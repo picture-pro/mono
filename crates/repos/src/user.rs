@@ -1,24 +1,15 @@
 use core::fmt;
-use std::sync::Arc;
 
 use db::{CreateModelError, Database, FetchModelByIndexError, FetchModelError};
-use hex::health;
+use hex::health::{self, HealthAware};
 use miette::Result;
 use models::{EitherSlug, LaxSlug, User};
 use tracing::instrument;
 
-use crate::{base::BaseRepository, ModelRepositoryLike};
-
 /// Stores and retrieves [`User`]s.
 #[derive(Clone)]
 pub struct UserRepository {
-  model_repo: Arc<
-    dyn ModelRepositoryLike<
-      Model = User,
-      ModelCreateRequest = User,
-      CreateError = CreateModelError,
-    >,
-  >,
+  model_repo: Database<User>,
 }
 
 impl fmt::Debug for UserRepository {
@@ -54,22 +45,7 @@ impl health::HealthReporter for UserRepository {
 
 impl UserRepository {
   /// Create a new [`UserRepository`].
-  pub fn new(
-    model_repo: Arc<
-      dyn ModelRepositoryLike<
-        Model = User,
-        ModelCreateRequest = User,
-        CreateError = CreateModelError,
-      >,
-    >,
-  ) -> Self {
-    Self { model_repo }
-  }
-
-  /// Create a new [`UserRepository`], backed by `BaseRepository`.
-  pub fn new_from_base(db: Database<User>) -> Self {
-    Self::new(Arc::new(BaseRepository::new(db)))
-  }
+  pub fn new(model_repo: Database<User>) -> Self { Self { model_repo } }
 
   /// Create a [`User`] model.
   #[instrument(skip(self))]

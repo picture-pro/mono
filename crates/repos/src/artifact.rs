@@ -1,5 +1,3 @@
-use std::{fmt, sync::Arc};
-
 use db::{CreateModelError, Database, FetchModelByIndexError, FetchModelError};
 use hex::health::{self, HealthAware};
 use models::{
@@ -10,8 +8,6 @@ use storage::{
   belt::Belt, ReadError as StorageReadError, StorageClient,
   WriteError as StorageWriteError,
 };
-
-use crate::{base::BaseRepository, ModelRepositoryLike};
 
 /// An error that occurs when reading the data of an [`Artifact`].
 #[derive(Debug, thiserror::Error, miette::Diagnostic)]
@@ -39,36 +35,10 @@ pub enum CreateArtifactError {
 }
 
 /// Stores and retrieves [`Artifact`]s.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ArtifactRepository {
   storage_repo: StorageClient,
-  model_repo: Arc<
-    dyn ModelRepositoryLike<
-      Model = Artifact,
-      ModelCreateRequest = Artifact,
-      CreateError = CreateModelError,
-    >,
-  >,
-}
-
-impl fmt::Debug for ArtifactRepository {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("ArtifactRepository")
-      .field("storage_repo", &self.storage_repo)
-      .field(
-        "model_repo",
-        &stringify!(
-          Arc<
-            dyn ModelRepositoryLike<
-              Model = Artifact,
-              ModelCreateRequest = Artifact,
-              CreateError = CreateModelError,
-            >,
-          >
-        ),
-      )
-      .finish()
-  }
+  db:           Database<Artifact>,
 }
 
 #[async_trait::async_trait]
@@ -76,7 +46,7 @@ impl health::HealthReporter for ArtifactRepository {
   fn name(&self) -> &'static str { stringify!(ArtifactRepository) }
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(vec![
-      self.model_repo.health_report(),
+      self.db.health_report(),
       self.storage_repo.health_report(),
     ])
     .await
@@ -88,26 +58,12 @@ impl ArtifactRepository {
   /// Create a new [`ArtifactRepository`].
   pub fn new(
     storage_repo: StorageClient,
-    model_repo: Arc<
-      dyn ModelRepositoryLike<
-        Model = Artifact,
-        ModelCreateRequest = Artifact,
-        CreateError = CreateModelError,
-      >,
-    >,
+    model_repo: Database<Artifact>,
   ) -> Self {
     Self {
       storage_repo,
-      model_repo,
+      db: model_repo,
     }
-  }
-
-  /// Create a new [`ArtifactRepository`], backed by `BaseRepository`.
-  pub fn new_from_base_and_storage_client(
-    db: Database<Artifact>,
-    storage: StorageClient,
-  ) -> Self {
-    Self::new(storage, Arc::new(BaseRepository::new(db)))
   }
 
   /// Fetch an [`Artifact`] by id.
@@ -115,7 +71,7 @@ impl ArtifactRepository {
     &self,
     id: ArtifactRecordId,
   ) -> Result<Option<Artifact>, FetchModelError> {
-    self.model_repo.fetch_model_by_id(id).await
+    self.db.fetch_model_by_id(id).await
   }
 
   /// Find an [`Artifact`] based on its unique (and indexed) storage path.
@@ -124,7 +80,7 @@ impl ArtifactRepository {
     path: ArtifactPath,
   ) -> Result<Option<Artifact>, FetchModelByIndexError> {
     self
-      .model_repo
+      .db
       .fetch_model_by_index(
         "path".into(),
         models::EitherSlug::Strict(StrictSlug::new(path.to_string())),
@@ -138,7 +94,7 @@ impl ArtifactRepository {
     id: ArtifactRecordId,
   ) -> Result<Option<Belt>, ReadArtifactError> {
     let artifact = self
-      .model_repo
+      .db
       .fetch_model_by_id(id)
       .await
       .map_err(ReadArtifactError::FetchModelError)?;
@@ -178,7 +134,7 @@ impl ArtifactRepository {
     };
 
     let artifact = self
-      .model_repo
+      .db
       .create_model(
         ArtifactCreateRequest {
           path,

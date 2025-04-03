@@ -1,7 +1,6 @@
 //! Repositories for use in services.
 
 mod artifact;
-mod base;
 mod mock;
 mod photo;
 mod photo_group;
