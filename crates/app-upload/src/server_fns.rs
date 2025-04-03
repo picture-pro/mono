@@ -28,10 +28,9 @@ pub async fn create_photo_group_from_artifacts(
   Result<PhotoGroupRecordId, CreatePhotoGroupFromArtifactsError>,
   ServerFnError,
 > {
+  use base_components::bridge_types::AuthStatus;
   use models::{PhotoArtifacts, PhotoCreateRequest, PhotoGroupCreateRequest};
   use prime_domain::PrimeDomainService;
-
-  use crate::AuthStatus;
 
   let auth_session: AuthStatus = expect_context();
   let Some(user) = auth_session.0 else {

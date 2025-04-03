@@ -1,0 +1,34 @@
+[package]
+name = "app-upload"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+base-components = { path = "../base-components" }
+lsc = { path = "../lsc" }
+models = { path = "../models" }
+
+gloo = { version = "0.11.0", features = ["file", "futures", "net"], default-features = false }
+leptos = { workspace = true }
+reactive_stores = { workspace = true }
+send_wrapper = { workspace = true }
+serde.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+web-sys = { workspace = true }
+futures.workspace = true
+
+auth-domain = { path = "../auth-domain", optional = true }
+prime-domain = { path = "../prime-domain", optional = true }
+tokio = { workspace = true, optional = true }
+
+[lints]
+workspace = true
+
+[features]
+default = [ ]
+hydrate = [ "leptos/hydrate", "base-components/hydrate", "lsc/hydrate" ]
+ssr = [
+  "leptos/ssr", "base-components/ssr", "lsc/ssr", "dep:auth-domain",
+  "dep:prime-domain", "dep:tokio",
+]

@@ -1,5 +1,4 @@
 #![expect(unexpected_cfgs)]
-#![feature(iterator_try_collect)]
 #![feature(impl_trait_in_fn_trait_return)]
 
 //! Leptos application for PicturePro.
@@ -8,8 +7,8 @@ mod bridge_types;
 mod components;
 mod pages;
 pub mod server_fns;
-mod utils;
 
+use app_upload::UploadPhotoPage;
 use base_components::PageContainer;
 use leptos::prelude::*;
 use leptos_meta::{

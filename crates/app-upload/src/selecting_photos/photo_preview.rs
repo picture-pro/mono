@@ -3,11 +3,8 @@ use models::{FileSize, Ulid};
 use reactive_stores::Store;
 
 use crate::{
-  pages::upload_photo_page::{
-    photo::PhotoUploadStatus,
-    selecting_photos::SelectingPhotosStateStoreFields, UploadStateStoreFields,
-  },
-  MAX_UPLOAD_SIZE,
+  MAX_UPLOAD_SIZE, UploadStateStoreFields, photo::PhotoUploadStatus,
+  selecting_photos::SelectingPhotosStateStoreFields,
 };
 
 #[component]

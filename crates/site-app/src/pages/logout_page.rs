@@ -1,4 +1,4 @@
-use base_components::FloatingBoxSection;
+use base_components::{utils::navigation::navigate_to, FloatingBoxSection};
 use leptos::prelude::*;
 use lsc::{button::*, icons::*};
 
@@ -32,7 +32,7 @@ fn LogoutButton() -> impl IntoView {
 
   Effect::new(move |_| {
     if matches!(action_value(), Some(Ok(()))) {
-      crate::utils::navigation::navigate_to("/");
+      navigate_to("/");
     }
   });
 

@@ -1,13 +1,10 @@
+use base_components::utils::inputs::touched_input_bindings;
 use leptos::prelude::*;
-use models::{UsdPriceNaive, PHOTO_GROUP_USAGE_RIGHTS_MINIMUM_PRICE};
+use models::{PHOTO_GROUP_USAGE_RIGHTS_MINIMUM_PRICE, UsdPriceNaive};
 use reactive_stores::Store;
 
-use crate::{
-  pages::upload_photo_page::{
-    configuring_group::ConfiguringGroupStateStoreFields, UploadStateStoreFields,
-  },
-  utils::inputs::touched_input_bindings,
-};
+use super::ConfiguringGroupStateStoreFields;
+use crate::UploadStateStoreFields;
 
 #[island]
 pub(super) fn GroupConfigurator() -> impl IntoView {

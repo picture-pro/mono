@@ -5,14 +5,15 @@ edition = "2024"
 
 [dependencies]
 lsc = { path = "../lsc" }
+models = { path = "../models" }
 
 leptos = { workspace = true }
-tracing.workspace = true
+web-sys = { workspace = true, features = [ "Window" ] }
 
 [lints]
 workspace = true
 
 [features]
 default = [ ]
-hydrate = [ "leptos/hydrate" ]
-ssr = [ "leptos/ssr" ]
+hydrate = [ "leptos/hydrate", "lsc/hydrate" ]
+ssr = [ "leptos/ssr", "lsc/ssr" ]

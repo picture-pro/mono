@@ -4,11 +4,9 @@ use reactive_stores::Store;
 
 use super::super::UploadState;
 use crate::{
-  pages::upload_photo_page::{
-    configuring_group::ConfiguringGroupStateStoreFields,
-    upload_finished::UploadFinishedState, UploadStateStoreFields,
-  },
+  UploadStateStoreFields, configuring_group::ConfiguringGroupStateStoreFields,
   server_fns::create_photo_group_from_artifacts,
+  upload_finished::UploadFinishedState,
 };
 
 #[component]

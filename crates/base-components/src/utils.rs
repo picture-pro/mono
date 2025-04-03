@@ -1,6 +1,11 @@
+//! Utils and functions.
+
 pub mod navigation {
+  //! Navigation utils.
+
   use leptos::logging;
 
+  /// Navigate to a new page.
   pub fn navigate_to(path: &str) {
     logging::log!("navigating to: {}", path);
     let result = web_sys::window()
@@ -12,6 +17,7 @@ pub mod navigation {
     }
   }
 
+  /// Reload the current page.
   #[allow(dead_code)]
   pub fn reload() {
     let result = web_sys::window()
@@ -25,9 +31,12 @@ pub mod navigation {
 }
 
 pub mod inputs {
+  //! Input utils.
+
   use leptos::{ev::Event, prelude::*};
 
-  pub(crate) fn touched_input_bindings(
+  /// Splits out bindings for a "touched" input signal.
+  pub fn touched_input_bindings(
     s: RwSignal<Option<String>>,
   ) -> (impl Fn() -> String, impl Fn(Event)) {
     (

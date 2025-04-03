@@ -4,7 +4,7 @@ use reactive_stores::Store;
 use web_sys::Event;
 
 use super::{Photo, SelectingPhotosStateStoreFields};
-use crate::pages::upload_photo_page::UploadStateStoreFields;
+use crate::UploadStateStoreFields;
 
 fn accept_image_from_input(ev: Event) {
   let context: Store<super::super::UploadState> = expect_context();

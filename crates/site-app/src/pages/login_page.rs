@@ -1,8 +1,9 @@
-use base_components::FloatingBoxSection;
+use base_components::{
+  utils::{inputs::touched_input_bindings, navigation::navigate_to},
+  FloatingBoxSection,
+};
 use leptos::prelude::*;
 use lsc::{button::*, field::*};
-
-use crate::utils::inputs::touched_input_bindings;
 
 #[island]
 pub fn LoginPage() -> impl IntoView {
@@ -30,7 +31,7 @@ pub fn LoginPage() -> impl IntoView {
 
   Effect::new(move |_| {
     if matches!(action_value(), Some(Ok(true))) {
-      crate::utils::navigation::navigate_to("/profile");
+      navigate_to("/profile");
     }
   });
 

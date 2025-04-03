@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use leptos::prelude::*;
 use reactive_stores::Store;
 
-use crate::pages::upload_photo_page::{
+use crate::{
+  UploadState, UploadStateStoreFields,
   configuring_group::{ConfiguringGroupState, UploadedPhoto},
   photo::PhotoUploadStatus,
   selecting_photos::SelectingPhotosStateStoreFields,
-  UploadState, UploadStateStoreFields,
 };
 
 #[component]

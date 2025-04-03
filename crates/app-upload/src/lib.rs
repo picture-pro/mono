@@ -1,6 +1,12 @@
+//! The photo upload flow for PicturePro.
+
+#![feature(iterator_try_collect)]
+#![expect(unexpected_cfgs)]
+
 mod configuring_group;
 mod photo;
 mod selecting_photos;
+mod server_fns;
 mod upload_finished;
 
 use std::{collections::HashMap, ops::Deref};
@@ -8,7 +14,7 @@ use std::{collections::HashMap, ops::Deref};
 use leptos::{either::EitherOf3, prelude::*};
 use reactive_stores::Store;
 
-pub const MAX_UPLOAD_SIZE: u64 = 50 * 1000 * 1000; // 50MB
+pub(crate) const MAX_UPLOAD_SIZE: u64 = 50 * 1000 * 1000; // 50MB
 
 use base_components::{Section, Title};
 
@@ -18,6 +24,7 @@ use self::{
   upload_finished::{UploadFinishedState, UploadFinishedStep},
 };
 
+/// The upload photo page.
 #[component]
 pub fn UploadPhotoPage() -> impl IntoView {
   view! {
@@ -30,7 +37,7 @@ pub fn UploadPhotoPage() -> impl IntoView {
 }
 
 #[island]
-pub fn UploadPhotoWizard() -> impl IntoView {
+fn UploadPhotoWizard() -> impl IntoView {
   let overall_context = Store::new(UploadState::default());
   provide_context(overall_context);
 

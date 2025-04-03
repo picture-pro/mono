@@ -1,9 +1,10 @@
-use base_components::FloatingBoxSection;
+use base_components::{
+  utils::{inputs::touched_input_bindings, navigation::navigate_to},
+  FloatingBoxSection,
+};
 use leptos::prelude::*;
 use lsc::{button::*, field::*};
 use models::{EmailAddress, HumanName, HumanNameError, UserRecordId};
-
-use crate::utils::inputs::touched_input_bindings;
 
 #[derive(Clone, PartialEq)]
 enum SignupFormState {
@@ -124,7 +125,7 @@ pub fn SignupPage() -> impl IntoView {
 
   Effect::new(move |_| {
     if action_succeeded() {
-      crate::utils::navigation::navigate_to("/profile");
+      navigate_to("/profile");
     }
   });
 

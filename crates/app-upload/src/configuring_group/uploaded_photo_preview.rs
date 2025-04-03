@@ -3,7 +3,7 @@ use models::Ulid;
 use reactive_stores::Store;
 
 use super::ConfiguringGroupStateStoreFields;
-use crate::pages::upload_photo_page::UploadStateStoreFields;
+use crate::UploadStateStoreFields;
 
 #[island]
 pub(super) fn UploadedPhotoPreviewer() -> impl IntoView {
