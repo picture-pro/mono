@@ -78,7 +78,6 @@ checksum = "c1fd03a028ef38ba2276dce7e33fcd6369c158a1bca17946c4b1b701891c1ff7"
 name = "app-upload"
 version = "0.1.0"
 dependencies = [
- "auth-domain",
  "base-components",
  "futures",
  "gloo",
@@ -376,7 +375,6 @@ name = "base-components"
 version = "0.1.0"
 dependencies = [
  "leptos",
- "lsc",
  "models",
  "web-sys",
 ]
@@ -575,16 +573,6 @@ checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
 dependencies = [
  "cfg-if",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "console_log"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be8aed40e4edbf4d3b4431ab260b63fdc40f5780a4766824329ea0f1eefe3c0f"
-dependencies = [
- "log",
- "web-sys",
 ]
 
 [[package]]
@@ -2453,7 +2441,6 @@ dependencies = [
  "miette",
  "models",
  "repos",
- "thiserror 2.0.8",
  "tracing",
 ]
 
@@ -3222,7 +3209,6 @@ dependencies = [
  "js-sys",
  "once_cell",
  "pin-project-lite",
- "rmp-serde",
  "send_wrapper",
  "serde",
  "serde_json",
@@ -3306,14 +3292,8 @@ dependencies = [
  "lsc",
  "models",
  "prime-domain",
- "reactive_stores",
- "send_wrapper",
  "serde",
- "server_fn",
- "thiserror 2.0.8",
- "tokio",
  "tracing",
- "web-sys",
 ]
 
 [[package]]
@@ -3321,7 +3301,6 @@ name = "site-frontend"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "console_log",
  "leptos",
  "site-app",
  "wasm-bindgen",
@@ -3336,7 +3315,6 @@ dependencies = [
  "axum-login",
  "leptos",
  "leptos_axum",
- "leptos_router",
  "miette",
  "prime-domain",
  "site-app",

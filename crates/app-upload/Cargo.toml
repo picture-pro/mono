@@ -18,7 +18,6 @@ tracing.workspace = true
 web-sys = { workspace = true }
 futures.workspace = true
 
-auth-domain = { path = "../auth-domain", optional = true }
 prime-domain = { path = "../prime-domain", optional = true }
 tokio = { workspace = true, optional = true }
 
@@ -29,6 +28,6 @@ workspace = true
 default = [ ]
 hydrate = [ "leptos/hydrate", "base-components/hydrate", "lsc/hydrate" ]
 ssr = [
-  "leptos/ssr", "base-components/ssr", "lsc/ssr", "dep:auth-domain",
-  "dep:prime-domain", "dep:tokio",
+  "leptos/ssr", "base-components/ssr", "lsc/ssr", "dep:prime-domain",
+  "dep:tokio",
 ]

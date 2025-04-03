@@ -12,7 +12,7 @@ hex.workspace = true
 tracing.workspace = true
 
 miette.workspace = true
-thiserror.workspace = true
+# thiserror.workspace = true
 
 async-trait.workspace = true
 

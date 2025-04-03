@@ -14,7 +14,7 @@ tower-sessions-kv-store = { path = "../tower-sessions-kv-store" }
 
 leptos = { workspace = true, features = [ "ssr", "tracing" ]}
 leptos_axum.workspace = true
-leptos_router.workspace = true
+# leptos_router.workspace = true
 
 axum.workspace = true
 tokio.workspace = true

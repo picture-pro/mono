@@ -10,8 +10,6 @@ leptos.workspace = true
 leptos_meta.workspace = true
 leptos_router.workspace = true
 leptos_axum = { workspace = true, optional = true }
-server_fn.workspace = true
-web-sys = { workspace = true, features = [ "Window" ] }
 
 app-upload = { path = "../app-upload" }
 base-components = { path = "../base-components" }
@@ -25,11 +23,7 @@ axum = { workspace = true, optional = true }
 futures.workspace = true
 serde.workspace = true
 tracing.workspace = true
-thiserror.workspace = true
-tokio = { workspace = true, optional = true }
 either = "1.13.0"
-send_wrapper.workspace = true
-reactive_stores.workspace = true
 
 [features]
 default = [ ]
@@ -38,9 +32,13 @@ hydrate = [
 ]
 ssr = [
   "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
-  "dep:axum", "dep:belt", "dep:auth-domain", "dep:prime-domain", "dep:tokio",
   "app-upload/ssr", "base-components/ssr", "lsc/ssr", "dep:leptos_axum",
+  "dep:axum", "dep:belt", "dep:auth-domain", "dep:prime-domain",
 ]
 
 [lints]
 workspace = true
+
+[package.metadata.cargo-machete]
+# leptos islands need serde as a root dep
+ignored = ["serde"]
