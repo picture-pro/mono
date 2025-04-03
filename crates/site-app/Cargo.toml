@@ -38,8 +38,8 @@ hydrate = [
 ]
 ssr = [
   "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
-  "app-upload/hydrate", "base-components/ssr", "lsc/ssr", "dep:leptos_axum",
   "dep:axum", "dep:belt", "dep:auth-domain", "dep:prime-domain", "dep:tokio",
+  "app-upload/ssr", "base-components/ssr", "lsc/ssr", "dep:leptos_axum",
 ]
 
 [lints]
