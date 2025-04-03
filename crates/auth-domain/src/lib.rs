@@ -140,67 +140,61 @@ impl AuthnBackend for AuthDomainService {
   }
 }
 
-// #[cfg(test)]
-// mod tests {
-//   use std::sync::Arc;
+#[cfg(test)]
+mod tests {
+  use models::{EmailAddress, HumanName};
+  use repos::db::Database;
 
-//   use models::{EmailAddress, HumanName};
-//   use repos::{CreateModelError, MockModelRepository};
+  use super::*;
 
-//   use super::*;
+  #[tokio::test]
+  async fn test_user_signup() {
+    let user_repo = UserRepository::new(Database::new_mock());
+    let service = AuthDomainService::new(user_repo);
 
-//   #[tokio::test]
-//   async fn test_user_signup() {
-//     let mock_repo = MockModelRepository::<User, User,
-// CreateModelError>::new();     let user_repo =
-// UserRepository::new(Arc::new(mock_repo));     let service =
-// AuthDomainService::new(user_repo);
+    let email = EmailAddress::try_new("test@example.com").unwrap();
+    let user_1_req = UserCreateRequest {
+      email: email.clone(),
+      name:  HumanName::try_new("Test User 1").unwrap(),
+      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
+    };
+    let user = service.user_signup(user_1_req).await.unwrap();
+    assert_eq!(user.email, email);
 
-//     let email = EmailAddress::try_new("test@example.com").unwrap();
-//     let user_1_req = UserCreateRequest {
-//       email: email.clone(),
-//       name:  HumanName::try_new("Test User 1").unwrap(),
-//       auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
-//     };
-//     let user = service.user_signup(user_1_req).await.unwrap();
-//     assert_eq!(user.email, email);
+    dbg!(&service);
 
-//     dbg!(&service);
+    let user_2_req = UserCreateRequest {
+      email: email.clone(),
+      name:  HumanName::try_new("Test User 2").unwrap(),
+      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
+    };
 
-//     let user_2_req = UserCreateRequest {
-//       email: email.clone(),
-//       name:  HumanName::try_new("Test User 2").unwrap(),
-//       auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
-//     };
+    let user2 = service.user_signup(user_2_req).await;
+    assert!(matches!(user2, Err(CreateUserError::EmailAlreadyUsed(_))));
+  }
 
-//     let user2 = service.user_signup(user_2_req).await;
-//     assert!(matches!(user2, Err(CreateUserError::EmailAlreadyUsed(_))));
-//   }
+  #[tokio::test]
+  async fn test_user_authenticate() {
+    let user_repo = UserRepository::new(Database::new_mock());
+    let service = AuthDomainService::new(user_repo);
 
-//   #[tokio::test]
-//   async fn test_user_authenticate() {
-//     let mock_repo = MockModelRepository::<User, User,
-// CreateModelError>::new();     let user_repo =
-// UserRepository::new(Arc::new(mock_repo));     let service =
-// AuthDomainService::new(user_repo);
+    let email = EmailAddress::try_new("test@example.com").unwrap();
+    let user_1_req = UserCreateRequest {
+      email: email.clone(),
+      name:  HumanName::try_new("Test User 1").unwrap(),
+      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
+    };
+    let user = service.user_signup(user_1_req).await.unwrap();
+    assert_eq!(user.email, email);
 
-//     let email = EmailAddress::try_new("test@example.com").unwrap();
-//     let user_1_req = UserCreateRequest {
-//       email: email.clone(),
-//       name:  HumanName::try_new("Test User 1").unwrap(),
-//       auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
-//     };
-//     let user = service.user_signup(user_1_req).await.unwrap();
-//     assert_eq!(user.email, email);
+    let creds = UserAuthCredentials::EmailEntryOnly(email.clone());
+    let auth_user = service.user_authenticate(creds).await.unwrap();
+    assert_eq!(auth_user, Some(user));
 
-//     let creds = UserAuthCredentials::EmailEntryOnly(email.clone());
-//     let auth_user = service.user_authenticate(creds).await.unwrap();
-//     assert_eq!(auth_user, Some(user));
-
-//     let creds = UserAuthCredentials::EmailEntryOnly(
-//       EmailAddress::try_new("untest@example.com").unwrap(),
-//     );
-//     let auth_user = service.user_authenticate(creds).await.unwrap();
-//     assert_eq!(auth_user, None);
-//   }
-// }
+    let creds = UserAuthCredentials::EmailEntryOnly(
+      EmailAddress::try_new("untest@example.com").unwrap(),
+    );
+    let auth_user = service.user_authenticate(creds).await.unwrap();
+    assert_eq!(auth_user, None);
+  }
+}
