@@ -1,7 +1,7 @@
 //! Button component and supporting types.
 
 use enum_iterator::Sequence;
-use leptos::{either::Either, prelude::*};
+use leptos::{either::EitherOf3, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::colors::NamedColor;
@@ -86,6 +86,20 @@ struct ButtonStyleProps {
   size:     ButtonSize,
   variant:  ButtonVariant,
   disabled: bool,
+}
+
+/// What element is used for the [`Button`].
+#[derive(
+  Clone, Copy, Default, Debug, PartialEq, Eq, Hash, Serialize, Deserialize,
+)]
+pub enum ButtonElementType {
+  /// `<button>`
+  #[default]
+  Button,
+  /// `<a>`
+  Link,
+  /// `<input type="submit">`
+  InputSubmit,
 }
 
 const BUTTON_SOLID_ACTIVE_FILTER: &str =
@@ -264,9 +278,9 @@ pub fn Button(
   /// The variant of the button.
   #[prop(into, optional)]
   variant: Signal<ButtonVariant>,
-  /// Whether the button is a `<link>`.
-  #[prop(into, default = false.into())]
-  is_link: Signal<bool>,
+  /// The HTML element of the button.
+  #[prop(into, optional)]
+  element_type: Signal<ButtonElementType>,
   /// Whether the button is disabled.
   #[prop(into, default = false.into())]
   disabled: Signal<bool>,
@@ -281,16 +295,19 @@ pub fn Button(
   };
   let class = Memo::new(move |_| style_props().class());
 
-  match is_link.get() {
-    true => Either::Left(view! {
+  match element_type() {
+    ButtonElementType::Button => EitherOf3::A(view! {
+      <button class=class disabled=disabled>
+        { children() }
+      </button>
+    }),
+    ButtonElementType::Link => EitherOf3::B(view! {
       <a class=class>
         { children() }
       </a>
     }),
-    false => Either::Right(view! {
-      <button class=class disabled=disabled>
-        { children() }
-      </button>
+    ButtonElementType::InputSubmit => EitherOf3::C(view! {
+      <input type="submit" class=class />
     }),
   }
 }

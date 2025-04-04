@@ -26,7 +26,7 @@ pub fn UploadPhotoButton() -> impl IntoView {
 
   view! {
     <Button
-      is_link=true
+      element_type=ButtonElementType::Link
       color=ButtonColor::Primary
       size={ButtonSize::Large}
       {..}

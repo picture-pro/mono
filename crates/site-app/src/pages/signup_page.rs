@@ -33,7 +33,9 @@ fn SubmitButton(#[prop(into)] state: Signal<SignupFormState>) -> impl IntoView {
   };
 
   view! {
-    <Button size=ButtonSize::Large disabled=disabled>
+    <Button
+      size=ButtonSize::Large disabled=disabled
+    >
       "Sign up"
       { icon_fragment }
     </Button>

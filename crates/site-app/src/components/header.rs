@@ -47,10 +47,16 @@ fn HeaderUserArea() -> impl IntoView {
 #[component]
 fn LoggedOutUserAuthActions() -> impl IntoView {
   view! {
-    <Button is_link=true color={ButtonColor::Primary} {..} href="/sign-up">
+    <Button
+      element_type=ButtonElementType::Link color={ButtonColor::Primary}
+      {..} href="/sign-up"
+    >
       "Sign Up"
     </Button>
-    <Button is_link=true color={ButtonColor::Base} {..} href="/log-in">
+    <Button
+      element_type=ButtonElementType::Link color={ButtonColor::Base}
+      {..} href="/log-in"
+    >
       "Log In"
     </Button>
   }
@@ -65,7 +71,10 @@ fn LoggedInUserAuthActions(user: PublicUser) -> impl IntoView {
         { user.name.to_string() }
       </Link>
     </span>
-    <Button is_link=true color={ButtonColor::Base} {..} href="/log-out">
+    <Button
+      element_type=ButtonElementType::Link color={ButtonColor::Base}
+      {..} href="/log-out"
+    >
       "Log Out"
     </Button>
   }
