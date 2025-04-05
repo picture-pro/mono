@@ -1,3 +1,4 @@
+use dvf::slugger::{EitherSlug, StrictSlug};
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
@@ -39,6 +40,10 @@ impl Model for PhotoGroup {
     &'static str,
     model::SlugFieldGetter<Self>,
   )] = &[];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] =
+    &[("owner", |photo_group| {
+      EitherSlug::Strict(StrictSlug::new(photo_group.owner.to_string()))
+    })];
 
   fn id(&self) -> PhotoGroupRecordId { self.id }
 }

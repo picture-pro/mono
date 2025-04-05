@@ -81,7 +81,7 @@ impl ArtifactRepository {
   ) -> Result<Option<Artifact>, FetchModelByIndexError> {
     self
       .db
-      .fetch_model_by_index(
+      .fetch_model_by_unique_index(
         "path".into(),
         models::EitherSlug::Strict(StrictSlug::new(path.to_string())),
       )

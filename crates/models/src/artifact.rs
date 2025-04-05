@@ -57,6 +57,10 @@ impl Model for Artifact {
   )] = &[("path", |artifact| {
     EitherSlug::Strict(StrictSlug::new(artifact.path.to_string()))
   })];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] =
+    &[("originator", |artifact| {
+      EitherSlug::Strict(StrictSlug::new(artifact.originator.to_string()))
+    })];
 
   fn id(&self) -> ArtifactRecordId { self.id }
 }

@@ -73,7 +73,7 @@ impl UserRepository {
   ) -> Result<Option<User>, FetchModelByIndexError> {
     self
       .model_repo
-      .fetch_model_by_index(
+      .fetch_model_by_unique_index(
         "email".to_string(),
         EitherSlug::Lax(LaxSlug::new(email.as_ref())),
       )

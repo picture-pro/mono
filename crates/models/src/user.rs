@@ -46,6 +46,7 @@ impl Model for User {
     &'static str,
     model::SlugFieldGetter<Self>,
   )] = &[("email", |u| EitherSlug::Lax(LaxSlug::new(u.email.as_ref())))];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> UserRecordId { self.id }
 }

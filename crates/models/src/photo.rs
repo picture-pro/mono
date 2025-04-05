@@ -33,6 +33,7 @@ impl Model for Photo {
     &'static str,
     model::SlugFieldGetter<Self>,
   )] = &[];
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> PhotoRecordId { self.id }
 }

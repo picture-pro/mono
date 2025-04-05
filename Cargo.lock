@@ -394,7 +394,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "belt"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "async-compression",
  "bytes",
@@ -679,9 +679,10 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "async-trait",
+ "generic-tests",
  "hex",
  "kv",
  "miette",
@@ -765,7 +766,7 @@ checksum = "669a445ee724c5c69b1b06fe0b63e70a1c84bc9bb7d9696cd4f4e3ec45050408"
 [[package]]
 name = "dvf"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "email_address",
  "nutype",
@@ -988,6 +989,17 @@ checksum = "85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a"
 dependencies = [
  "typenum",
  "version_check",
+]
+
+[[package]]
+name = "generic-tests"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9ff6d6584f4f6fa911d5e07856abf1a48dc5599b3734f2eaea130f2c3baa989"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.90",
 ]
 
 [[package]]
@@ -1218,7 +1230,7 @@ checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 [[package]]
 name = "health"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "async-trait",
  "futures",
@@ -1240,7 +1252,7 @@ checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 [[package]]
 name = "hex"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "health",
  "tokio",
@@ -1713,7 +1725,7 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "async-trait",
  "hex",
@@ -2125,7 +2137,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "dvf",
  "serde",
@@ -3348,7 +3360,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "deunicode",
  "nutype",
@@ -3408,12 +3420,12 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starc"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 
 [[package]]
 name = "storage"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9c1d96#e9c1d969c97ab25dea3ab4b1ae5c029a16e29bee"
+source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
 dependencies = [
  "async-trait",
  "belt",
