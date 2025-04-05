@@ -61,11 +61,14 @@ debug = 2
 [profile.dev.build-override]
 opt-level = 3
 
+[profile.server-dev]
+inherits = "dev"
+
 # only for client-side wasm builds
 [profile.wasm-release]
 inherits = "release"
 opt-level = 'z'
-lto = true
+lto = "thin"
 codegen-units = 1
 strip = true
 
@@ -97,6 +100,7 @@ env = "DEV"
 
 bin-features = []
 bin-default-features = false
+bin-profile-dev = "server-dev"
 lib-features = []
 lib-default-features = false
 lib-profile-release = "wasm-release"
