@@ -12,7 +12,8 @@ use models::{
 pub use repos;
 use repos::{
   belt::Belt, ArtifactRepository, CreateArtifactError, CreateModelError,
-  FetchModelError, PhotoGroupRepository, PhotoRepository,
+  FetchModelByIndexError, FetchModelError, PhotoGroupRepository,
+  PhotoRepository,
 };
 use tracing::instrument;
 
@@ -86,5 +87,17 @@ impl PrimeDomainService {
     id: ArtifactRecordId,
   ) -> Result<Option<Artifact>, FetchModelError> {
     self.artifact_repo.fetch_artifact_by_id(id).await
+  }
+
+  /// Fetch [`PhotoGroup`]s by user.
+  #[instrument(skip(self))]
+  pub async fn fetch_photo_groups_by_user(
+    &self,
+    owner: UserRecordId,
+  ) -> Result<Vec<PhotoGroup>, FetchModelByIndexError> {
+    self
+      .photo_group_repo
+      .fetch_photo_groups_by_user(owner)
+      .await
   }
 }

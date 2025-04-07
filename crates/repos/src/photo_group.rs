@@ -1,7 +1,7 @@
-use db::{CreateModelError, Database, FetchModelError};
+use db::{CreateModelError, Database, FetchModelByIndexError, FetchModelError};
 use hex::health::{self, HealthAware};
 use miette::Result;
-use models::PhotoGroup;
+use models::{EitherSlug, PhotoGroup, StrictSlug, UserRecordId};
 use tracing::instrument;
 
 /// Stores and retrieves [`PhotoGroup`]s.
@@ -42,6 +42,20 @@ impl PhotoGroupRepository {
     id: models::PhotoGroupRecordId,
   ) -> Result<Option<PhotoGroup>, FetchModelError> {
     self.db.fetch_model_by_id(id).await
+  }
+
+  /// Fetch [`PhotoGroup`]s by user.
+  pub async fn fetch_photo_groups_by_user(
+    &self,
+    owner: UserRecordId,
+  ) -> Result<Vec<PhotoGroup>, FetchModelByIndexError> {
+    self
+      .db
+      .fetch_model_by_index(
+        "owner".to_owned(),
+        EitherSlug::Strict(StrictSlug::new(owner.to_string())),
+      )
+      .await
   }
 
   /// Produce a list of all [`PhotoGroup`]s.
