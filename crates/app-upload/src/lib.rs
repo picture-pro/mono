@@ -59,9 +59,9 @@ fn UploadPhotoWizard() -> impl IntoView {
   });
 
   move || match memoized_top_level_switch() {
-    EitherOf3::A(_) => EitherOf3::A(view! { <SelectingPhotosStep /> }),
-    EitherOf3::B(_) => EitherOf3::B(view! { <ConfiguringGroupStep /> }),
-    EitherOf3::C(_) => EitherOf3::C(view! { <UploadFinishedStep /> }),
+    EitherOf3::A(_) => view! { <SelectingPhotosStep /> }.into_any(),
+    EitherOf3::B(_) => view! { <ConfiguringGroupStep /> }.into_any(),
+    EitherOf3::C(_) => view! { <UploadFinishedStep /> }.into_any(),
   }
 }
 

@@ -54,6 +54,7 @@ console_log = "1"
 [profile.dev]
 opt-level = 0
 debug = 1
+split-debuginfo = "packed"
 incremental = true
 [profile.dev.package."*"]
 opt-level = 3
