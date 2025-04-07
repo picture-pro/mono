@@ -1,5 +1,46 @@
 use base_components::{Section, Title};
 use leptos::prelude::*;
+use models::PhotoGroup;
+
+use crate::server_fns::fetch_photo_groups_for_user;
+
+#[component]
+pub fn PhotoGroupPreview(pg: PhotoGroup) -> impl IntoView {
+  view! {
+    <pre><code>{ format!("{pg:#?}") }</code></pre>
+  }
+}
+
+#[component]
+pub fn ProfilePhotoGroupPreview() -> impl IntoView {
+  let photo_groups =
+    Resource::new(move || (), move |_| fetch_photo_groups_for_user());
+
+  let suspended_fn = move || {
+    Suspend::new(async move {
+      match photo_groups.await {
+        Ok(pgs) => view! {
+          <For
+            each=move || pgs.clone()
+            key=move |pg| pg.id
+            children=move |pg| view! { <PhotoGroupPreview pg=pg /> }
+          />
+        }
+        .into_any(),
+        Err(e) => {
+          let e = e.to_string();
+          view! { "failed to fetch photo groups: " {e} }.into_any()
+        }
+      }
+    })
+  };
+
+  view! {
+    <Suspense fallback=move || view! { "Loading..." }>
+      { suspended_fn }
+    </Suspense>
+  }
+}
 
 #[component]
 pub fn ProfilePage() -> impl IntoView {
@@ -17,6 +58,9 @@ pub fn ProfilePage() -> impl IntoView {
       </div>
     </Section>
 
+    <Section>
+      <ProfilePhotoGroupPreview />
+    </Section>
   }
 }
 
