@@ -88,19 +88,19 @@ localFlake: { ... }: {
         }
         {
           name = "watch";
-          command = "cargo leptos watch $@";
+          command = "cargo leptos watch -v $@";
           help = "Runs ${bin-hl "cargo-leptos"} in watch mode.";
           category = "[build actions]";
         }
         {
           name = "serve";
-          command = "cargo leptos serve $@";
+          command = "cargo leptos serve -v $@";
           help = "Runs ${bin-hl "cargo-leptos"} in watch mode.";
           category = "[build actions]";
         }
         {
           name = "serve-release";
-          command = "cargo leptos serve --release $@";
+          command = "cargo leptos serve -v --release $@";
           help = "Runs ${bin-hl "cargo-leptos"} in watch mode.";
           category = "[build actions]";
         }
