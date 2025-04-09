@@ -22,7 +22,12 @@ pub struct AppState {
 
 impl AppState {
   pub async fn new(l_opts: LeptosOptions) -> Result<Self> {
-    let kv_store = kv::KeyValueStore::new_redb("/tmp/picturepro-db")?;
+    let kv_store_location = std::path::PathBuf::from(
+      std::env::var("REDB_STORE_PATH")
+        .unwrap_or("/tmp/picturepro-db".to_owned()),
+    );
+
+    let kv_store = kv::KeyValueStore::new_redb(&kv_store_location)?;
 
     let session_store =
       tower_sessions_kv_store::TowerSessionsKvStore::new(kv_store.clone());
