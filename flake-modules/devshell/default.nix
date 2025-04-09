@@ -54,12 +54,10 @@ localFlake: { ... }: {
         mprocs # runs commands in parallel
         cargo-leptos # leptos build tool
         dart-sass tailwindcss yarn # css build tools
-        binaryen # wasm tools
-        opentofu flyctl terraform
+        flyctl
 
         # dependencies for local rust builds
-        pkg-config
-        openssl
+        pkg-config openssl
         clang lld mold # faster linking + gcc for some crates
       ];
 
