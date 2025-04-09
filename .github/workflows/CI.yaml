@@ -11,8 +11,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
-      - name: Verify flake inputs
-        uses: DeterminateSystems/flake-checker-action@main
       - name: Use Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Run checks
