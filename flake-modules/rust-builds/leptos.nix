@@ -86,6 +86,7 @@
       buildPhaseCargoCommand = ''
         LEPTOS_HASH_FILES=true cargo leptos build --release -vvv
       '';
+      doNotPostBuildInstallCargoBinaries = true;
 
       installPhaseCommand = ''
         mkdir -p $out/bin
