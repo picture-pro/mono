@@ -1,0 +1,26 @@
+
+app = "picturepro"
+
+primary_region = "dfw"
+swap_size_mb = 2048
+
+[build]
+  image = "site-server:latest"
+
+[http_service]
+  internal_port = 3000
+  auto_stop_machines = "suspend"
+  auto_start_machines = false
+  min_machines_running = 0
+
+[env]
+  REDB_STORE_PATH = "/data/picturepro-db"
+  STORAGE_PATH = "/data/picturepro-storage"
+
+[[mounts]]
+  source = "picturepro-data"
+  destination = "/data"
+  initial_size = "1gb"
+
+[[vm]]
+  size = "shared-cpu-1x"
