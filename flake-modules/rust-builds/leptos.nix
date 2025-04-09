@@ -101,7 +101,11 @@
     site-server-container = pkgs.dockerTools.buildLayeredImage {
       name = leptos-options.bin-package;
       tag = "latest";
-      contents = [ site-server pkgs.cacert ];
+      contents = [
+        site-server
+        pkgs.cacert
+        pkgs.bash
+      ];
       config = {
         # runs the executable with tini: https://github.com/krallin/tini
         # this does signal forwarding and zombie process reaping
