@@ -26,6 +26,10 @@ impl AppState {
       std::env::var("REDB_STORE_PATH")
         .unwrap_or("/tmp/picturepro-db".to_owned()),
     );
+    let storage_location = std::path::PathBuf::from(
+      std::env::var("STORAGE_PATH")
+        .unwrap_or("/tmp/picturepro-storage".to_owned()),
+    );
 
     let kv_store = kv::KeyValueStore::new_redb(&kv_store_location)?;
 
@@ -43,9 +47,7 @@ impl AppState {
     );
 
     let storage_credentials = prime_domain::models::StorageCredentials::Local(
-      prime_domain::models::LocalStorageCredentials(
-        std::path::PathBuf::from_str("/tmp/picturepro-store").unwrap(),
-      ),
+      prime_domain::models::LocalStorageCredentials(storage_location),
     );
     let artifact_storage_client =
       StorageClient::new_from_storage_creds(storage_credentials).await?;
