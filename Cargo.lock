@@ -394,7 +394,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "belt"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "async-compression",
  "bytes",
@@ -679,7 +679,7 @@ dependencies = [
 [[package]]
 name = "db"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "async-trait",
  "generic-tests",
@@ -766,7 +766,7 @@ checksum = "669a445ee724c5c69b1b06fe0b63e70a1c84bc9bb7d9696cd4f4e3ec45050408"
 [[package]]
 name = "dvf"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "email_address",
  "nutype",
@@ -1230,7 +1230,7 @@ checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 [[package]]
 name = "health"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "async-trait",
  "futures",
@@ -1252,7 +1252,7 @@ checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 [[package]]
 name = "hex"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "health",
  "tokio",
@@ -1725,11 +1725,12 @@ dependencies = [
 [[package]]
 name = "kv"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "async-trait",
  "hex",
  "miette",
+ "redb",
  "rmp-serde",
  "serde",
  "slugger",
@@ -2137,7 +2138,7 @@ dependencies = [
 [[package]]
 name = "model"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "dvf",
  "serde",
@@ -2782,6 +2783,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "redb"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea0a72cd7140de9fc3e318823b883abf819c20d478ec89ce880466dc2ef263c6"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3360,7 +3370,7 @@ dependencies = [
 [[package]]
 name = "slugger"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "deunicode",
  "nutype",
@@ -3420,12 +3430,12 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starc"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 
 [[package]]
 name = "storage"
 version = "0.1.0"
-source = "git+https://github.com/rambit-systems/rambit?rev=e9a49e0#e9a49e07b6663fe2310c7844ce64f7324db09f95"
+source = "git+https://github.com/rambit-systems/rambit?rev=09069dd#09069dd5488bb0f7b8b9edc686ea3ecf70f1c5db"
 dependencies = [
  "async-trait",
  "belt",

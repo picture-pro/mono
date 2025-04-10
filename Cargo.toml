@@ -17,13 +17,13 @@ miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f
 thiserror = "2"
 
 # inherited from rambit
-belt =    { git = "https://github.com/rambit-systems/rambit", rev = "e9a49e0" }
-db =      { git = "https://github.com/rambit-systems/rambit", rev = "e9a49e0" }
-dvf =     { git = "https://github.com/rambit-systems/rambit", rev = "e9a49e0" }
-hex =     { git = "https://github.com/rambit-systems/rambit", rev = "e9a49e0" }
-kv =      { git = "https://github.com/rambit-systems/rambit", rev = "e9a49e0" }
-model =   { git = "https://github.com/rambit-systems/rambit", rev = "e9a49e0" }
-storage = { git = "https://github.com/rambit-systems/rambit", rev = "e9a49e0" }
+belt =    { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
+db =      { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
+dvf =     { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
+hex =     { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
+kv =      { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
+model =   { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
+storage = { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
 
 # async
 futures = { version = "0.3" }
