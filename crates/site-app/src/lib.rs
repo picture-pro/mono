@@ -51,7 +51,7 @@ pub fn App() -> impl IntoView {
   provide_meta_context();
 
   view! {
-    <Title text="Welcome to Leptos"/>
+    <Title text="PicturePro"/>
 
     <Header/>
     <PageContainer>
