@@ -9,7 +9,7 @@ swap_size_mb = 2048
 
 [http_service]
   internal_port = 3000
-  auto_stop_machines = "suspend"
+  auto_stop_machines = "off"
   auto_start_machines = false
   min_machines_running = 0
 
