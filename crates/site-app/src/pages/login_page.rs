@@ -71,6 +71,7 @@ pub fn LoginPage() -> impl IntoView {
 }
 
 #[server(name = LoginActionParams)]
+#[tracing::instrument]
 async fn login(email: String) -> Result<bool, ServerFnError> {
   use auth_domain::{AuthDomainService, AuthSession};
   use models::{EmailAddress, PublicUser, UserAuthCredentials};

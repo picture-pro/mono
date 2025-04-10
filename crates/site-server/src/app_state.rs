@@ -1,4 +1,4 @@
-use std::{str::FromStr, time::Duration};
+use std::str::FromStr;
 
 use auth_domain::AuthDomainService;
 use axum::extract::FromRef;
@@ -22,9 +22,6 @@ pub struct AppState {
 
 impl AppState {
   pub async fn new(l_opts: LeptosOptions) -> Result<Self> {
-    // let kv_store =
-    //   kv::KeyValueStore::new_retryable_tikv_from_env(5,
-    // Duration::from_secs(2))     .await;
     let kv_store = kv::KeyValueStore::new_redb("/tmp/picturepro-db")?;
 
     let session_store =

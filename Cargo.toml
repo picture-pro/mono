@@ -17,18 +17,18 @@ miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f
 thiserror = "2"
 
 # inherited from rambit
-belt =    { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
-db =      { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
-dvf =     { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
-hex =     { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
-kv =      { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
-model =   { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
-storage = { git = "https://github.com/rambit-systems/rambit", rev = "09069dd" }
+belt =    { git = "https://github.com/rambit-systems/rambit", rev = "86982e6" }
+db =      { git = "https://github.com/rambit-systems/rambit", rev = "86982e6" }
+dvf =     { git = "https://github.com/rambit-systems/rambit", rev = "86982e6" }
+hex =     { git = "https://github.com/rambit-systems/rambit", rev = "86982e6" }
+kv =      { git = "https://github.com/rambit-systems/rambit", rev = "86982e6", features = [ "redb" ] }
+model =   { git = "https://github.com/rambit-systems/rambit", rev = "86982e6" }
+storage = { git = "https://github.com/rambit-systems/rambit", rev = "86982e6" }
 
 # async
 futures = { version = "0.3" }
 async-trait = "0.1"
-tokio = { version = "1" }
+tokio = { version = "1", features = [ "rt-multi-thread" ] }
 
 # app-level http
 axum = { version = "0.7", features = [ "macros", "tracing" ] }

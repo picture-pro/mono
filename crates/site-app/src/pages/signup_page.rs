@@ -270,6 +270,7 @@ pub fn SignupPage() -> impl IntoView {
 }
 
 #[server(name = SignupActionParams)]
+#[tracing::instrument]
 async fn signup(
   name: String,
   email: String,
