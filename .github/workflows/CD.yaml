@@ -20,4 +20,4 @@ jobs:
       - name: Containerize & Deploy to Fly
         run:  docker load -i $(nix build ".#site-server-container" -L --no-link --print-out-paths) && flyctl deploy --local-only --detach
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_DEPLOY_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
