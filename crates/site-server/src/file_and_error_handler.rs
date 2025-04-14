@@ -18,9 +18,13 @@ pub async fn fallback_handler(
   let options = LeptosOptions::from_ref(&state);
   let app_state = AppState::from_ref(&state);
   let res = get_static_file(uri, &options.site_root, req.headers());
-  let res = res.await.unwrap();
+  let mut res = res.await.unwrap();
 
   if res.status() == StatusCode::OK {
+    res.headers_mut().insert(
+      "Cache-Control",
+      HeaderValue::from_static("max-age=31536000, immutable"),
+    );
     res.into_response()
   } else {
     let mut res =
