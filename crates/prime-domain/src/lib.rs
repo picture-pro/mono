@@ -6,8 +6,8 @@ use hex::health::{self, HealthAware};
 use miette::Result;
 pub use models;
 use models::{
-  Artifact, ArtifactRecordId, Photo, PhotoCreateRequest, PhotoGroup,
-  PhotoGroupCreateRequest, PhotoRecordId, UserRecordId,
+  Artifact, ArtifactMimeType, ArtifactRecordId, Photo, PhotoCreateRequest,
+  PhotoGroup, PhotoGroupCreateRequest, PhotoRecordId, UserRecordId,
 };
 pub use repos;
 use repos::{
@@ -58,8 +58,12 @@ impl PrimeDomainService {
     &self,
     data: Belt,
     originator: UserRecordId,
+    stated_mime_type: Option<ArtifactMimeType>,
   ) -> Result<Artifact, CreateArtifactError> {
-    self.artifact_repo.create_artifact(data, originator).await
+    self
+      .artifact_repo
+      .create_artifact(data, originator, stated_mime_type)
+      .await
   }
 
   /// Create a [`Photo`].

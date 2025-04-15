@@ -1,8 +1,8 @@
 use db::{CreateModelError, Database, FetchModelByIndexError, FetchModelError};
 use hex::health::{self, HealthAware};
 use models::{
-  Artifact, ArtifactCreateRequest, ArtifactPath, ArtifactRecordId,
-  CompressionStatus, FileSize, StrictSlug, UserRecordId,
+  Artifact, ArtifactCreateRequest, ArtifactMimeType, ArtifactPath,
+  ArtifactRecordId, CompressionStatus, FileSize, StrictSlug, UserRecordId,
 };
 use storage::{
   belt::Belt, ReadError as StorageReadError, StorageClient,
@@ -122,6 +122,7 @@ impl ArtifactRepository {
     &self,
     data: Belt,
     originator: UserRecordId,
+    stated_mime_type: Option<ArtifactMimeType>,
   ) -> Result<Artifact, CreateArtifactError> {
     let pre_comp_counter = data.counter();
     let data = data.adapt_to_comp(storage::belt::CompressionAlgorithm::Zstd);
@@ -146,6 +147,7 @@ impl ArtifactRepository {
           path,
           originator,
           comp_status,
+          stated_mime_type,
         }
         .into(),
       )

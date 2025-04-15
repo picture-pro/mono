@@ -16,13 +16,15 @@ pub type ArtifactRecordId = RecordId<Artifact>;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Artifact {
   /// The artifact's ID.
-  pub id:          ArtifactRecordId,
+  pub id:               ArtifactRecordId,
   /// The artifact's path.
-  pub path:        ArtifactPath,
+  pub path:             ArtifactPath,
   /// The artifact's originator.
-  pub originator:  UserRecordId,
+  pub originator:       UserRecordId,
   /// The artifact's compression status.
-  pub comp_status: dvf::CompressionStatus,
+  pub comp_status:      dvf::CompressionStatus,
+  /// The artifact's stated mime-type.
+  pub stated_mime_type: Option<ArtifactMimeType>,
 }
 
 /// The object storage path for an [`Artifact`].
@@ -49,6 +51,22 @@ impl fmt::Display for ArtifactPath {
   }
 }
 
+/// The object storage path for an [`Artifact`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ArtifactMimeType(String);
+
+impl ArtifactMimeType {
+  /// Creates a new [`ArtifactMimeType`].
+  pub fn new(mime_type: &str) -> Self { Self(mime_type.to_owned()) }
+
+  /// Converts the [`ArtifactMimeType`] into a [`String`].
+  pub fn into_inner(self) -> String { self.0 }
+}
+
+impl AsRef<str> for ArtifactMimeType {
+  fn as_ref(&self) -> &str { &self.0 }
+}
+
 impl Model for Artifact {
   const TABLE_NAME: &'static str = ARTIFACT_TABLE_NAME;
   const UNIQUE_INDICES: &'static [(
@@ -69,20 +87,23 @@ impl Model for Artifact {
 #[derive(Debug)]
 pub struct ArtifactCreateRequest {
   /// The artifact's path.
-  pub path:        ArtifactPath,
+  pub path:             ArtifactPath,
   /// The artifact's originator.
-  pub originator:  UserRecordId,
+  pub originator:       UserRecordId,
   /// The artifact's compression status.
-  pub comp_status: dvf::CompressionStatus,
+  pub comp_status:      dvf::CompressionStatus,
+  /// The artifact's stated mime-type.
+  pub stated_mime_type: Option<ArtifactMimeType>,
 }
 
 impl From<ArtifactCreateRequest> for Artifact {
   fn from(input: ArtifactCreateRequest) -> Self {
     Self {
-      id:          ArtifactRecordId::new(),
-      path:        input.path,
-      originator:  input.originator,
-      comp_status: input.comp_status,
+      id:               ArtifactRecordId::new(),
+      path:             input.path,
+      originator:       input.originator,
+      comp_status:      input.comp_status,
+      stated_mime_type: input.stated_mime_type,
     }
   }
 }
