@@ -5,6 +5,7 @@ use auth_domain::AuthSession;
 use axum::{
   body::Body,
   extract::{Request, State},
+  handler::Handler,
   response::IntoResponse,
   routing::{get, post},
   Router,
@@ -78,12 +79,10 @@ async fn main() {
   // this nastiness is to serve an "unrouted" axum handler with state
   let fallback_service = ServiceBuilder::new()
     .layer(CompressionLayer::new())
+    .layer(auth_layer.clone())
     .service(
-      Router::new()
-        .route("/", get(self::file_and_error_handler::fallback_handler))
-        .route("/*a", get(self::file_and_error_handler::fallback_handler))
-        .with_state(app_state.clone())
-        .layer(auth_layer.clone()),
+      self::file_and_error_handler::fallback_handler
+        .with_state(app_state.clone()),
     );
 
   let server_fn_handler = {
@@ -108,7 +107,7 @@ async fn main() {
   };
 
   let app = Router::new()
-    .leptos_routes_with_handler(routes.clone(), leptos_routes_handler)
+    .leptos_routes_with_handler(routes, leptos_routes_handler)
     .route(
       "/api/upload_artifact",
       post(site_app::server_fns::upload_artifact),
