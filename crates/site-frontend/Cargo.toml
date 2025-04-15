@@ -12,5 +12,6 @@ crate-type = ["cdylib", "rlib"]
 site-app = { path = "../site-app", default-features = false, features = ["hydrate"] }
 leptos = { workspace = true, features = [ "hydrate" ] }
 
+getrandom = { version = "0.3", features = ["wasm_js"] }
 console_error_panic_hook.workspace = true
 wasm-bindgen.workspace = true

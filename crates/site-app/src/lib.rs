@@ -1,4 +1,3 @@
-#![expect(unexpected_cfgs)]
 #![feature(impl_trait_in_fn_trait_return)]
 
 //! Leptos application for PicturePro.

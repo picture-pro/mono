@@ -1,7 +1,6 @@
 //! The photo upload flow for PicturePro.
 
 #![feature(iterator_try_collect)]
-#![expect(unexpected_cfgs)]
 
 mod configuring_group;
 mod photo;
