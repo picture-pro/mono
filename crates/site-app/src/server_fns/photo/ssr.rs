@@ -39,7 +39,7 @@ pub async fn fetch_photo_thumbnail(
 
   let artifact_id = photo.artifacts.thumbnail;
 
-  let artifact_data = pd
+  let (artifact_data, artifact_mime_type) = pd
     .read_artifact_by_id(artifact_id)
     .await
     .map_err(|e| {
@@ -54,13 +54,22 @@ pub async fn fetch_photo_thumbnail(
       (StatusCode::INTERNAL_SERVER_ERROR, "Internal Error").into_response()
     })?;
 
+  const APPLICATION_OCTET_STREAM: HeaderValue =
+    HeaderValue::from_static("application/octet-stream");
+  let content_type = artifact_mime_type
+    .and_then(|mt| HeaderValue::from_str(mt.as_ref()).ok())
+    .unwrap_or(APPLICATION_OCTET_STREAM);
+
   Ok(efficiently_compressed_belt_http_response(
     &headers,
     artifact_data,
-    HeaderMap::from_iter([(
-      CACHE_CONTROL,
-      HeaderValue::from_static("max-age=31536000, immutable"),
-    )]),
+    HeaderMap::from_iter([
+      (
+        CACHE_CONTROL,
+        HeaderValue::from_static("max-age=31536000, immutable"),
+      ),
+      (CONTENT_TYPE, content_type),
+    ]),
   ))
 }
 
@@ -83,12 +92,7 @@ fn efficiently_compressed_belt_http_response(
     })
     .unwrap_or_default();
 
-  const APPLICATION_OCTET_STREAM: HeaderValue =
-    HeaderValue::from_static("application/octet-stream");
-
-  let mut out_headers = HeaderMap::with_capacity(2);
-  out_headers.insert(CONTENT_TYPE, APPLICATION_OCTET_STREAM);
-
+  let mut out_headers = HeaderMap::with_capacity(1);
   match current_comp_http_name {
     // current compression is directly usable, so send as-is
     Some(current_comp_http_name)
