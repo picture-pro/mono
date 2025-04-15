@@ -112,6 +112,10 @@ async fn main() {
       "/api/upload_artifact",
       post(site_app::server_fns::upload_artifact),
     )
+    .route(
+      "/api/photo_thumbnail/:id",
+      get(site_app::server_fns::fetch_photo_thumbnail),
+    )
     .route("/api/*fn_name", post(server_fn_handler))
     .fallback_service(fallback_service)
     .with_state(app_state)
