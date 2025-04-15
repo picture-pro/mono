@@ -7,7 +7,13 @@ use crate::server_fns::fetch_photo_groups_for_user;
 #[component]
 pub fn PhotoGroupPreview(pg: PhotoGroup) -> impl IntoView {
   view! {
-    <pre><code>{ format!("{pg:#?}") }</code></pre>
+    <For
+      each=move || pg.photos.clone()
+      key=move |p| *p
+      children=move |p| view! {
+        <img src=format!("/api/photo_thumbnail/{p}") />
+      }
+    />
   }
 }
 
