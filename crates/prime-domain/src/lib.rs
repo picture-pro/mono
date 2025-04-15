@@ -7,13 +7,13 @@ use miette::Result;
 pub use models;
 use models::{
   Artifact, ArtifactRecordId, Photo, PhotoCreateRequest, PhotoGroup,
-  PhotoGroupCreateRequest, UserRecordId,
+  PhotoGroupCreateRequest, PhotoRecordId, UserRecordId,
 };
 pub use repos;
 use repos::{
   belt::Belt, ArtifactRepository, CreateArtifactError, CreateModelError,
   FetchModelByIndexError, FetchModelError, PhotoGroupRepository,
-  PhotoRepository,
+  PhotoRepository, ReadArtifactError,
 };
 use tracing::instrument;
 
@@ -87,6 +87,24 @@ impl PrimeDomainService {
     id: ArtifactRecordId,
   ) -> Result<Option<Artifact>, FetchModelError> {
     self.artifact_repo.fetch_artifact_by_id(id).await
+  }
+
+  /// Read the data of an [`Artifact`].
+  #[instrument(skip(self))]
+  pub async fn read_artifact_by_id(
+    &self,
+    id: ArtifactRecordId,
+  ) -> Result<Option<Belt>, ReadArtifactError> {
+    self.artifact_repo.read_artifact_by_id(id).await
+  }
+
+  /// Fetch an [`Photo`].
+  #[instrument(skip(self))]
+  pub async fn fetch_photo(
+    &self,
+    id: PhotoRecordId,
+  ) -> Result<Option<Photo>, FetchModelError> {
+    self.photo_repo.fetch_photo_by_id(id).await
   }
 
   /// Fetch [`PhotoGroup`]s by user.
