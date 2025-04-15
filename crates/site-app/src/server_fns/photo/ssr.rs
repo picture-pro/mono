@@ -4,7 +4,7 @@ use axum::{
   body::Body,
   extract::{Path, State},
   http::{
-    header::{CONTENT_ENCODING, CONTENT_TYPE},
+    header::{CACHE_CONTROL, CONTENT_ENCODING, CONTENT_TYPE},
     HeaderMap, HeaderValue, Response, StatusCode,
   },
   response::{IntoResponse, IntoResponseParts},
@@ -57,7 +57,10 @@ pub async fn fetch_photo_thumbnail(
   Ok(efficiently_compressed_belt_http_response(
     &headers,
     artifact_data,
-    (),
+    HeaderMap::from_iter([(
+      CACHE_CONTROL,
+      HeaderValue::from_static("max-age=31536000, immutable"),
+    )]),
   ))
 }
 
