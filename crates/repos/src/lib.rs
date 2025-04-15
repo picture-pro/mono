@@ -4,6 +4,7 @@ mod artifact;
 mod photo;
 mod photo_group;
 mod user;
+mod utils;
 
 pub use db::{self, CreateModelError, FetchModelByIndexError, FetchModelError};
 pub use storage::{self, belt};

@@ -104,7 +104,13 @@ impl ArtifactRepository {
           .storage_repo
           .read(&artifact.path.to_path_buf())
           .await
-          .map_err(ReadArtifactError::StorageReadError)?;
+          .map_err(ReadArtifactError::StorageReadError)?
+          .set_declared_comp(
+            artifact
+              .comp_status
+              .algorithm()
+              .map(crate::utils::dvf_comp_to_belt_comp),
+          );
         Ok(Some(data))
       }
       None => Ok(None),
