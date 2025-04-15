@@ -92,7 +92,7 @@ impl ArtifactRepository {
   pub async fn read_artifact_by_id(
     &self,
     id: ArtifactRecordId,
-  ) -> Result<Option<Belt>, ReadArtifactError> {
+  ) -> Result<Option<(Belt, Option<ArtifactMimeType>)>, ReadArtifactError> {
     let artifact = self
       .db
       .fetch_model_by_id(id)
@@ -111,7 +111,7 @@ impl ArtifactRepository {
               .algorithm()
               .map(crate::utils::dvf_comp_to_belt_comp),
           );
-        Ok(Some(data))
+        Ok(Some((data, artifact.stated_mime_type)))
       }
       None => Ok(None),
     }

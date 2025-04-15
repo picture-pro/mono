@@ -98,7 +98,7 @@ impl PrimeDomainService {
   pub async fn read_artifact_by_id(
     &self,
     id: ArtifactRecordId,
-  ) -> Result<Option<Belt>, ReadArtifactError> {
+  ) -> Result<Option<(Belt, Option<ArtifactMimeType>)>, ReadArtifactError> {
     self.artifact_repo.read_artifact_by_id(id).await
   }
 
