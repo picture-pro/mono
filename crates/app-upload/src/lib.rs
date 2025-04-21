@@ -41,8 +41,8 @@ fn UploadPhotoWizard() -> impl IntoView {
   provide_context(overall_context);
 
   Effect::new(move || {
-    let guard = overall_context.read();
-    leptos::logging::log!("{:#?}", guard.deref());
+    let context: Store<UploadState> = expect_context();
+    leptos::logging::log!("{:#?}", context.read().deref());
   });
 
   let memoized_top_level_switch = Memo::new(move |_| {
@@ -58,9 +58,9 @@ fn UploadPhotoWizard() -> impl IntoView {
   });
 
   move || match memoized_top_level_switch() {
-    EitherOf3::A(_) => view! { <SelectingPhotosStep /> }.into_any(),
-    EitherOf3::B(_) => view! { <ConfiguringGroupStep /> }.into_any(),
-    EitherOf3::C(_) => view! { <UploadFinishedStep /> }.into_any(),
+    EitherOf3::A(_) => EitherOf3::A(view! { <SelectingPhotosStep /> }),
+    EitherOf3::B(_) => EitherOf3::B(view! { <ConfiguringGroupStep /> }),
+    EitherOf3::C(_) => EitherOf3::C(view! { <UploadFinishedStep /> }),
   }
 }
 
