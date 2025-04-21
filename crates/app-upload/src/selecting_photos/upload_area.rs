@@ -6,30 +6,6 @@ use web_sys::Event;
 use super::{Photo, SelectingPhotosStateStoreFields};
 use crate::UploadStateStoreFields;
 
-fn accept_image_from_input(ev: Event) {
-  let context: Store<super::super::UploadState> = expect_context();
-  let state = context
-    .selecting_photos_0()
-    .expect("`UploadContext` not in state `SelectingPhotos`");
-
-  // get file list
-  let element: web_sys::HtmlInputElement = event_target(&ev);
-  let Some(file_list) = element.files() else {
-    debug_warn!("failed to get file list of event target");
-    return;
-  };
-
-  // extract each image in file list
-  for file in FileList::from(file_list).iter() {
-    let photo = Photo::new(file.clone());
-    let photos_subfield = state.photos();
-    photos_subfield.write().insert(photo.id(), photo);
-  }
-
-  // reset input
-  element.set_value("");
-}
-
 #[component]
 pub(super) fn UploadArea() -> impl IntoView {
   use lsc::icons::*;
@@ -39,6 +15,30 @@ pub(super) fn UploadArea() -> impl IntoView {
                items-stretch";
 
   let icon_class = "size-24 text-basea-11 dark:text-basedarka-11";
+
+  let context: Store<super::super::UploadState> = expect_context();
+  let state = context
+    .selecting_photos_0()
+    .expect("`UploadContext` not in state `SelectingPhotos`");
+
+  let handler = move |ev: Event| {
+    // get file list
+    let element: web_sys::HtmlInputElement = event_target(&ev);
+    let Some(file_list) = element.files() else {
+      debug_warn!("failed to get file list of event target");
+      return;
+    };
+
+    // extract each image in file list
+    for file in FileList::from(file_list).iter() {
+      let photo = Photo::new(file.clone());
+      let photos_subfield = state.photos();
+      photos_subfield.write().insert(photo.id(), photo);
+    }
+
+    // reset input
+    element.set_value("");
+  };
 
   view! {
     <div class=class>
@@ -53,7 +53,7 @@ pub(super) fn UploadArea() -> impl IntoView {
             <p>"Take a photo with your camera."</p>
             <input
               type="file" class="hidden" id="camera-input" accept="image/*"
-              capture="environment" multiple="multiple" on:change=accept_image_from_input
+              capture="environment" multiple="multiple" on:change=handler
             />
           </div>
         </div>
@@ -71,7 +71,7 @@ pub(super) fn UploadArea() -> impl IntoView {
             <p>"Upload a photo from your device."</p>
             <input
               type="file" class="hidden" id="file-input" accept="image/*"
-              multiple="multiple" on:change=accept_image_from_input
+              multiple="multiple" on:change=handler
             />
           </div>
         </div>
