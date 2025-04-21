@@ -86,13 +86,13 @@ localFlake: { ... }: {
         }
         {
           name = "watch";
-          command = "cargo leptos watch -v $@";
+          command = "cargo leptos watch $@";
           help = "Runs ${bin-hl "cargo-leptos"} in watch mode.";
           category = "[build actions]";
         }
         {
           name = "serve";
-          command = "cargo leptos serve -v $@";
+          command = "cargo leptos serve $@";
           help = "Runs ${bin-hl "cargo-leptos"} in watch mode.";
           category = "[build actions]";
         }
