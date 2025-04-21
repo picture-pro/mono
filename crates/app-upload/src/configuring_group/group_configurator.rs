@@ -18,7 +18,7 @@ pub(super) fn GroupConfigurator() -> impl IntoView {
   let price = RwSignal::new(None::<String>);
   let (read_price, write_price) = touched_input_bindings(price);
   let validated_price = Memo::new(move |_| {
-    let validated_price = price().as_ref().map(|v| {
+    price().as_ref().map(|v| {
       match v.parse::<f32>() {
         Ok(p) if p < 0.0 => Err("Price cannot be negative".to_owned()),
         Ok(p) => Ok(UsdPriceNaive::new_from_f32(p)),
@@ -31,9 +31,7 @@ pub(super) fn GroupConfigurator() -> impl IntoView {
         )),
         p => Ok(p),
       })
-    });
-
-    validated_price
+    })
   });
 
   let field_error_text = move || {
