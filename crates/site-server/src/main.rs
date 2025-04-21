@@ -76,8 +76,7 @@ async fn main() {
   .build();
 
   // fallback service with compression
-  // this nastiness is to serve an "unrouted" axum handler with state
-  let fallback_service = ServiceBuilder::new()
+  let static_service = ServiceBuilder::new()
     .layer(CompressionLayer::new())
     .layer(auth_layer.clone())
     .service(
@@ -85,6 +84,7 @@ async fn main() {
         .with_state(app_state.clone()),
     );
 
+  // serve server fns with context from axum
   let server_fn_handler = {
     let app_state = app_state.clone();
     move |req: Request| {
@@ -106,8 +106,7 @@ async fn main() {
     }
   };
 
-  let app = Router::new()
-    .leptos_routes_with_handler(routes, leptos_routes_handler)
+  let api_router = Router::new()
     .route(
       "/api/upload_artifact",
       post(site_app::server_fns::upload_artifact),
@@ -117,10 +116,14 @@ async fn main() {
       get(site_app::server_fns::fetch_photo_thumbnail),
     )
     .route("/api/{*fn_name}", post(server_fn_handler))
-    .fallback_service(fallback_service)
+    .with_state(app_state.clone());
+  let app = Router::new()
+    .leptos_routes_with_handler(routes, leptos_routes_handler)
+    .merge(api_router)
+    .route_service("/{*path}", static_service)
     .with_state(app_state)
-    .layer(auth_layer)
-    .layer(TraceLayer::new_for_http());
+    .layer(TraceLayer::new_for_http())
+    .layer(auth_layer);
 
   // run our app with hyper
   // `axum::Server` is a re-export of `hyper::Server`
