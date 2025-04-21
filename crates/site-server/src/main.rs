@@ -13,11 +13,23 @@ use axum::{
 use axum_login::AuthManagerLayerBuilder;
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
+use miette::{Context, IntoDiagnostic};
 use site_app::*;
 use tower::ServiceBuilder;
 use tower_http::{compression::CompressionLayer, trace::TraceLayer};
 
 use self::app_state::AppState;
+
+fn context_provider(
+  app_state: AppState,
+  auth_session: AuthSession,
+) -> impl Fn() + Clone {
+  move || {
+    provide_context(app_state.prime_domain_service.clone());
+    provide_context(app_state.auth_domain_service.clone());
+    provide_context(site_app::AuthStatus(auth_session.user.clone()));
+  }
+}
 
 #[axum::debug_handler]
 async fn leptos_routes_handler(
@@ -25,26 +37,31 @@ async fn leptos_routes_handler(
   State(app_state): State<AppState>,
   request: Request<Body>,
 ) -> axum::response::Response {
-  let handler = leptos_axum::render_app_to_stream_with_context(
-    {
-      let app_state = app_state.clone();
-      move || {
-        provide_context(app_state.prime_domain_service.clone());
-        provide_context(app_state.auth_domain_service.clone());
-        provide_context(site_app::AuthStatus(auth_session.user.clone()));
-      }
-    },
-    {
-      let leptos_options = app_state.leptos_options.clone();
-      move || shell(leptos_options.clone())
-    },
-  );
+  let leptos_options = app_state.leptos_options.clone();
+  leptos_axum::render_app_to_stream_with_context(
+    context_provider(app_state.clone(), auth_session),
+    move || shell(leptos_options.clone()),
+  )(request)
+  .await
+  .into_response()
+}
 
-  handler(request).await.into_response()
+#[axum::debug_handler]
+async fn server_fn_handler(
+  auth_session: AuthSession,
+  State(app_state): State<AppState>,
+  request: Request<Body>,
+) -> axum::response::Response {
+  leptos_axum::handle_server_fns_with_context(
+    context_provider(app_state, auth_session),
+    request,
+  )
+  .await
+  .into_response()
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> miette::Result<()> {
   tracing_subscriber::fmt()
     .with_env_filter(
       tracing_subscriber::EnvFilter::builder()
@@ -57,14 +74,17 @@ async fn main() {
 
   tracing::info!("starting picturepro site server");
 
-  let conf = get_configuration(None).unwrap();
+  let conf = get_configuration(None)
+    .into_diagnostic()
+    .context("failed to get leptos configuration")?;
   let addr = conf.leptos_options.site_addr;
   let leptos_options = conf.leptos_options;
-  // Generate the list of routes in your Leptos App
   let routes = generate_route_list(App);
 
   tracing::info!("initializing app state");
-  let app_state = AppState::new(leptos_options).await.unwrap();
+  let app_state = AppState::new(leptos_options)
+    .await
+    .context("failed to initialize app state")?;
   tracing::info!("app state initialized");
 
   let session_layer =
@@ -85,26 +105,6 @@ async fn main() {
     );
 
   // serve server fns with context from axum
-  let server_fn_handler = {
-    let app_state = app_state.clone();
-    move |req: Request| {
-      let auth_session = req
-        .extensions()
-        .get::<AuthSession>()
-        .expect(
-          "request in server fn handler didn't have `AuthSession` extension",
-        )
-        .clone();
-      leptos_axum::handle_server_fns_with_context(
-        move || {
-          provide_context(app_state.prime_domain_service.clone());
-          provide_context(app_state.auth_domain_service.clone());
-          provide_context(site_app::AuthStatus(auth_session.user.clone()));
-        },
-        req,
-      )
-    }
-  };
 
   let api_router = Router::new()
     .route(
@@ -127,7 +127,15 @@ async fn main() {
 
   // run our app with hyper
   // `axum::Server` is a re-export of `hyper::Server`
+  let listener = tokio::net::TcpListener::bind(&addr)
+    .await
+    .into_diagnostic()
+    .with_context(|| format!("failed to bind listener to `{addr}`"))?;
   tracing::info!("listening on http://{}", &addr);
-  let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-  axum::serve(listener, app).await.unwrap();
+  axum::serve(listener, app)
+    .await
+    .into_diagnostic()
+    .context("failed to serve app")?;
+
+  Ok(())
 }
