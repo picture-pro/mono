@@ -13,12 +13,13 @@ use crate::{
 #[component]
 pub(super) fn NextStepButton() -> impl IntoView {
   let context: Store<super::super::UploadState> = expect_context();
-  let state = context
-    .selecting_photos_0()
-    .expect("`UploadContext` not in state `SelectingPhotos`");
-  let photos = state.photos();
 
   let ready_to_advance = Memo::new(move |_| {
+    let state = context
+      .selecting_photos_0()
+      .expect("`UploadContext` not in state `SelectingPhotos`");
+    let photos = state.photos();
+
     if photos.read().is_empty() {
       return false;
     }
@@ -38,6 +39,11 @@ pub(super) fn NextStepButton() -> impl IntoView {
   let disabled_signal = Signal::derive(move || !ready_to_advance());
 
   let handler = move |_| {
+    let state = context
+      .selecting_photos_0()
+      .expect("`UploadContext` not in state `SelectingPhotos`");
+    let photos = state.photos();
+
     let uploaded_photos: HashMap<_, _> = photos
       .read()
       .values()

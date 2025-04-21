@@ -10,12 +10,12 @@ use crate::{
 #[component]
 pub(super) fn PhotoPreviewer() -> impl IntoView {
   let context: Store<super::super::UploadState> = expect_context();
-  let state = context
-    .selecting_photos_0()
-    .expect("`UploadContext` not in state `SelectingPhotos`");
-  let photos = state.photos();
 
   let photo_id_iter = move || {
+    let state = context
+      .selecting_photos_0()
+      .expect("`UploadContext` not in state `SelectingPhotos`");
+    let photos = state.photos();
     let mut keys = photos.read().keys().copied().collect::<Vec<_>>();
     keys.sort_unstable();
     keys.into_iter()
@@ -40,12 +40,14 @@ pub(super) fn PhotoPreviewer() -> impl IntoView {
 #[component]
 fn PhotoPreview(id: Ulid) -> impl IntoView {
   let context: Store<super::super::UploadState> = expect_context();
-  let state = context
-    .selecting_photos_0()
-    .expect("`UploadContext` not in state `SelectingPhotos`");
-  let photos = state.photos();
 
-  let url = move || photos.read().get(&id).map(|f| f.url().to_string());
+  let url = move || {
+    let state = context
+      .selecting_photos_0()
+      .expect("`UploadContext` not in state `SelectingPhotos`");
+    let photos = state.photos();
+    photos.read().get(&id).map(|f| f.url().to_string())
+  };
 
   let image_class = "w-full sm:max-h-48 max-h-40 border-2 border-base-8 \
                      dark:border-basedark-8 group-hover:border-primary-8 \
@@ -55,11 +57,19 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
                      rounded-lg";
 
   let delete_handler = move |_| {
+    let state = context
+      .selecting_photos_0()
+      .expect("`UploadContext` not in state `SelectingPhotos`");
+    let photos = state.photos();
     photos.write().remove(&id);
   };
 
   let status_overlay_element = move || {
-    move || match photos.read().get(&id).map(|f| f.upload_status()()) {
+    let state = context
+      .selecting_photos_0()
+      .expect("`UploadContext` not in state `SelectingPhotos`");
+    let photos = state.photos();
+    match photos.read().get(&id).map(|f| f.upload_status()()) {
       Some(PhotoUploadStatus::UploadInProgress) => EitherOf3::A(view! {
         <ProgressOverlay />
       }),

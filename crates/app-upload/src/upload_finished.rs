@@ -7,11 +7,13 @@ use super::UploadStateStoreFields;
 #[island]
 pub(super) fn UploadFinishedStep() -> impl IntoView {
   let context: Store<super::UploadState> = expect_context();
-  let state = context
-    .upload_finished_0()
-    .expect("`UploadContext` not in state `UploadFinished`");
-  let photo_group_id = state.photo_group();
-  let photo_group_id = Signal::derive(move || photo_group_id.get().to_string());
+
+  let photo_group_id = move || {
+    let state = context
+      .upload_finished_0()
+      .expect("`UploadContext` not in state `UploadFinished`");
+    state.photo_group().get().to_string()
+  };
 
   view! {
     <p>"Upload Finished"</p>

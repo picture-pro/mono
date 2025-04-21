@@ -6,33 +6,31 @@ use reactive_stores::Store;
 use super::ConfiguringGroupStateStoreFields;
 use crate::UploadStateStoreFields;
 
+fn validate_price_input(input: &str) -> Result<UsdPriceNaive, String> {
+  match input.parse::<f32>() {
+    Ok(p) if p < 0.0 => Err("Price cannot be negative".to_owned()),
+    Ok(p) => Ok(UsdPriceNaive::new_from_f32(p)),
+    Err(_) if input.is_empty() => Err("Price is required.".to_owned()),
+    Err(_) => Err("Price must be a number.".to_owned()),
+  }
+  .and_then(|p| match p {
+    p if p < PHOTO_GROUP_USAGE_RIGHTS_MINIMUM_PRICE => Err(format!(
+      "Minimum price is {PHOTO_GROUP_USAGE_RIGHTS_MINIMUM_PRICE}."
+    )),
+    p => Ok(p),
+  })
+}
+
 #[island]
 pub(super) fn GroupConfigurator() -> impl IntoView {
   use lsc::field::*;
 
   let context: Store<super::super::UploadState> = expect_context();
-  let state = context
-    .configuring_group_0()
-    .expect("`UploadContext` not in state `ConfiguringGroup`");
 
   let price = RwSignal::new(None::<String>);
   let (read_price, write_price) = touched_input_bindings(price);
-  let validated_price = Memo::new(move |_| {
-    price().as_ref().map(|v| {
-      match v.parse::<f32>() {
-        Ok(p) if p < 0.0 => Err("Price cannot be negative".to_owned()),
-        Ok(p) => Ok(UsdPriceNaive::new_from_f32(p)),
-        Err(_) if v.is_empty() => Err("Price is required.".to_owned()),
-        Err(_) => Err("Price must be a number.".to_owned()),
-      }
-      .and_then(|p| match p {
-        p if p < PHOTO_GROUP_USAGE_RIGHTS_MINIMUM_PRICE => Err(format!(
-          "Minimum price is {PHOTO_GROUP_USAGE_RIGHTS_MINIMUM_PRICE}."
-        )),
-        p => Ok(p),
-      })
-    })
-  });
+  let validated_price =
+    Memo::new(move |_| price().as_ref().map(|v| validate_price_input(v)));
 
   let field_error_text = move || {
     let Some(Err(error_text)) = validated_price() else {
@@ -51,6 +49,9 @@ pub(super) fn GroupConfigurator() -> impl IntoView {
   Effect::watch(
     move || validated_price.get(),
     move |vp, _, _| {
+      let state = context
+        .configuring_group_0()
+        .expect("`UploadContext` not in state `ConfiguringGroup`");
       state
         .usage_rights_price()
         .set(vp.as_ref().cloned().and_then(Result::ok));

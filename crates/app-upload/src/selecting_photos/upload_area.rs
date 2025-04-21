@@ -17,11 +17,12 @@ pub(super) fn UploadArea() -> impl IntoView {
   let icon_class = "size-24 text-basea-11 dark:text-basedarka-11";
 
   let context: Store<super::super::UploadState> = expect_context();
-  let state = context
-    .selecting_photos_0()
-    .expect("`UploadContext` not in state `SelectingPhotos`");
 
   let handler = move |ev: Event| {
+    let state = context
+      .selecting_photos_0()
+      .expect("`UploadContext` not in state `SelectingPhotos`");
+
     // get file list
     let element: web_sys::HtmlInputElement = event_target(&ev);
     let Some(file_list) = element.files() else {
