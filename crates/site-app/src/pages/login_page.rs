@@ -16,7 +16,7 @@ pub fn LoginPage() -> impl IntoView {
     Action::new(move |_: &()| login(email.get().unwrap_or_default()));
   let action_value = action.value();
   let action_value_view = move || {
-    action_value().map(|v| match v {
+    action_value.get().map(|v| match v {
       Ok(true) => leptos::either::EitherOf3::A(view! {
         <p class="text-success-11 dark:text-successdark-11">"Logging in..."</p>
       }),
@@ -30,7 +30,7 @@ pub fn LoginPage() -> impl IntoView {
   };
 
   Effect::new(move |_| {
-    if matches!(action_value(), Some(Ok(true))) {
+    if matches!(action_value.get(), Some(Ok(true))) {
       navigate_to("/profile");
     }
   });

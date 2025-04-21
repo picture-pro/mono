@@ -1,7 +1,7 @@
 use std::fmt;
 
 use gloo::file::{Blob, File, ObjectUrl};
-use leptos::prelude::{Action, LocalStorage, Signal};
+use leptos::prelude::*;
 use models::{ArtifactRecordId, FileSize, Ulid};
 use reactive_stores::Store;
 use send_wrapper::SendWrapper;
@@ -42,7 +42,7 @@ impl Photo {
     match self.action_state {
       PhotoActionState::Started(action) => {
         let value = action.value();
-        Signal::derive(move || value().and_then(|r| r.ok()))
+        Signal::derive(move || value.get().and_then(|r| r.ok()))
       }
       PhotoActionState::Oversized(_) => Signal::stored(None),
     }
@@ -62,9 +62,7 @@ impl fmt::Debug for Photo {
 
 #[derive(Clone)]
 pub enum PhotoActionState {
-  Started(
-    Action<SendWrapper<Blob>, Result<ArtifactRecordId, String>, LocalStorage>,
-  ),
+  Started(Action<SendWrapper<Blob>, Result<ArtifactRecordId, String>>),
   Oversized(FileSize),
 }
 
@@ -94,7 +92,7 @@ impl PhotoActionState {
       PhotoActionState::Started(action) => {
         let value = action.value();
         Signal::derive(move || {
-          if value().is_some() {
+          if value.get().is_some() {
             PhotoUploadStatus::UploadFinished
           } else {
             PhotoUploadStatus::UploadInProgress

@@ -31,7 +31,7 @@ fn LogoutButton() -> impl IntoView {
   let action_value = action.value();
 
   Effect::new(move |_| {
-    if matches!(action_value(), Some(Ok(()))) {
+    if matches!(action_value.get(), Some(Ok(()))) {
       navigate_to("/");
     }
   });

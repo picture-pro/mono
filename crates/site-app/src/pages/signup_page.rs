@@ -113,9 +113,9 @@ pub fn SignupPage() -> impl IntoView {
   });
   let action_value = action.value();
   let action_pending = action.pending();
-  let action_succeeded = move || matches!(action_value(), Some(Ok(_)));
+  let action_succeeded = move || matches!(action_value.get(), Some(Ok(_)));
   let action_value_view = move || {
-    action_value().map(|v| match v {
+    action_value.get().map(|v| match v {
       Ok(id) => leptos::either::Either::Left(view! {
         <p class="text-success-11 dark:text-successdark-11">"User created with id: " {id.to_string()}</p>
       }),

@@ -57,7 +57,7 @@ localFlake: { ... }: {
         flyctl
 
         # dependencies for local rust builds
-        pkg-config openssl
+        pkg-config openssl binaryen
         clang lld mold # faster linking + gcc for some crates
       ];
 
