@@ -1,4 +1,4 @@
-{ inputs, ... }: {
+{ ... }: {
   perSystem = { pkgs, rust-toolchain, rust-workspace, system, ... }: let
     inherit (rust-workspace.workspace-base-args) src;
     inherit (rust-toolchain) craneLib;
