@@ -1,3 +1,4 @@
+use base_components::SmallImage;
 use leptos::{either::EitherOf3, prelude::*};
 use models::{FileSize, Ulid};
 use reactive_stores::Store;
@@ -21,11 +22,10 @@ pub(super) fn PhotoPreviewer() -> impl IntoView {
     keys.into_iter()
   };
 
-  let grid_class =
-    "grid xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 grid-cols-3 gap-4";
+  let class = "flex flex-row flex-wrap gap-4";
 
   view! {
-    <div class=grid_class>
+    <div class=class>
       <For
         each=photo_id_iter
         key=move |id| *id
@@ -48,13 +48,6 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
     let photos = state.photos();
     photos.read().get(&id).map(|f| f.url().to_string())
   };
-
-  let image_class = "w-full sm:max-h-48 max-h-40 border-2 border-base-8 \
-                     dark:border-basedark-8 group-hover:border-primary-8 \
-                     group-hover:dark:border-primarydark-8 ring-2 \
-                     ring-transparent group-hover:ring-primary-8 \
-                     group-hover:dark:ring-primarydark-8 transition-colors \
-                     rounded-lg";
 
   let delete_handler = move |_| {
     let state = context
@@ -85,7 +78,7 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
       view! {
         <div class="flex flex-col justify-center items-center group">
           <div class="relative">
-            <img src={url} class=image_class />
+            <SmallImage url=url />
             { status_overlay_element }
             <DeleteButtonOverlay {..} on:click=delete_handler />
           </div>
