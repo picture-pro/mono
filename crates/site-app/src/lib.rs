@@ -2,12 +2,12 @@
 
 //! Leptos application for PicturePro.
 
-mod bridge_types;
 mod components;
 mod pages;
 pub mod server_fns;
 
 use app_upload::UploadPhotoPage;
+pub use base_components::bridge_types::*;
 use base_components::PageContainer;
 use leptos::prelude::*;
 use leptos_meta::{
@@ -18,7 +18,6 @@ use leptos_router::{
   path,
 };
 
-pub use self::bridge_types::*;
 use self::{components::Header, pages::*};
 
 /// The main shell for the Leptos application.
