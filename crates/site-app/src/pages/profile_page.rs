@@ -1,4 +1,4 @@
-use base_components::{Prose, Section, Title};
+use base_components::{Prose, Section, SmallImage, Title};
 use leptos::prelude::*;
 use models::PhotoGroup;
 
@@ -6,14 +6,24 @@ use crate::server_fns::fetch_photo_groups_for_user;
 
 #[component]
 pub fn PhotoGroupPreview(pg: PhotoGroup) -> impl IntoView {
+  let class = "bg-base-2 dark:bg-basedark-2 border border-base-7 \
+               dark:border-basedark-7 rounded-lg flex flex-col p-4 gap-4 \
+               shadow-md";
+
+  let price = format!("Price: {}", pg.config.usage_rights_price);
   view! {
-    <For
-      each=move || pg.photos.clone()
-      key=move |p| *p
-      children=move |p| view! {
-        <img src=format!("/api/photo_thumbnail/{p}") />
-      }
-    />
+    <div class=class>
+      <p class="text-2xl">{ price }</p>
+      <div class="flex flex-row flex-wrap gap-4">
+      <For
+        each=move || pg.photos.clone()
+        key=move |p| *p
+        children=move |p| view! {
+          <SmallImage url=format!("/api/photo_thumbnail/{p}") />
+        }
+      />
+      </div>
+    </div>
   }
 }
 
@@ -26,11 +36,13 @@ pub fn ProfilePhotoGroupPreview() -> impl IntoView {
     Suspend::new(async move {
       match photo_groups.await {
         Ok(pgs) => view! {
-          <For
-            each=move || pgs.clone()
-            key=move |pg| pg.id
-            children=move |pg| view! { <PhotoGroupPreview pg=pg /> }
-          />
+          <div class="flex flex-row flex-wrap gap-4">
+            <For
+              each=move || pgs.clone()
+              key=move |pg| pg.id
+              children=move |pg| view! { <PhotoGroupPreview pg=pg /> }
+            />
+          </div>
         }
         .into_any(),
         Err(e) => {
