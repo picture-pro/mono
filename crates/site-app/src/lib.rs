@@ -7,7 +7,6 @@ mod pages;
 pub mod server_fns;
 
 use app_upload::UploadPhotoPage;
-pub use base_components::bridge_types::*;
 use base_components::PageContainer;
 use leptos::prelude::*;
 use leptos_meta::{
@@ -17,6 +16,7 @@ use leptos_router::{
   components::{Route, Router, Routes},
   path,
 };
+pub use models;
 
 use self::{components::Header, pages::*};
 

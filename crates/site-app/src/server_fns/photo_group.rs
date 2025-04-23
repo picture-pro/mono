@@ -5,7 +5,7 @@ use models::PhotoGroup;
 #[server]
 pub async fn fetch_photo_groups_for_user(
 ) -> Result<Vec<PhotoGroup>, ServerFnError> {
-  use base_components::bridge_types::AuthStatus;
+  use models::AuthStatus;
   use prime_domain::PrimeDomainService;
 
   let auth_session: AuthStatus = expect_context();

@@ -27,7 +27,7 @@ fn context_provider(
   move || {
     provide_context(app_state.prime_domain_service.clone());
     provide_context(app_state.auth_domain_service.clone());
-    provide_context(site_app::AuthStatus(auth_session.user.clone()));
+    provide_context(models::AuthStatus(auth_session.user.clone()));
   }
 }
 

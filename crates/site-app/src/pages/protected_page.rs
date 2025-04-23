@@ -1,7 +1,6 @@
 use base_components::{Section, Title};
 use leptos::{either::Either, prelude::*};
-
-use crate::AuthStatus;
+use models::AuthStatus;
 
 #[component]
 pub fn ProtectedPage(children: Children) -> impl IntoView {

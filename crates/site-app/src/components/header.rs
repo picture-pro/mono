@@ -1,8 +1,6 @@
 use leptos::{either::Either, prelude::*};
 use lsc::{button::*, link::*};
-use models::PublicUser;
-
-use crate::AuthStatus;
+use models::{AuthStatus, PublicUser};
 
 #[component]
 pub fn Header() -> impl IntoView {

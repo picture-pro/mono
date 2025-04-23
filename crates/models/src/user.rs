@@ -4,6 +4,8 @@ use dvf::slugger::{EitherSlug, LaxSlug};
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
+pub use self::bridge::*;
+
 /// The table name for [`User`] records.
 pub const USER_TABLE_NAME: &str = "user";
 
@@ -94,6 +96,14 @@ impl From<User> for PublicUser {
       auth_hash_bytes,
     }
   }
+}
+
+/// Types in this module are for repackaging data to transfer from the high-deps
+/// side (server code) to the low-deps side (client code)
+mod bridge {
+  /// The status of user authentication.
+  #[derive(Debug, Clone)]
+  pub struct AuthStatus(pub Option<super::PublicUser>);
 }
 
 #[cfg(feature = "auth")]
