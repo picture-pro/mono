@@ -1,10 +1,10 @@
 [package]
+edition = "2021"
 name = "auth-domain"
 version = "0.1.0"
-edition = "2021"
 
 [dependencies]
-models = { path = "../models", features = [ "auth" ] }
+models = { path = "../models", features = ["auth"] }
 repos = { path = "../repos" }
 
 hex.workspace = true
@@ -18,7 +18,7 @@ async-trait.workspace = true
 axum-login.workspace = true
 
 [dev-dependencies]
-tokio = { workspace = true, features = [ "full" ] }
+tokio = { workspace = true, features = ["full"] }
 
 [lints]
 workspace = true

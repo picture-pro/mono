@@ -1,7 +1,7 @@
 
 [workspace]
-resolver = "3"
 members = ["crates/*"]
+resolver = "3"
 
 [workspace.lints.rust]
 missing_docs = "deny"
@@ -13,52 +13,54 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # errors
 # miette = { version = "7", default-features = false, features = [ "derive" ] }
-miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f0ec74317166ec08113", default-features = false, features = ["derive"] }
+miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f0ec74317166ec08113", default-features = false, features = [
+  "derive",
+] }
 thiserror = "2"
 
 # inherited from rambit
-belt =    { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
-db =      { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
-dvf =     { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
-hex =     { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
-kv =      { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533", features = [ "redb" ] }
-model =   { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
+belt = { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
+db = { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
+dvf = { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
+hex = { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
+kv = { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533", features = ["redb"] }
+model = { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
 storage = { git = "https://github.com/rambit-systems/rambit", rev = "e7d3533" }
 
 # async
-futures = { version = "0.3" }
 async-trait = "0.1"
-tokio = { version = "1", features = [ "rt-multi-thread" ] }
+futures = { version = "0.3" }
+tokio = { version = "1", features = ["rt-multi-thread"] }
 
 # app-level http
-axum = { version = "0.8", features = [ "macros", "tracing" ] }
+axum = { version = "0.8", features = ["macros", "tracing"] }
 axum-login = { version = "0.17" }
-tower = { version = "0.5", features = [ ] }
-tower-http = { version = "0.6", features = [ ] }
-tower-sessions = { version = "0.14", default-features = false, features = [ "axum-core" ] }
+tower = { version = "0.5", features = [] }
+tower-http = { version = "0.6", features = [] }
+tower-sessions = { version = "0.14", default-features = false, features = ["axum-core"] }
 
 # leptos
-leptos = { version = "0.8.0-rc2", features = [ "nightly", "tracing", "islands" ] }
-leptos_axum = { version = "0.8.0-rc2", features = [ "tracing" ] }
-leptos_meta = { version = "0.8.0-rc2", features = [ "tracing" ] }
-leptos_router = { version = "0.8.0-rc2", features = [ "nightly", "tracing" ] }
-reactive_stores = { version = "0.2.0-rc2" }
-send_wrapper = { version = "0.6" }
-server_fn = { version = "0.8.0-rc2", features = [ "msgpack" ] }
-wasm-bindgen = "=0.2.100"
-web-sys = { version = "0.3" }
 console_error_panic_hook = "0.1"
 console_log = "1"
+leptos = { version = "0.8.0-rc2", features = ["nightly", "tracing", "islands"] }
+leptos_axum = { version = "0.8.0-rc2", features = ["tracing"] }
+leptos_meta = { version = "0.8.0-rc2", features = ["tracing"] }
+leptos_router = { version = "0.8.0-rc2", features = ["nightly", "tracing"] }
+reactive_stores = { version = "0.2.0-rc2" }
+send_wrapper = { version = "0.6" }
+server_fn = { version = "0.8.0-rc2", features = ["msgpack"] }
+wasm-bindgen = "=0.2.100"
+web-sys = { version = "0.3" }
 
 # improve dev compile times
 [profile.dev]
-opt-level = 0
 debug = 1
-split-debuginfo = "packed"
 incremental = true
+opt-level = 0
+split-debuginfo = "packed"
 [profile.dev.package."*"]
-opt-level = 3
 debug = 2
+opt-level = 3
 [profile.dev.build-override]
 opt-level = 3
 
@@ -67,41 +69,41 @@ inherits = "dev"
 
 # only for client-side wasm builds
 [profile.wasm-release]
-inherits = "release"
-opt-level = 'z'
-lto = "thin"
 codegen-units = 1
+inherits = "release"
+lto = "thin"
+opt-level = 'z'
 strip = "debuginfo"
 
 # leptos metadata
 [[workspace.metadata.leptos]]
-name = "site"
 hash-files = false
+name = "site"
 
 bin-package = "site-server"
 lib-package = "site-frontend"
 
-site-root = "target/site"
 site-pkg-dir = "pkg"
+site-root = "target/site"
 
-style-file = "crates/site-app/style/main.scss"
 assets-dir = "crates/site-app/public"
+style-file = "crates/site-app/style/main.scss"
 
-site-addr = "0.0.0.0:3000"
 reload-port = 3001
+site-addr = "0.0.0.0:3000"
 
 browserquery = "defaults"
 
-tailwind-input-file = "crates/site-app/style/main.scss"
 tailwind-config-file = "crates/site-app/style/tailwind/tailwind.config.js"
+tailwind-input-file = "crates/site-app/style/main.scss"
 
 # set by cargo-leptos
-watch = false
 env = "DEV"
+watch = false
 
-bin-features = []
 bin-default-features = false
+bin-features = []
 bin-profile-dev = "server-dev"
-lib-features = []
 lib-default-features = false
+lib-features = []
 lib-profile-release = "wasm-release"

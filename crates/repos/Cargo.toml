@@ -1,7 +1,7 @@
 [package]
+edition = "2021"
 name = "repos"
 version = "0.1.0"
-edition = "2021"
 
 [dependencies]
 models = { path = "../models" }
@@ -12,14 +12,14 @@ storage.workspace = true
 
 tracing.workspace = true
 
-thiserror.workspace = true
 miette.workspace = true
+thiserror.workspace = true
 
 async-trait.workspace = true
-tokio = { workspace = true, features = [ "sync" ] }
+tokio = { workspace = true, features = ["sync"] }
 
 [dev-dependencies]
-tokio = { workspace = true, features = [ "full" ] }
+tokio = { workspace = true, features = ["full"] }
 
 [lints]
 workspace = true

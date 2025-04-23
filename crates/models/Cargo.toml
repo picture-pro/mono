@@ -1,7 +1,7 @@
 [package]
+edition = "2021"
 name = "models"
 version = "0.1.0"
-edition = "2021"
 
 [dependencies]
 serde.workspace = true
@@ -12,8 +12,8 @@ model.workspace = true
 axum-login = { workspace = true, optional = true }
 
 [features]
-default = [ ]
-auth = [ "dep:axum-login" ]
+auth = ["dep:axum-login"]
+default = []
 
 [lints]
 workspace = true

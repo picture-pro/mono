@@ -1,18 +1,18 @@
 [package]
+edition = "2024"
 name = "base-components"
 version = "0.1.0"
-edition = "2024"
 
 [dependencies]
 models = { path = "../models" }
 
 leptos = { workspace = true }
-web-sys = { workspace = true, features = [ "Window" ] }
+web-sys = { workspace = true, features = ["Window"] }
 
 [lints]
 workspace = true
 
 [features]
-default = [ ]
-hydrate = [ "leptos/hydrate" ]
-ssr = [ "leptos/ssr" ]
+default = []
+hydrate = ["leptos/hydrate"]
+ssr = ["leptos/ssr"]
