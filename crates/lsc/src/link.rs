@@ -149,7 +149,7 @@ impl LinkStyleProps {
   }
 
   fn class(&self) -> String {
-    let base_class = "transition duration-100";
+    let base_class = "transition";
 
     format!(
       "{base_class} {} {} {}",

@@ -9,6 +9,9 @@ module.exports = {
       'xl': '1280px',
       // '2xl': '1536px',
     },
+    transitionDuration: {
+      'DEFAULT': '100ms',
+    },
     extend: {
       fontFamily: {
         sans: ["Roboto", "sans-serif"],
