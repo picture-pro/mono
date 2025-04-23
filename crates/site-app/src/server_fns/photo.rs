@@ -1,5 +1,5 @@
 #[cfg(feature = "ssr")]
-mod ssr;
+mod fetch_photo_thumbnail;
 
 #[cfg(feature = "ssr")]
-pub use self::ssr::*;
+pub use self::fetch_photo_thumbnail::*;
