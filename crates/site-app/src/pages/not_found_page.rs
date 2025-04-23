@@ -1,4 +1,4 @@
-use base_components::{Section, Title};
+use base_components::{Prose, Section, Title};
 use leptos::prelude::*;
 use lsc::link::*;
 
@@ -7,12 +7,12 @@ pub fn NotFoundPage() -> impl IntoView {
   view! {
     <Section>
       <Title>"Page not found."</Title>
-      <p class="max-w-prose text-base-dim">
+      <Prose>
         "We don't have the page you requested on hand. "
         <Link {..} href="/">
           "Go home."
         </Link>
-      </p>
+      </Prose>
     </Section>
   }
 }

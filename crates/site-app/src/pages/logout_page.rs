@@ -1,4 +1,6 @@
-use base_components::{utils::navigation::navigate_to, FloatingBoxSection};
+use base_components::{
+  utils::navigation::navigate_to, FloatingBoxSection, Prose,
+};
 use leptos::prelude::*;
 use lsc::{button::*, icons::*};
 
@@ -10,9 +12,9 @@ pub fn LogoutPage() -> impl IntoView {
         "Are you sure?"
       </p>
 
-      <p class="text-base-dim max-w-prose">
+      <Prose>
         "You can always log back in later. Come back soon!"
-      </p>
+      </Prose>
 
       <div class="flex flex-row justify-between items-center mt-8">
         <Button color=ButtonColor::Base size=ButtonSize::Large>

@@ -1,4 +1,4 @@
-use base_components::{Section, Title};
+use base_components::{Prose, Section, Title};
 use leptos::prelude::*;
 use lsc::{button::*, icons::*};
 
@@ -12,11 +12,11 @@ pub fn HomePage() -> impl IntoView {
           <span class="font-semibold">"PicturePro"</span>
           "."
         </Title>
-        <p class="max-w-prose text-base-dim">
+        <Prose>
           "Sharing candids is now easier than ever. Cute moment at the park? Done. Posing at the Grand Canyon? Easy. "
           <span class="font-semibold">"PicturePro"</span>
           " is the best way to share your photos with friends and family."
-        </p>
+        </Prose>
         <div class="h-8" />
         <Button
           element_type=ButtonElementType::Link color=ButtonColor::Primary

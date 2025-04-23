@@ -1,6 +1,6 @@
 use base_components::{
   utils::{inputs::touched_input_bindings, navigation::navigate_to},
-  FloatingBoxSection,
+  FloatingBoxSection, Prose,
 };
 use leptos::prelude::*;
 use lsc::{button::*, field::*};
@@ -41,9 +41,9 @@ pub fn LoginPage() -> impl IntoView {
         "Log into your account"
       </p>
 
-      <p class="text-base-dim max-w-prose">
+      <Prose>
         "This is some placeholder text. More placeholder text will hold the place of text whose place needs to be held."
-      </p>
+      </Prose>
 
       <form class="mt-2 mb-4 flex flex-col gap-4">
         <div class="flex flex-col gap-1">

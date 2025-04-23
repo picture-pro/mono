@@ -1,4 +1,4 @@
-use base_components::{Section, Title};
+use base_components::{Prose, Section, Title};
 use leptos::{either::Either, prelude::*};
 use models::AuthStatus;
 
@@ -16,9 +16,9 @@ pub fn ProtectedPage(children: Children) -> impl IntoView {
       </Section>
 
       <Section>
-        <p class="max-w-prose text-base-dim">
+        <Prose>
           "You need to be logged in to see this page."
-        </p>
+        </Prose>
       </Section>
     }),
   }

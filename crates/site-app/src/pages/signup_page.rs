@@ -1,6 +1,6 @@
 use base_components::{
   utils::{inputs::touched_input_bindings, navigation::navigate_to},
-  FloatingBoxSection,
+  FloatingBoxSection, Prose,
 };
 use leptos::prelude::*;
 use lsc::{button::*, field::*};
@@ -224,10 +224,10 @@ pub fn SignupPage() -> impl IntoView {
       <p class="text-3xl font-serif font-semibold tracking-tight">
         "Create your account"
       </p>
-      <p class="text-base-dim max-w-prose">
+      <Prose>
         "Spend less time distributing your photos and more time capturing memories. Sign up for \
         PicturePro today."
-      </p>
+      </Prose>
 
       <form class="mt-2 mb-4 flex flex-col gap-4">
         <FormField

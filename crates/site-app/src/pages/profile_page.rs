@@ -1,4 +1,4 @@
-use base_components::{Section, Title};
+use base_components::{Prose, Section, Title};
 use leptos::prelude::*;
 use models::PhotoGroup;
 
@@ -57,8 +57,8 @@ pub fn ProfilePage() -> impl IntoView {
     <Section>
       <div class="flex flex-row gap-2 justify-between">
         <div class="space-y-4">
-          <p class="max-w-prose text-base-dim">"We've got nothing else to display here right now."</p>
-          <p class="max-w-prose text-base-dim">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."</p>
+          <Prose>"We've got nothing else to display here right now."</Prose>
+          <Prose>"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."</Prose>
         </div>
         <UploadPhotoButton />
       </div>
