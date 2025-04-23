@@ -6,6 +6,7 @@ version = "0.1.0"
 [dependencies]
 models = { path = "../models" }
 
+const_format.workspace = true
 leptos = { workspace = true }
 web-sys = { workspace = true, features = ["Window"] }
 

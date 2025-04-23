@@ -1,3 +1,4 @@
+use base_components::SmallImage;
 use leptos::prelude::*;
 use models::Ulid;
 use reactive_stores::Store;
@@ -19,11 +20,10 @@ pub(super) fn UploadedPhotoPreviewer() -> impl IntoView {
     keys.into_iter()
   };
 
-  let grid_class =
-    "grid xl:grid-cols-6 lg:grid-cols-5 md:grid-cols-4 grid-cols-3 gap-4";
+  let class = "flex flex-row flex-wrap gap-4";
 
   view! {
-    <div class=grid_class>
+    <div class=class>
       <For
         each=photo_id_iter
         key=move |id| *id
@@ -45,22 +45,11 @@ fn UploadedPhotoPreview(id: Ulid) -> impl IntoView {
 
   let url = move || photos.read().get(&id).map(|f| f.url().to_string());
 
-  let image_class = "w-full sm:max-h-48 max-h-40 border-2 border-base-8 \
-                     dark:border-basedark-8 group-hover:border-primary-8 \
-                     group-hover:dark:border-primarydark-8 ring-2 \
-                     ring-transparent group-hover:ring-primary-8 \
-                     group-hover:dark:ring-primarydark-8 transition-colors \
-                     rounded-lg";
+  let image_fn = move |url| {
+    view! {
+      <SmallImage url=url />
+    }
+  };
 
-  move || {
-    url().map(|url| {
-      view! {
-        <div class="flex flex-col justify-center items-center group">
-          <div class="relative">
-            <img src={url} class=image_class />
-          </div>
-        </div>
-      }
-    })
-  }
+  move || url().map(image_fn)
 }

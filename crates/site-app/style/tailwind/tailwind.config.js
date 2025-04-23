@@ -9,9 +9,6 @@ module.exports = {
       'xl': '1280px',
       // '2xl': '1536px',
     },
-    transitionDuration: {
-      'DEFAULT': '100ms',
-    },
     extend: {
       fontFamily: {
         sans: ["Roboto", "sans-serif"],
@@ -35,6 +32,9 @@ module.exports = {
       animation: {
         'fade-in': 'fade-in 0.3s ease-in-out',
         'fade-out': 'fade-out 0.3s ease-in-out',
+      },
+      transitionDuration: {
+        'DEFAULT': '100ms',
       },
     },
   },
