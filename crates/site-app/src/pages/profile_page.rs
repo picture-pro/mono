@@ -18,9 +18,8 @@ pub fn PhotoGroupPreview(pg: PhotoGroup) -> impl IntoView {
   view! {
     <div class=class>
       <Link
-        color=LinkColor::Base size=LinkSize::ExtraLarge
-        underline=LinkUnderline::Always high_contrast=true
-        {..} href=url
+        color=LinkColor::Primary size=LinkSize::ExtraLarge
+        underline=LinkUnderline::Always attr:href=url
       >{ price }</Link>
       <div class="flex flex-row flex-wrap gap-4">
       <For
