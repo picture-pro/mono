@@ -36,7 +36,7 @@ pub fn ProfilePhotoGroupPreview() -> impl IntoView {
     Suspend::new(async move {
       match photo_groups.await {
         Ok(pgs) => view! {
-          <div class="flex flex-row flex-wrap gap-4">
+          <div class="flex flex-col gap-4">
             <For
               each=move || pgs.clone()
               key=move |pg| pg.id
