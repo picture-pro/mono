@@ -2357,6 +2357,7 @@ dependencies = [
  "hex",
  "miette",
  "models",
+ "qr",
  "repos",
  "tracing",
 ]

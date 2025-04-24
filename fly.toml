@@ -14,6 +14,7 @@ internal_port = 3000
 min_machines_running = 0
 
 [env]
+BASE_URL = "https://picturepro.fly.dev"
 REDB_STORE_PATH = "/data/picturepro-db"
 STORAGE_PATH = "/data/picturepro-storage"
 

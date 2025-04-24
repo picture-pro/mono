@@ -1,7 +1,7 @@
 //! Provides domain-specific methods for creating QR codes.
 
 use fast_qr::{QRBuilder, convert::svg::SvgBuilder, qr::QRCodeError};
-use models::PhotoGroupRecordId;
+use models::{BaseUrl, PhotoGroupRecordId};
 
 /// Provides domain-specific methods for creating QR codes.
 #[derive(Clone, Debug)]
@@ -14,12 +14,14 @@ impl QrCodeGenerator {
 
   /// Generates a QR code for a given [`PhotoGroup`].
   pub fn generate_photo_group_link(
-    base_url: &str,
+    &self,
+    base_url: &BaseUrl,
     id: PhotoGroupRecordId,
   ) -> Result<String, QRCodeError> {
     const PHOTO_GROUP_PATH: &str = "/photo-group/";
 
-    let full_url = format!("{base_url}{PHOTO_GROUP_PATH}{id}");
+    let full_url =
+      format!("{base_url}{PHOTO_GROUP_PATH}{id}", base_url = base_url.0);
 
     let qr = QRBuilder::new(full_url).build()?;
 

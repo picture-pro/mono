@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [dependencies]
 models = { path = "../models" }
+qr = { path = "../qr" }
 repos = { path = "../repos" }
 
 hex.workspace = true

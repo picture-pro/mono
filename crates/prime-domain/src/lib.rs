@@ -3,13 +3,14 @@
 
 pub use hex;
 use hex::health::{self, HealthAware};
-use miette::Result;
+use miette::{Context, IntoDiagnostic, Result};
 pub use models;
 use models::{
-  Artifact, ArtifactMimeType, ArtifactRecordId, Photo, PhotoCreateRequest,
-  PhotoGroup, PhotoGroupCreateRequest, PhotoGroupRecordId, PhotoRecordId,
-  UserRecordId,
+  Artifact, ArtifactMimeType, ArtifactRecordId, BaseUrl, Photo,
+  PhotoCreateRequest, PhotoGroup, PhotoGroupCreateRequest, PhotoGroupRecordId,
+  PhotoRecordId, UserRecordId,
 };
+use qr::QrCodeGenerator;
 pub use repos;
 use repos::{
   belt::Belt, ArtifactRepository, CreateArtifactError, CreateModelError,
@@ -24,6 +25,7 @@ pub struct PrimeDomainService {
   photo_repo:       PhotoRepository,
   photo_group_repo: PhotoGroupRepository,
   artifact_repo:    ArtifactRepository,
+  qr_generator:     QrCodeGenerator,
 }
 
 #[async_trait::async_trait]
@@ -50,6 +52,7 @@ impl PrimeDomainService {
       photo_repo,
       photo_group_repo,
       artifact_repo,
+      qr_generator: QrCodeGenerator::new(),
     }
   }
 
@@ -131,5 +134,19 @@ impl PrimeDomainService {
       .photo_group_repo
       .fetch_photo_groups_by_user(owner)
       .await
+  }
+
+  /// Generate a QR code for a [`PhotoGroup`].
+  #[instrument(skip(self))]
+  pub fn generate_photo_group_qr(
+    &self,
+    base_url: &BaseUrl,
+    id: PhotoGroupRecordId,
+  ) -> Result<String> {
+    self
+      .qr_generator
+      .generate_photo_group_link(base_url, id)
+      .into_diagnostic()
+      .context("failed to generate photo group qr code")
   }
 }

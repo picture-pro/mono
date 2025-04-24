@@ -28,6 +28,7 @@ fn context_provider(
     provide_context(app_state.prime_domain_service.clone());
     provide_context(app_state.auth_domain_service.clone());
     provide_context(models::AuthStatus(auth_session.user.clone()));
+    provide_context(app_state.base_url.clone());
   }
 }
 
@@ -116,6 +117,10 @@ async fn main() -> miette::Result<()> {
       get(site_app::server_fns::fetch_photo_thumbnail),
     )
     .route("/api/{*fn_name}", post(server_fn_handler))
+    .route(
+      "/photo-group/{id}/qr",
+      get(site_app::server_fns::photo_group_qr_code),
+    )
     .with_state(app_state.clone());
   let app = Router::new()
     .leptos_routes_with_handler(routes, leptos_routes_handler)
