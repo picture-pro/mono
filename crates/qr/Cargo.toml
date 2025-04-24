@@ -1,0 +1,12 @@
+[package]
+edition = "2024"
+name = "qr"
+version = "0.1.0"
+
+[dependencies]
+models = { path = "../models" }
+
+fast_qr = { version = "0.13", features = ["svg"] }
+
+[lints]
+workspace = true
