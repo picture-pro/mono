@@ -6,14 +6,22 @@ use crate::server_fns::fetch_photo_groups_for_user;
 
 #[component]
 pub fn PhotoGroupPreview(pg: PhotoGroup) -> impl IntoView {
+  use lsc::link::*;
+
   let class = "bg-base-2 dark:bg-basedark-2 border border-base-7 \
                dark:border-basedark-7 rounded-lg flex flex-col p-4 gap-4 \
                shadow-md";
 
   let price = format!("Price: {}", pg.config.usage_rights_price);
+  let url = format!("/photo-group/{}", pg.id);
+
   view! {
     <div class=class>
-      <p class="text-2xl">{ price }</p>
+      <Link
+        color=LinkColor::Base size=LinkSize::ExtraLarge
+        underline=LinkUnderline::Always high_contrast=true
+        {..} href=url
+      >{ price }</Link>
       <div class="flex flex-row flex-wrap gap-4">
       <For
         each=move || pg.photos.clone()
