@@ -7,7 +7,8 @@ use miette::Result;
 pub use models;
 use models::{
   Artifact, ArtifactMimeType, ArtifactRecordId, Photo, PhotoCreateRequest,
-  PhotoGroup, PhotoGroupCreateRequest, PhotoRecordId, UserRecordId,
+  PhotoGroup, PhotoGroupCreateRequest, PhotoGroupRecordId, PhotoRecordId,
+  UserRecordId,
 };
 pub use repos;
 use repos::{
@@ -102,13 +103,22 @@ impl PrimeDomainService {
     self.artifact_repo.read_artifact_by_id(id).await
   }
 
-  /// Fetch an [`Photo`].
+  /// Fetch a [`Photo`].
   #[instrument(skip(self))]
   pub async fn fetch_photo(
     &self,
     id: PhotoRecordId,
   ) -> Result<Option<Photo>, FetchModelError> {
     self.photo_repo.fetch_photo_by_id(id).await
+  }
+
+  /// Fetch a [`PhotoGroup`].
+  #[instrument(skip(self))]
+  pub async fn fetch_photo_group(
+    &self,
+    id: PhotoGroupRecordId,
+  ) -> Result<Option<PhotoGroup>, FetchModelError> {
+    self.photo_group_repo.fetch_photo_group_by_id(id).await
   }
 
   /// Fetch [`PhotoGroup`]s by user.
