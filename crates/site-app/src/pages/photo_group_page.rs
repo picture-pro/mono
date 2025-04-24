@@ -56,7 +56,6 @@ pub fn PhotoGroupPageInner(pg: PhotoGroup) -> impl IntoView {
   view! {
     <Section>
       <Title>"Photo Group"</Title>
-      <pre><code>"id = \"" { pg.id.to_string() } "\""</code></pre>
     </Section>
     <Section>
       <PhotoGroupDetails pg=pg />
@@ -66,17 +65,44 @@ pub fn PhotoGroupPageInner(pg: PhotoGroup) -> impl IntoView {
 
 #[component]
 pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
+  use lsc::{button::*, icons::*};
+
   view! {
-    <div>
-      <p class="text-xl">{ pg.config.usage_rights_price.to_string() }</p>
+    <div class="flex flex-row gap-4 items-start">
       <div class="flex flex-row flex-wrap gap-4">
-      <For
-        each=move || pg.photos.clone()
-        key=move |p| *p
-        children=move |p| view! {
-          <SmallImage url=format!("/api/photo_thumbnail/{p}") />
-        }
-      />
+        <For
+          each=move || pg.photos.clone()
+          key=move |p| *p
+          children=move |p| view! {
+            <SmallImage url=format!("/api/photo_thumbnail/{p}") />
+          }
+        />
+      </div>
+
+      // <div class="my-4 w-[1px] border-l-2 border-dashed border-base-8 dark:border-basedark-8" />
+
+      <div class="min-w-64 flex flex-col gap-4 pl-4 border-l-2 border-base-8 dark:border-basedark-8">
+        <p class="text-3xl">
+          "Price: "
+          <span class="font-bold">
+            { pg.config.usage_rights_price.to_string() }
+          </span>
+        </p>
+
+        <div class="flex flex-col gap-2">
+          <Button
+            color=ButtonColor::Primary size=ButtonSize::Large
+          >
+            "Buy Now"
+            <LightningBoltIcon {..} class="size-5" />
+          </Button>
+          <Button
+            color=ButtonColor::Base size=ButtonSize::Large
+          >
+            "Save For Later"
+            <ClockIcon {..} class="size-5" />
+          </Button>
+        </div>
       </div>
     </div>
   }
