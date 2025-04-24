@@ -1,4 +1,4 @@
-use base_components::SmallImage;
+use base_components::{ImageStyle, SmallImage};
 use leptos::{either::EitherOf3, prelude::*};
 use models::{FileSize, Ulid};
 use reactive_stores::Store;
@@ -78,7 +78,7 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
       view! {
         <div class="flex flex-col justify-center items-center group">
           <div class="relative">
-            <SmallImage url=url />
+            <SmallImage url=url style=ImageStyle::BorderHover />
             { status_overlay_element }
             <DeleteButtonOverlay {..} on:click=delete_handler />
           </div>

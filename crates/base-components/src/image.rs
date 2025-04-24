@@ -23,7 +23,7 @@ pub fn SmallImage(
   #[prop(into)]
   url: Signal<String>,
   /// The image's style.
-  #[prop(into, default = ImageStyle::BorderHover.into())]
+  #[prop(into, default = ImageStyle::Border.into())]
   style: Signal<ImageStyle>,
   /// Extra classes for the image.
   #[prop(into, optional)]
