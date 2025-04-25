@@ -1,3 +1,4 @@
+use base_components::{PhotoGroupQrCode, Prose, Section};
 use leptos::prelude::*;
 use models::PhotoGroupRecordId;
 use reactive_stores::Store;
@@ -8,19 +9,25 @@ use super::UploadStateStoreFields;
 pub(super) fn UploadFinishedStep() -> impl IntoView {
   let context: Store<super::UploadState> = expect_context();
 
-  let photo_group_id = move || {
+  let id = Signal::derive(move || {
     let state = context
       .upload_finished_0()
       .expect("`UploadContext` not in state `UploadFinished`");
-    state.photo_group().get().to_string()
-  };
+    state.photo_group().get()
+  });
 
   view! {
-    <p>"Upload Finished"</p>
-    <p>
-      "Photo Group: "
-      { photo_group_id }
-    </p>
+    <Section>
+      <Prose>"Show this QR code to share your photo group!"</Prose>
+    </Section>
+
+    <Section>
+      <div class="flex flex-col justify-center items-center h-full w-full">
+        { move || view! {
+          <PhotoGroupQrCode id=id() {..} class="aspect-square w-full max-w-96 rounded-lg" />
+        }}
+      </div>
+    </Section>
   }
 }
 

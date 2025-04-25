@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use base_components::{Section, SmallImage, Title};
+use base_components::{PhotoGroupQrCode, Section, SmallImage, Title};
 use leptos::{either::Either, prelude::*};
 use leptos_router::hooks::use_params_map;
 use models::{PhotoGroup, PhotoGroupRecordId};
@@ -69,7 +69,7 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
 
   view! {
     <div class="flex flex-row gap-4 items-start">
-      <div class="flex flex-row flex-wrap gap-4">
+      <div class="flex-1 flex flex-row flex-wrap gap-4">
         <For
           each=move || pg.photos.clone()
           key=move |p| *p
@@ -81,7 +81,7 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
 
       // <div class="my-4 w-[1px] border-l-2 border-dashed border-base-8 dark:border-basedark-8" />
 
-      <div class="min-w-64 flex flex-col gap-4 pl-4 border-l-2 border-base-8 dark:border-basedark-8">
+      <div class="min-w-64 flex flex-col gap-6 pl-4 border-l-2 border-base-8 dark:border-basedark-8">
         <p class="text-3xl">
           "Price: "
           <span class="font-bold">
@@ -102,6 +102,14 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
             "Save For Later"
             <ClockIcon {..} class="size-5" />
           </Button>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <p class="text-3xl">"Share:"</p>
+          <PhotoGroupQrCode
+            id=pg.id {..}
+            class="aspect-square w-full max-w-96 rounded-lg"
+          />
         </div>
       </div>
     </div>
