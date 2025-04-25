@@ -68,7 +68,7 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
   use lsc::{button::*, icons::*};
 
   view! {
-    <div class="flex flex-row gap-4 items-start">
+    <div class="flex flex-col-reverse sm:flex-row gap-8 sm:items-start">
       <div class="flex-1 flex flex-row flex-wrap gap-4">
         <For
           each=move || pg.photos.clone()
@@ -81,7 +81,7 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
 
       // <div class="my-4 w-[1px] border-l-2 border-dashed border-base-8 dark:border-basedark-8" />
 
-      <div class="min-w-64 flex flex-col gap-6 pl-4 border-l-2 border-base-8 dark:border-basedark-8">
+      <div class="sm:min-w-64 flex flex-col gap-6 p-2 pb-8 sm:p-0 sm:pl-4 border-b-2 sm:border-b-0 sm:border-l-2 border-base-8 dark:border-basedark-8">
         <p class="text-3xl">
           "Price: "
           <span class="font-bold">
