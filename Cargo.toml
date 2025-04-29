@@ -7,6 +7,7 @@ resolver = "3"
 missing_docs = "deny"
 
 [workspace.dependencies]
+bytes = { version = "1" }
 const_format = { version = "0.2", features = ["fmt"] }
 serde = { version = "1", features = ["derive"] }
 tracing = { version = "0.1" }

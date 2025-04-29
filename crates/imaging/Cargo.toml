@@ -1,0 +1,14 @@
+[package]
+edition = "2024"
+name = "imaging"
+version = "0.1.0"
+
+[dependencies]
+models = { path = "../models" }
+
+bytes.workspace = true
+image = "0.25.6"
+thiserror.workspace = true
+
+[lints]
+workspace = true
