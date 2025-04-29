@@ -72,6 +72,8 @@ pub async fn fetch_photo_thumbnail(
   ))
 }
 
+/// Matches the compression of a [`Belt`] to the best available option indicated
+/// by request headers, and sets the appropriate headers in the response.
 fn efficiently_compressed_belt_http_response(
   req_headers: &HeaderMap,
   belt: Belt,
