@@ -12,7 +12,7 @@ impl QrCodeGenerator {
   #[expect(clippy::new_without_default)]
   pub fn new() -> Self { QrCodeGenerator(()) }
 
-  /// Generates a QR code for a given [`PhotoGroup`].
+  /// Generates a QR code for a given [`PhotoGroup`](models::PhotoGroup).
   pub fn generate_photo_group_link(
     &self,
     base_url: &BaseUrl,

@@ -57,7 +57,7 @@ mod ssr {
   use models::{BaseUrl, PhotoGroupRecordId};
   use prime_domain::PrimeDomainService;
 
-  /// Generate a QR code for a [`PhotoGroup`].
+  /// Generate a QR code for a [`PhotoGroup`](models::PhotoGroup).
   pub async fn photo_group_qr_code(
     Path(id): Path<String>,
     State(pd): State<PrimeDomainService>,
