@@ -1,10 +1,9 @@
 use std::{fmt, path::PathBuf};
 
-use dvf::slugger::{EitherSlug, StrictSlug};
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
-use crate::UserRecordId;
+use crate::{CompressionStatus, EitherSlug, StrictSlug, Ulid, UserRecordId};
 
 /// The table name for [`Artifact`] records.
 pub const ARTIFACT_TABLE_NAME: &str = "artifact";
@@ -22,24 +21,24 @@ pub struct Artifact {
   /// The artifact's originator.
   pub originator:       UserRecordId,
   /// The artifact's compression status.
-  pub comp_status:      dvf::CompressionStatus,
+  pub comp_status:      CompressionStatus,
   /// The artifact's stated mime-type.
   pub stated_mime_type: Option<ArtifactMimeType>,
 }
 
 /// The object storage path for an [`Artifact`].
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ArtifactPath(dvf::Ulid);
+pub struct ArtifactPath(Ulid);
 
 impl ArtifactPath {
-  /// Creates a new [`ArtifactPath`] from a [`dvf::Ulid`].
-  pub fn new(ulid: dvf::Ulid) -> Self { Self(ulid) }
+  /// Creates a new [`ArtifactPath`] from a [`Ulid`].
+  pub fn new(ulid: Ulid) -> Self { Self(ulid) }
 
   /// Creates a new random [`ArtifactPath`].
-  pub fn new_random() -> Self { Self(dvf::Ulid::new()) }
+  pub fn new_random() -> Self { Self(Ulid::new()) }
 
-  /// Converts the [`ArtifactPath`] into a [`dvf::Ulid`].
-  pub fn into_inner(self) -> dvf::Ulid { self.0 }
+  /// Converts the [`ArtifactPath`] into a [`Ulid`].
+  pub fn into_inner(self) -> Ulid { self.0 }
 
   /// Converts the [`ArtifactPath`] into a [`PathBuf`].
   pub fn to_path_buf(&self) -> PathBuf { self.0.to_string().into() }
@@ -91,7 +90,7 @@ pub struct ArtifactCreateRequest {
   /// The artifact's originator.
   pub originator:       UserRecordId,
   /// The artifact's compression status.
-  pub comp_status:      dvf::CompressionStatus,
+  pub comp_status:      CompressionStatus,
   /// The artifact's stated mime-type.
   pub stated_mime_type: Option<ArtifactMimeType>,
 }

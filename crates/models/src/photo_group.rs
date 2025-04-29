@@ -1,8 +1,9 @@
-use dvf::slugger::{EitherSlug, StrictSlug};
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
-use crate::{price::UsdPriceNaive, PhotoRecordId, UserRecordId};
+use crate::{
+  price::UsdPriceNaive, EitherSlug, PhotoRecordId, StrictSlug, UserRecordId,
+};
 
 /// The table name for [`PhotoGroup`] records.
 pub const PHOTO_GROUP_TABLE_NAME: &str = "photo_group";

@@ -1,10 +1,10 @@
 use std::hash::{self, Hash, Hasher};
 
-use dvf::slugger::{EitherSlug, LaxSlug};
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
 pub use self::bridge::*;
+use crate::{EitherSlug, EmailAddress, HumanName, LaxSlug};
 
 /// The table name for [`User`] records.
 pub const USER_TABLE_NAME: &str = "user";
@@ -18,9 +18,9 @@ pub struct User {
   /// The user's ID.
   pub id:    UserRecordId,
   /// The user's name.
-  pub name:  dvf::HumanName,
+  pub name:  HumanName,
   /// The user's email address.
-  pub email: dvf::EmailAddress,
+  pub email: EmailAddress,
   /// The user's authentication secrets.
   pub auth:  UserAuthCredentials,
 }
@@ -39,7 +39,7 @@ impl User {
 pub enum UserAuthCredentials {
   /// Indicates that the user is authenticated through just an email entry, and
   /// no other verification. VERY DANGEROUS.
-  EmailEntryOnly(dvf::EmailAddress),
+  EmailEntryOnly(EmailAddress),
 }
 
 impl Model for User {
@@ -57,9 +57,9 @@ impl Model for User {
 #[derive(Debug)]
 pub struct UserCreateRequest {
   /// The user's name.
-  pub name:  dvf::HumanName,
+  pub name:  HumanName,
   /// The user's email address.
-  pub email: dvf::EmailAddress,
+  pub email: EmailAddress,
   /// The user's authentication secrets.
   pub auth:  UserAuthCredentials,
 }
@@ -81,7 +81,7 @@ pub struct PublicUser {
   /// The user's ID.
   pub id:              UserRecordId,
   /// The user's name.
-  pub name:            dvf::HumanName,
+  pub name:            HumanName,
   /// The hash of the user's authentication secrets.
   pub auth_hash_bytes: Box<[u8]>,
 }
