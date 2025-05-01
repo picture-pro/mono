@@ -76,11 +76,16 @@ mod ssr {
       }
     };
 
-    let mut headers = HeaderMap::new();
-    headers.insert(
-      header::CONTENT_TYPE,
-      HeaderValue::from_static("image/svg+xml"),
-    );
+    let headers = HeaderMap::from_iter([
+      (
+        header::CONTENT_TYPE,
+        HeaderValue::from_static("image/svg+xml"),
+      ),
+      (
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("max-age=31536000, immutable"),
+      ),
+    ]);
 
     (headers, qr_code).into_response()
   }
