@@ -54,6 +54,9 @@ impl AppState {
     let photo_group_repo = prime_domain::repos::PhotoGroupRepository::new(
       Database::new_from_kv(kv_store.clone()),
     );
+    let image_repo = prime_domain::repos::ImageRepository::new(
+      Database::new_from_kv(kv_store.clone()),
+    );
     let user_repo = prime_domain::repos::UserRepository::new(
       Database::new_from_kv(kv_store.clone()),
     );
@@ -68,8 +71,12 @@ impl AppState {
       Database::new_from_kv(kv_store),
     );
 
-    let prime_domain_service =
-      PrimeDomainService::new(photo_repo, photo_group_repo, artifact_repo);
+    let prime_domain_service = PrimeDomainService::new(
+      photo_repo,
+      photo_group_repo,
+      image_repo,
+      artifact_repo,
+    );
     let auth_domain_service = AuthDomainService::new(user_repo);
 
     Ok(Self {

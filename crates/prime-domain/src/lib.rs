@@ -14,8 +14,8 @@ use qr::QrCodeGenerator;
 pub use repos;
 use repos::{
   belt::Belt, ArtifactRepository, CreateArtifactError, CreateModelError,
-  FetchModelByIndexError, FetchModelError, PhotoGroupRepository,
-  PhotoRepository, ReadArtifactError,
+  FetchModelByIndexError, FetchModelError, ImageRepository,
+  PhotoGroupRepository, PhotoRepository, ReadArtifactError,
 };
 use tracing::instrument;
 
@@ -25,6 +25,7 @@ pub struct PrimeDomainService {
   photo_repo:       PhotoRepository,
   photo_group_repo: PhotoGroupRepository,
   artifact_repo:    ArtifactRepository,
+  image_repo:       ImageRepository,
   qr_generator:     QrCodeGenerator,
 }
 
@@ -46,12 +47,14 @@ impl PrimeDomainService {
   pub fn new(
     photo_repo: PhotoRepository,
     photo_group_repo: PhotoGroupRepository,
+    image_repo: ImageRepository,
     artifact_repo: ArtifactRepository,
   ) -> Self {
     Self {
       photo_repo,
       photo_group_repo,
       artifact_repo,
+      image_repo,
       qr_generator: QrCodeGenerator::new(),
     }
   }
