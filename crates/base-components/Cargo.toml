@@ -9,7 +9,7 @@ models = { path = "../models" }
 const_format.workspace = true
 leptos = { workspace = true }
 serde.workspace = true
-web-sys = { workspace = true, features = ["Window"] }
+web-sys = { workspace = true, features = ["Window", "HtmlImageElement"] }
 
 [lints]
 workspace = true

@@ -1,8 +1,9 @@
 #![allow(missing_docs)]
 
 use const_format::formatcp;
-use leptos::prelude::*;
+use leptos::{html::Img, prelude::*};
 use serde::{Deserialize, Serialize};
+use web_sys::Event;
 
 /// The style of the image.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -69,20 +70,35 @@ pub fn SmallImageWithFallback(
   let url = Signal::stored(url);
   let fallback_data = Signal::stored(fallback_data);
 
+  // whether to show the full version
   let loaded = RwSignal::new(false);
 
+  // what actually goes into the image
   let src = Signal::derive(move || match loaded.get() {
     true => url.get(),
     false => fallback_data.get(),
   });
 
-  let onload_handler = move |_| {
-    leptos::logging::log!("hit onload handler");
-    loaded.set(true);
+  // fires when image fully loads, or never if cached
+  let onload_handler = move |e: Event| {
+    let image: web_sys::HtmlImageElement = event_target(&e);
+    loaded.set(image.complete());
   };
+
+  let image_ref = NodeRef::<Img>::new();
+
+  // sets `loaded` immediately after render if image is cached
+  Effect::watch(
+    move || (),
+    move |_, _, _| {
+      let image = image_ref.get().unwrap();
+      loaded.set(image.complete());
+    },
+    true,
+  );
 
   view! {
     <SmallImage url=src style=style extra_class=extra_class />
-    <img class="hidden" src=url on:load=onload_handler />
+    <img class="hidden" src=url on:load=onload_handler node_ref=image_ref />
   }
 }
