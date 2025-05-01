@@ -22,10 +22,10 @@ use tracing::instrument;
 /// The prime domain service.
 #[derive(Debug, Clone)]
 pub struct PrimeDomainService {
-  photo_repo:       PhotoRepository,
-  photo_group_repo: PhotoGroupRepository,
   artifact_repo:    ArtifactRepository,
   image_repo:       ImageRepository,
+  photo_group_repo: PhotoGroupRepository,
+  photo_repo:       PhotoRepository,
   qr_generator:     QrCodeGenerator,
 }
 
@@ -45,16 +45,16 @@ impl health::HealthReporter for PrimeDomainService {
 impl PrimeDomainService {
   /// Create a new [`PrimeDomainService`].
   pub fn new(
+    artifact_repo: ArtifactRepository,
+    image_repo: ImageRepository,
     photo_repo: PhotoRepository,
     photo_group_repo: PhotoGroupRepository,
-    image_repo: ImageRepository,
-    artifact_repo: ArtifactRepository,
   ) -> Self {
     Self {
-      photo_repo,
-      photo_group_repo,
       artifact_repo,
       image_repo,
+      photo_repo,
+      photo_group_repo,
       qr_generator: QrCodeGenerator::new(),
     }
   }

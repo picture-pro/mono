@@ -48,13 +48,13 @@ impl AppState {
 
     let session_store = TowerSessionsKvStore::new(kv_store.clone());
 
+    let image_repo = prime_domain::repos::ImageRepository::new(
+      Database::new_from_kv(kv_store.clone()),
+    );
     let photo_repo = prime_domain::repos::PhotoRepository::new(
       Database::new_from_kv(kv_store.clone()),
     );
     let photo_group_repo = prime_domain::repos::PhotoGroupRepository::new(
-      Database::new_from_kv(kv_store.clone()),
-    );
-    let image_repo = prime_domain::repos::ImageRepository::new(
       Database::new_from_kv(kv_store.clone()),
     );
     let user_repo = prime_domain::repos::UserRepository::new(
@@ -72,10 +72,10 @@ impl AppState {
     );
 
     let prime_domain_service = PrimeDomainService::new(
+      artifact_repo,
+      image_repo,
       photo_repo,
       photo_group_repo,
-      image_repo,
-      artifact_repo,
     );
     let auth_domain_service = AuthDomainService::new(user_repo);
 
