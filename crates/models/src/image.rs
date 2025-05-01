@@ -17,12 +17,12 @@ pub struct Image {
   /// The [`Artifact`](crate::Artifact) backing the image.
   pub artifact: ArtifactRecordId,
   /// The image's metadata.
-  pub meta:     ImageMetaData,
+  pub meta:     ImageMetadata,
 }
 
 /// The metadata of an [`Image`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ImageMetaData {
+pub struct ImageMetadata {
   /// The width of the image.
   pub width:        u32,
   /// The height of the image.
@@ -63,7 +63,7 @@ pub struct ImageCreateRequest {
   /// The [`Artifact`](crate::Artifact) backing the image.
   pub artifact: ArtifactRecordId,
   /// The image's metadata.
-  pub meta:     ImageMetaData,
+  pub meta:     ImageMetadata,
 }
 
 impl From<ImageCreateRequest> for Image {

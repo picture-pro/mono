@@ -4,7 +4,7 @@ use std::io::Cursor;
 
 use bytes::Bytes;
 use image::{ImageError, ImageFormat, imageops::FilterType};
-use models::{ImageMetaData, ImageTinyPreview, MAX_TINY_PREVIEW_DIMENSION};
+use models::{ImageMetadata, ImageTinyPreview, MAX_TINY_PREVIEW_DIMENSION};
 use thiserror::Error;
 
 /// Image processor.
@@ -28,7 +28,7 @@ impl ImageProcessor {
   /// Creates [`ImageMetadata`] from input bytes.
   pub fn image_from_bytes(
     data: Bytes,
-  ) -> Result<ImageMetaData, ImageCreateError> {
+  ) -> Result<ImageMetadata, ImageCreateError> {
     // open an image reader
     let mut reader = image::ImageReader::new(Cursor::new(data))
       .with_guessed_format()
@@ -54,7 +54,7 @@ impl ImageProcessor {
       .write_to(&mut Cursor::new(&mut preview_bytes), ImageFormat::Avif)
       .map_err(ImageCreateError::PreviewEncodingFailed)?;
 
-    Ok(ImageMetaData {
+    Ok(ImageMetadata {
       width:        img.width(),
       height:       img.height(),
       tiny_preview: ImageTinyPreview {
