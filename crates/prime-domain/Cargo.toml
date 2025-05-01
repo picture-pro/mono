@@ -10,12 +10,15 @@ repos = { path = "../repos" }
 
 hex.workspace = true
 
+serde.workspace = true
 tracing.workspace = true
 
 miette.workspace = true
-# thiserror.workspace = true
+thiserror.workspace = true
 
 async-trait.workspace = true
+futures.workspace = true
+tokio.workspace = true
 
 [lints]
 workspace = true

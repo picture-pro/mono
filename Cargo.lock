@@ -85,8 +85,6 @@ name = "app-upload"
 version = "0.1.0"
 dependencies = [
  "base-components",
- "const_format",
- "futures",
  "gloo",
  "leptos",
  "lsc",
@@ -95,8 +93,6 @@ dependencies = [
  "reactive_stores",
  "send_wrapper",
  "serde",
- "thiserror 2.0.12",
- "tokio",
  "tracing",
  "web-sys",
 ]
@@ -2726,11 +2722,15 @@ name = "prime-domain"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "futures",
  "hex",
  "miette",
  "models",
  "qr",
  "repos",
+ "serde",
+ "thiserror 2.0.12",
+ "tokio",
  "tracing",
 ]
 

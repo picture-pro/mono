@@ -1,7 +1,5 @@
 //! The photo upload flow for PicturePro.
 
-#![feature(iterator_try_collect)]
-
 mod configuring_group;
 mod photo;
 mod selecting_photos;

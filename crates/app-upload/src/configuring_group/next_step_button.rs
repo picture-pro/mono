@@ -45,7 +45,7 @@ pub(super) fn NextStepButton() -> impl IntoView {
   Effect::watch(
     move || action.value().get(),
     move |value, _, _| {
-      if let Some(Ok(Ok(photo_group_id))) = value {
+      if let Some(Ok(photo_group_id)) = value {
         *context.write() = UploadState::UploadFinished(UploadFinishedState {
           photo_group: *photo_group_id,
         });

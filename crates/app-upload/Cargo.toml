@@ -8,19 +8,15 @@ base-components = { path = "../base-components" }
 lsc = { path = "../lsc" }
 models = { path = "../models" }
 
-const_format.workspace = true
-futures.workspace = true
 gloo = { version = "0.11.0", features = ["file", "futures", "net"], default-features = false }
 leptos = { workspace = true }
 reactive_stores = { workspace = true }
 send_wrapper = { workspace = true }
 serde.workspace = true
-thiserror.workspace = true
 tracing.workspace = true
 web-sys = { workspace = true }
 
 prime-domain = { path = "../prime-domain", optional = true }
-tokio = { workspace = true, optional = true }
 
 [lints]
 workspace = true
@@ -28,4 +24,8 @@ workspace = true
 [features]
 default = []
 hydrate = ["leptos/hydrate", "base-components/hydrate", "lsc/hydrate"]
-ssr = ["leptos/ssr", "base-components/ssr", "lsc/ssr", "dep:prime-domain", "dep:tokio"]
+ssr = ["leptos/ssr", "base-components/ssr", "lsc/ssr", "dep:prime-domain"]
+
+[package.metadata.cargo-machete]
+# leptos islands need serde as a root dep
+ignored = ["serde"]
