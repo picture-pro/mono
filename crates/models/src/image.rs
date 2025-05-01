@@ -13,9 +13,16 @@ pub type ImageRecordId = RecordId<Image>;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Image {
   /// The image's ID.
-  pub id:           ImageRecordId,
+  pub id:       ImageRecordId,
   /// The [`Artifact`](crate::Artifact) backing the image.
-  pub artifact:     ArtifactRecordId,
+  pub artifact: ArtifactRecordId,
+  /// The image's metadata.
+  pub meta:     ImageMetaData,
+}
+
+/// The metadata of an [`Image`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ImageMetaData {
   /// The width of the image.
   pub width:        u32,
   /// The height of the image.
@@ -54,23 +61,17 @@ impl Model for Image {
 #[derive(Debug)]
 pub struct ImageCreateRequest {
   /// The [`Artifact`](crate::Artifact) backing the image.
-  pub artifact:     ArtifactRecordId,
-  /// The width of the image.
-  pub width:        u32,
-  /// The height of the image.
-  pub height:       u32,
-  /// A tiny preview of the image.
-  pub tiny_preview: ImageTinyPreview,
+  pub artifact: ArtifactRecordId,
+  /// The image's metadata.
+  pub meta:     ImageMetaData,
 }
 
 impl From<ImageCreateRequest> for Image {
   fn from(value: ImageCreateRequest) -> Self {
     Self {
-      id:           ImageRecordId::default(),
-      artifact:     value.artifact,
-      width:        value.width,
-      height:       value.height,
-      tiny_preview: value.tiny_preview,
+      id:       ImageRecordId::default(),
+      artifact: value.artifact,
+      meta:     value.meta,
     }
   }
 }

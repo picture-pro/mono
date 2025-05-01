@@ -4,21 +4,11 @@ use std::io::Cursor;
 
 use bytes::Bytes;
 use image::{ImageError, ImageFormat, imageops::FilterType};
-use models::{ImageTinyPreview, MAX_TINY_PREVIEW_DIMENSION};
+use models::{ImageMetaData, ImageTinyPreview, MAX_TINY_PREVIEW_DIMENSION};
 use thiserror::Error;
 
 /// Image processor.
 pub struct ImageProcessor {}
-
-/// The metadata of an [`Image`](models::Image).
-pub struct ImageMetaData {
-  /// The width of the image.
-  pub width:        u32,
-  /// The height of the image.
-  pub height:       u32,
-  /// A tiny preview of the image.
-  pub tiny_preview: ImageTinyPreview,
-}
 
 /// Errors for creating [`ImageMetadata`].
 #[derive(Error, Debug)]
