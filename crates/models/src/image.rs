@@ -32,7 +32,7 @@ pub struct ImageMetadata {
 }
 
 /// The maximum side length of an [`Image`]'s [`ImageTinyPreview`].
-pub const MAX_TINY_PREVIEW_DIMENSION: u32 = 200;
+pub const MAX_TINY_PREVIEW_DIMENSION: u32 = 100;
 
 /// A tiny preview of an [`Image`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
