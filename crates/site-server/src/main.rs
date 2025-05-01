@@ -109,8 +109,8 @@ async fn main() -> miette::Result<()> {
 
   let api_router = Router::new()
     .route(
-      "/api/upload_artifact",
-      post(site_app::server_fns::upload_artifact),
+      "/api/upload_artifact_as_image",
+      post(site_app::server_fns::upload_artifact_as_image),
     )
     .route(
       "/api/photo_thumbnail/{id}",

@@ -5,12 +5,15 @@
 
 pub use hex;
 use hex::health::{self, HealthAware};
+pub use imaging;
+use imaging::{ImageCreateError, ImageProcessor};
 use miette::{Context, IntoDiagnostic, Result};
 pub use models;
 use models::{
-  Artifact, ArtifactMimeType, ArtifactRecordId, BaseUrl, Photo, PhotoArtifacts,
-  PhotoCreateRequest, PhotoGroup, PhotoGroupConfig, PhotoGroupCreateRequest,
-  PhotoGroupRecordId, PhotoRecordId, UserRecordId,
+  Artifact, ArtifactMimeType, ArtifactRecordId, BaseUrl, Image,
+  ImageCreateRequest, ImageRecordId, Photo, PhotoCreateRequest, PhotoGroup,
+  PhotoGroupConfig, PhotoGroupCreateRequest, PhotoGroupRecordId, PhotoImages,
+  PhotoRecordId, UserRecordId,
 };
 use qr::QrCodeGenerator;
 pub use repos;
@@ -25,6 +28,7 @@ use tracing::instrument;
 #[derive(Debug, Clone)]
 pub struct PrimeDomainService {
   artifact_repo:    ArtifactRepository,
+  image_processor:  ImageProcessor,
   image_repo:       ImageRepository,
   photo_group_repo: PhotoGroupRepository,
   photo_repo:       PhotoRepository,
@@ -44,15 +48,16 @@ impl health::HealthReporter for PrimeDomainService {
   }
 }
 
-/// The possible errors of [`create_photo_group_from_artifacts`].
+/// The possible errors of
+/// [`PrimeDomainService::create_photo_group_from_artifacts`].
 #[derive(Debug, thiserror::Error)]
-pub enum CreatePhotoGroupFromArtifactsError {
-  /// Failed to fetch an artifact.
+pub enum CreatePhotoGroupFromImagesError {
+  /// Failed to fetch an image.
   #[error("failed to fetch artifact: {0}")]
-  ArtifactFetchingFailed(FetchModelError),
-  /// The artifact didn't exist.
-  #[error("missing artifact: {0}")]
-  MissingArtifact(ArtifactRecordId),
+  ImageFetchingFailed(FetchModelError),
+  /// The image didn't exist.
+  #[error("missing image: {0}")]
+  MissingImage(ImageRecordId),
   /// Failed to create a photo.
   #[error("failed to create a photo: {0}")]
   PhotoCreatingFailed(CreateModelError),
@@ -61,16 +66,35 @@ pub enum CreatePhotoGroupFromArtifactsError {
   InternalError,
 }
 
+/// The possible errors of [`PrimeDomainService::create_image_from_artifact`].
+#[derive(Debug, thiserror::Error)]
+pub enum CreateImageFromArtifactError {
+  /// The artifact didn't exist.
+  #[error("missing artifact: {0}")]
+  MissingArtifact(ArtifactRecordId),
+  /// Failed to read from an artifact.
+  #[error("failed to read from artifact: {0}")]
+  ReadArtifactError(ReadArtifactError),
+  /// Failed to process image.
+  #[error("failed to process image: {0}")]
+  ImageProcessingError(ImageCreateError),
+  /// Failed to create image.
+  #[error("failed to create image: {0}")]
+  CreateImageError(CreateModelError),
+}
+
 impl PrimeDomainService {
   /// Create a new [`PrimeDomainService`].
   pub fn new(
     artifact_repo: ArtifactRepository,
+    image_processor: ImageProcessor,
     image_repo: ImageRepository,
     photo_repo: PhotoRepository,
     photo_group_repo: PhotoGroupRepository,
   ) -> Self {
     Self {
       artifact_repo,
+      image_processor,
       image_repo,
       photo_repo,
       photo_group_repo,
@@ -92,9 +116,50 @@ impl PrimeDomainService {
       .await
   }
 
+  /// Create an [`Image`] from an [`Artifact`].
+  #[instrument(skip(self))]
+  pub async fn create_image_from_artifact(
+    &self,
+    artifact_id: ArtifactRecordId,
+  ) -> Result<Image, CreateImageFromArtifactError> {
+    let (data, _) = self
+      .read_artifact_by_id(artifact_id)
+      .await
+      .map_err(CreateImageFromArtifactError::ReadArtifactError)?
+      .ok_or(CreateImageFromArtifactError::MissingArtifact(artifact_id))?;
+
+    let data = data.adapt_to_no_comp().collect().await.map_err(|e| {
+      tracing::error!("failed to read from belt: {e}");
+      CreateImageFromArtifactError::ReadArtifactError(
+        ReadArtifactError::IoError(e),
+      )
+    })?;
+
+    let image_meta = tokio::task::spawn_blocking({
+      let image_processor = self.image_processor.clone();
+      move || image_processor.image_from_bytes(data.as_ref())
+    })
+    .await
+    .expect("propagating panic from `image_from_bytes`")
+    .map_err(CreateImageFromArtifactError::ImageProcessingError)?;
+
+    let image_cr = ImageCreateRequest {
+      artifact: artifact_id,
+      meta:     image_meta,
+    };
+
+    let image = self
+      .image_repo
+      .create_image(image_cr)
+      .await
+      .map_err(CreateImageFromArtifactError::CreateImageError)?;
+
+    Ok(image)
+  }
+
   /// Create a [`Photo`].
   #[instrument(skip(self))]
-  pub async fn create_photo(
+  async fn create_photo(
     &self,
     input: PhotoCreateRequest,
   ) -> Result<Photo, CreateModelError> {
@@ -112,54 +177,51 @@ impl PrimeDomainService {
 
   /// Create a [`PhotoGroup`] from a set of [`Artifact`]s.
   #[instrument(skip(self))]
-  pub async fn create_photo_group_from_artifacts(
+  pub async fn create_photo_group_from_images(
     &self,
-    artifact_ids: Vec<ArtifactRecordId>,
+    image_ids: Vec<ImageRecordId>,
     config: PhotoGroupConfig,
     user: UserRecordId,
-  ) -> Result<PhotoGroupRecordId, CreatePhotoGroupFromArtifactsError> {
-    let artifacts =
-      futures::future::join_all(artifact_ids.into_iter().map(|ar| {
-        tokio::spawn({
-          let pd = self.clone();
-          async move { (ar, pd.fetch_artifact(ar).await) }
-        })
-      }))
-      .await;
+  ) -> Result<PhotoGroupRecordId, CreatePhotoGroupFromImagesError> {
+    let artifacts = futures::future::join_all(image_ids.into_iter().map(|i| {
+      tokio::spawn({
+        let pd = self.clone();
+        async move { (i, pd.fetch_image(i).await) }
+      })
+    }))
+    .await;
 
     // we keep the ID with the value the whole way.
     // here we first get rid of the join errors, then the fetch errors, and then
     // we throw if the artifact doesn't exist.
-    let artifacts = artifacts
+    let images = artifacts
       .into_iter()
       .try_collect::<Vec<_>>()
       .map_err(|e| {
         tracing::error!("failed to join artifact fetching tasks: {e}");
-        CreatePhotoGroupFromArtifactsError::InternalError
+        CreatePhotoGroupFromImagesError::InternalError
       })?
       .into_iter()
       .map(|(ar, a)| a.map(|a| (ar, a)))
       .try_collect::<Vec<_>>()
-      .map_err(CreatePhotoGroupFromArtifactsError::ArtifactFetchingFailed)?
+      .map_err(CreatePhotoGroupFromImagesError::ImageFetchingFailed)?
       .into_iter()
-      .map(|(ar, a)| {
-        a.ok_or(CreatePhotoGroupFromArtifactsError::MissingArtifact(ar))
-      })
+      .map(|(ar, a)| a.ok_or(CreatePhotoGroupFromImagesError::MissingImage(ar)))
       .try_collect::<Vec<_>>()?;
 
-    let mut photos = Vec::with_capacity(artifacts.len());
-    for artifact in artifacts {
-      let photo_artifacts = PhotoArtifacts {
-        original:  artifact.id,
-        thumbnail: artifact.id,
+    let mut photos = Vec::with_capacity(images.len());
+    for image in images {
+      let photo_images = PhotoImages {
+        original:  image.id,
+        thumbnail: image.id,
       };
       let photo_create_request = PhotoCreateRequest {
-        artifacts: photo_artifacts,
+        artifacts: photo_images,
       };
       let photo = self
         .create_photo(photo_create_request)
         .await
-        .map_err(CreatePhotoGroupFromArtifactsError::PhotoCreatingFailed)?;
+        .map_err(CreatePhotoGroupFromImagesError::PhotoCreatingFailed)?;
       photos.push(photo.id);
     }
 
@@ -173,7 +235,7 @@ impl PrimeDomainService {
       .await
       .map_err(|e| {
         tracing::error!("failed to create photo group: {e}");
-        CreatePhotoGroupFromArtifactsError::InternalError
+        CreatePhotoGroupFromImagesError::InternalError
       })?;
 
     Ok(photo_group.id)
@@ -195,6 +257,15 @@ impl PrimeDomainService {
     id: ArtifactRecordId,
   ) -> Result<Option<(Belt, Option<ArtifactMimeType>)>, ReadArtifactError> {
     self.artifact_repo.read_artifact_by_id(id).await
+  }
+
+  /// Fetch a [`Image`].
+  #[instrument(skip(self))]
+  pub async fn fetch_image(
+    &self,
+    id: ImageRecordId,
+  ) -> Result<Option<Image>, FetchModelError> {
+    self.image_repo.fetch_image_by_id(id).await
   }
 
   /// Fetch a [`Photo`].

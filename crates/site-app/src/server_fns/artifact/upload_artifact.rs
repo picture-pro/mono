@@ -9,16 +9,17 @@ use axum::{
 };
 use belt::Belt;
 use futures::TryStreamExt;
-use models::{ArtifactMimeType, ArtifactRecordId};
+use models::{ArtifactMimeType, ArtifactRecordId, ImageRecordId};
+use prime_domain::CreateImageFromArtifactError;
 
 /// Uploads an artifact from the HTTP stream. Requires authentication.
 #[axum::debug_handler]
-pub async fn upload_artifact(
+pub async fn upload_artifact_as_image(
   req_headers: HeaderMap,
   State(prime_domain): State<prime_domain::PrimeDomainService>,
   auth_session: AuthSession,
   body: Body,
-) -> Result<Json<ArtifactRecordId>, String> {
+) -> Result<Json<ImageRecordId>, String> {
   let user = auth_session
     .user
     .ok_or("authentication required".to_string())?;
@@ -38,5 +39,18 @@ pub async fn upload_artifact(
     .await
     .map_err(|e| format!("failed to upload artifact: {e}"))?;
 
-  Ok(Json(artifact.id))
+  let image = prime_domain
+    .create_image_from_artifact(artifact.id)
+    .await
+    .map_err(|e| match e {
+      CreateImageFromArtifactError::MissingArtifact(record_id) => {
+        format!("missing artifact {record_id}")
+      }
+      e => {
+        tracing::error!("failed to create image from artifact: {e}");
+        "Internal Error".to_string()
+      }
+    })?;
+
+  Ok(Json(image.id))
 }

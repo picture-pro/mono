@@ -21,6 +21,9 @@ pub enum ReadArtifactError {
   /// An error that occurs when reading the data of an [`Artifact`].
   #[error("Failed to read Artifact data: {0}")]
   StorageReadError(StorageReadError),
+  /// IO error.
+  #[error("An IO error occurred: {0}")]
+  IoError(std::io::Error),
 }
 
 /// An error that occurs when creating an [`Artifact`].

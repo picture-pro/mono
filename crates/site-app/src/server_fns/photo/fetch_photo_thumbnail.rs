@@ -36,7 +36,21 @@ pub async fn fetch_photo_thumbnail(
       (StatusCode::NOT_FOUND, "Photo Not Found").into_response()
     })?;
 
-  let artifact_id = photo.artifacts.thumbnail;
+  let image_id = photo.artifacts.thumbnail;
+
+  let image = pd
+    .fetch_image(image_id)
+    .await
+    .map_err(|e| {
+      tracing::error!("failed to fetch image: {e}");
+      (StatusCode::INTERNAL_SERVER_ERROR, "Internal Error").into_response()
+    })?
+    .ok_or_else(|| {
+      tracing::warn!("image {image_id} missing (referenced by photo {id})",);
+      (StatusCode::INTERNAL_SERVER_ERROR, "Internal Error").into_response()
+    })?;
+
+  let artifact_id = image.artifact;
 
   let (artifact_data, artifact_mime_type) = pd
     .read_artifact_by_id(artifact_id)
@@ -47,8 +61,7 @@ pub async fn fetch_photo_thumbnail(
     })?
     .ok_or_else(|| {
       tracing::error!(
-        "artifact {artifact_id} missing (referenced by photo {photo_id})",
-        photo_id = photo.id
+        "artifact {artifact_id} missing (referenced by image {image_id})",
       );
       (StatusCode::INTERNAL_SERVER_ERROR, "Internal Error").into_response()
     })?;

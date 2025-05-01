@@ -1,7 +1,7 @@
 use model::{Model, RecordId};
 use serde::{Deserialize, Serialize};
 
-use crate::ArtifactRecordId;
+use crate::ImageRecordId;
 
 /// The table name for [`Photo`] records.
 pub const PHOTO_TABLE_NAME: &str = "photo";
@@ -15,16 +15,16 @@ pub struct Photo {
   /// The photo's ID.
   pub id:        PhotoRecordId,
   /// The photo's artifacts.
-  pub artifacts: PhotoArtifacts,
+  pub artifacts: PhotoImages,
 }
 
-/// The artifacts for a [`Photo`].
+/// The [`Image`](crate::Image)s for a [`Photo`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct PhotoArtifacts {
-  /// The photo's original artifact.
-  pub original:  ArtifactRecordId,
-  /// The photo's thumbnail artifact.
-  pub thumbnail: ArtifactRecordId,
+pub struct PhotoImages {
+  /// The photo's original image.
+  pub original:  ImageRecordId,
+  /// The photo's thumbnail image.
+  pub thumbnail: ImageRecordId,
 }
 
 impl Model for Photo {
@@ -42,7 +42,7 @@ impl Model for Photo {
 #[derive(Debug)]
 pub struct PhotoCreateRequest {
   /// The photo's artifacts.
-  pub artifacts: PhotoArtifacts,
+  pub artifacts: PhotoImages,
 }
 
 impl From<PhotoCreateRequest> for Photo {

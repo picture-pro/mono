@@ -5,7 +5,7 @@ use reactive_stores::Store;
 use super::super::UploadState;
 use crate::{
   UploadStateStoreFields, configuring_group::ConfiguringGroupStateStoreFields,
-  server_fns::create_photo_group_from_artifacts,
+  server_fns::create_photo_group_from_images,
   upload_finished::UploadFinishedState,
 };
 
@@ -27,13 +27,13 @@ pub(super) fn NextStepButton() -> impl IntoView {
     let artifact_ids = photos
       .read()
       .values()
-      .map(|up| up.artifact_id())
+      .map(|up| up.image_id())
       .collect::<Vec<_>>();
     let usage_rights_price = state
       .usage_rights_price()
       .get()
       .expect("`usage_rights_price` is `None`");
-    create_photo_group_from_artifacts(artifact_ids, PhotoGroupConfig {
+    create_photo_group_from_images(artifact_ids, PhotoGroupConfig {
       usage_rights_price,
     })
   });

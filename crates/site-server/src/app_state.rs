@@ -71,8 +71,11 @@ impl AppState {
       Database::new_from_kv(kv_store),
     );
 
+    let image_processor = prime_domain::imaging::ImageProcessor::new();
+
     let prime_domain_service = PrimeDomainService::new(
       artifact_repo,
+      image_processor,
       image_repo,
       photo_repo,
       photo_group_repo,

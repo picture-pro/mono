@@ -2,7 +2,7 @@ use std::fmt;
 
 use gloo::file::{Blob, File, ObjectUrl};
 use leptos::prelude::*;
-use models::{ArtifactRecordId, FileSize, Ulid};
+use models::{FileSize, ImageRecordId, Ulid};
 use reactive_stores::Store;
 use send_wrapper::SendWrapper;
 
@@ -38,7 +38,7 @@ impl Photo {
   pub(super) fn upload_status(&self) -> Signal<PhotoUploadStatus> {
     self.action_state.status()
   }
-  pub(super) fn artifact_id(&self) -> Signal<Option<ArtifactRecordId>> {
+  pub(super) fn image_id(&self) -> Signal<Option<ImageRecordId>> {
     match self.action_state {
       PhotoActionState::Started(action) => {
         let value = action.value();
@@ -62,7 +62,7 @@ impl fmt::Debug for Photo {
 
 #[derive(Clone)]
 pub enum PhotoActionState {
-  Started(Action<SendWrapper<Blob>, Result<ArtifactRecordId, String>>),
+  Started(Action<SendWrapper<Blob>, Result<ImageRecordId, String>>),
   Oversized(FileSize),
 }
 
@@ -115,19 +115,19 @@ pub(super) enum PhotoUploadStatus {
 
 async fn upload_action_fn(
   blob: SendWrapper<Blob>,
-) -> Result<ArtifactRecordId, String> {
+) -> Result<ImageRecordId, String> {
   use gloo::net::http::*;
 
-  let request = Request::post("/api/upload_artifact")
+  let request = Request::post("/api/upload_artifact_as_image")
     .body(blob.take())
-    .expect("failed to set blob as body of upload_artifact request");
+    .expect("failed to set blob as body of upload_artifact_as_image request");
 
   let response = request
     .send()
     .await
     .map_err(|e| format!("failed to send upload_artifact request: {e}"))?;
 
-  let value: ArtifactRecordId = response.json().await.map_err(|e| {
+  let value: ImageRecordId = response.json().await.map_err(|e| {
     format!("failed to deserialize upload_artifact response: {e}")
   })?;
 

@@ -4,6 +4,7 @@ name = "prime-domain"
 version = "0.1.0"
 
 [dependencies]
+imaging = { path = "../imaging" }
 models = { path = "../models" }
 qr = { path = "../qr" }
 repos = { path = "../repos" }

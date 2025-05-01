@@ -1,16 +1,16 @@
 use std::fmt;
 
 use gloo::file::{Blob, ObjectUrl};
-use models::{ArtifactRecordId, Ulid};
+use models::{ImageRecordId, Ulid};
 use send_wrapper::SendWrapper;
 
 use super::super::photo::{Photo, PhotoUploadStatus};
 
 pub struct UploadedPhoto {
-  id:          Ulid,
-  blob:        SendWrapper<Blob>,
-  url:         SendWrapper<ObjectUrl>,
-  artifact_id: ArtifactRecordId,
+  id:       Ulid,
+  blob:     SendWrapper<Blob>,
+  url:      SendWrapper<ObjectUrl>,
+  image_id: ImageRecordId,
 }
 
 impl fmt::Debug for UploadedPhoto {
@@ -19,7 +19,7 @@ impl fmt::Debug for UploadedPhoto {
       .field("id", &self.id)
       .field("blob", &self.blob)
       .field("url", &self.url.to_string())
-      .field("artifact_id", &self.artifact_id)
+      .field("artifact_id", &self.image_id)
       .finish()
   }
 }
@@ -29,19 +29,19 @@ impl UploadedPhoto {
     id: Ulid,
     blob: SendWrapper<Blob>,
     url: SendWrapper<ObjectUrl>,
-    artifact_id: ArtifactRecordId,
+    image_id: ImageRecordId,
   ) -> Self {
     Self {
       id,
       blob,
       url,
-      artifact_id,
+      image_id,
     }
   }
 
   pub fn id(&self) -> Ulid { self.id }
   pub fn url(&self) -> ObjectUrl { self.url.clone().take() }
-  pub fn artifact_id(&self) -> ArtifactRecordId { self.artifact_id }
+  pub fn image_id(&self) -> ImageRecordId { self.image_id }
 
   pub fn from_photo(photo: &Photo) -> Option<Self> {
     match photo.upload_status()() {
@@ -49,9 +49,8 @@ impl UploadedPhoto {
         photo.id(),
         SendWrapper::new(photo.blob()),
         SendWrapper::new(photo.url()),
-        photo.artifact_id()().expect(
-          "photo upload status inconsistent; unable to find artifact_id",
-        ),
+        photo.image_id()()
+          .expect("photo upload status inconsistent; unable to find image_id"),
       )),
       _ => None,
     }

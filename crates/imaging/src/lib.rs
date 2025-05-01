@@ -2,12 +2,12 @@
 
 use std::io::Cursor;
 
-use bytes::Bytes;
 use image::{ImageError, ImageFormat, imageops::FilterType};
 use models::{ImageMetadata, ImageTinyPreview, MAX_TINY_PREVIEW_DIMENSION};
 use thiserror::Error;
 
 /// Image processor.
+#[derive(Clone, Debug)]
 pub struct ImageProcessor {}
 
 /// Errors for creating [`ImageMetadata`].
@@ -25,9 +25,14 @@ pub enum ImageCreateError {
 }
 
 impl ImageProcessor {
+  /// Creates a new [`ImageProcessor`].
+  #[expect(clippy::new_without_default)]
+  pub fn new() -> Self { ImageProcessor {} }
+
   /// Creates [`ImageMetadata`] from input bytes.
   pub fn image_from_bytes(
-    data: Bytes,
+    &self,
+    data: &[u8],
   ) -> Result<ImageMetadata, ImageCreateError> {
     // open an image reader
     let mut reader = image::ImageReader::new(Cursor::new(data))
