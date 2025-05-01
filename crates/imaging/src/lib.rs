@@ -4,12 +4,8 @@ use std::io::Cursor;
 
 use bytes::Bytes;
 use image::{ImageError, ImageFormat, imageops::FilterType};
-use models::ImageTinyPreview;
+use models::{ImageTinyPreview, MAX_TINY_PREVIEW_DIMENSION};
 use thiserror::Error;
-
-/// The maximum side length of an [`Image`](models::Image)'s
-/// [`ImageTinyPreview`].
-pub const MAX_TINY_PREVIEW_DIMENSION: u32 = 200;
 
 /// Image processor.
 pub struct ImageProcessor {}

@@ -24,6 +24,9 @@ pub struct Image {
   pub tiny_preview: ImageTinyPreview,
 }
 
+/// The maximum side length of an [`Image`]'s [`ImageTinyPreview`].
+pub const MAX_TINY_PREVIEW_DIMENSION: u32 = 200;
+
 /// A tiny preview of an [`Image`].
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ImageTinyPreview {
