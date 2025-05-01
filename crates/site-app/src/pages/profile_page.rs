@@ -1,12 +1,9 @@
-use base64::Engine;
-use base_components::{
-  ImageStyle, Prose, Section, SmallImageWithFallback, Title,
-};
+use base_components::{Prose, Section, Title};
 use leptos::prelude::*;
-use models::{Image, PhotoGroup, PhotoRecordId};
+use models::PhotoGroup;
 
-use crate::server_fns::{
-  fetch_photo_groups_for_user, fetch_thumbnail_image_for_photo,
+use crate::{
+  components::PhotoPreview, server_fns::fetch_photo_groups_for_user,
 };
 
 #[component]
@@ -32,45 +29,10 @@ pub fn PhotoGroupPreview(pg: PhotoGroup) -> impl IntoView {
         key=move |p| *p
         children=move |p| view! {
           <PhotoPreview id=p />
-          // <SmallImage url=format!("/api/photo_thumbnail/{p}") />
         }
       />
       </div>
     </div>
-  }
-}
-
-#[component]
-pub fn PhotoPreview(id: PhotoRecordId) -> impl IntoView {
-  let resource = Resource::new(move || id, fetch_thumbnail_image_for_photo);
-
-  let render_fn = move |i: Image| {
-    let url = format!("/api/photo_thumbnail/{id}");
-    let fallback_data = format!(
-      "data:image/avif;charset=utf-8;base64,{}",
-      base64::prelude::BASE64_STANDARD.encode(i.meta.tiny_preview.data)
-    );
-    // let aspect_ratio = i.meta.width as f32 / i.meta.height as f32;
-    view! {
-      <SmallImageWithFallback
-        url=url fallback_data=fallback_data
-        style=ImageStyle::Border
-        // aspect_ratio=aspect_ratio
-      />
-    }
-  };
-
-  move || {
-    Suspend::new(async move {
-      match resource.await {
-        Ok(Some(i)) => render_fn(i).into_any(),
-        Ok(None) => view! { "image not found" }.into_any(),
-        Err(e) => {
-          let e = e.to_string();
-          view! { "failed to fetch image: " {e} }.into_any()
-        }
-      }
-    })
   }
 }
 

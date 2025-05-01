@@ -1,11 +1,13 @@
 use std::str::FromStr;
 
-use base_components::{PhotoGroupQrCode, Section, SmallImage, Title};
+use base_components::{PhotoGroupQrCode, Section, Title};
 use leptos::{either::Either, prelude::*};
 use leptos_router::hooks::use_params_map;
 use models::{PhotoGroup, PhotoGroupRecordId};
 
-use crate::{pages::NotFoundPage, server_fns::fetch_photo_group};
+use crate::{
+  components::PhotoPreview, pages::NotFoundPage, server_fns::fetch_photo_group,
+};
 
 fn extract_photo_group_id() -> Signal<Option<PhotoGroupRecordId>> {
   let params = use_params_map();
@@ -74,7 +76,7 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
           each=move || pg.photos.clone()
           key=move |p| *p
           children=move |p| view! {
-            <SmallImage url=format!("/api/photo_thumbnail/{p}") />
+            <PhotoPreview id=p />
           }
         />
       </div>
