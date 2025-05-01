@@ -1,8 +1,11 @@
+#![allow(missing_docs)]
+
 use const_format::formatcp;
 use leptos::prelude::*;
+use serde::{Deserialize, Serialize};
 
 /// The style of the image.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ImageStyle {
   /// No style.
   None,
@@ -30,7 +33,7 @@ pub fn SmallImage(
   extra_class: MaybeProp<String>,
 ) -> impl IntoView {
   const BASE_CLASS: &str = "h-40 sm:h-48 max-w-80 sm:max-w-96 rounded-lg \
-                            object-cover object-center transition rounded-lg";
+                            object-cover object-center transition";
   const BORDER_BASE_CLASS: &str = formatcp!("{BASE_CLASS} {BORDER_ADD_CLASS}");
   const BORDER_HOVER_BASE_CLASS: &str =
     formatcp!("{BORDER_BASE_CLASS} {BORDER_HOVER_ADD_CLASS}");
@@ -46,5 +49,40 @@ pub fn SmallImage(
 
   view! {
     <img src=url class=class />
+  }
+}
+
+#[island]
+pub fn SmallImageWithFallback(
+  /// The image's URL.
+  #[prop(into)]
+  url: String,
+  /// The image's fallback data.
+  fallback_data: String,
+  /// The image's style.
+  #[prop(into)]
+  style: ImageStyle,
+  /// Extra classes for the image.
+  #[prop(into, optional)]
+  extra_class: Option<String>,
+) -> impl IntoView {
+  let url = Signal::stored(url);
+  let fallback_data = Signal::stored(fallback_data);
+
+  let loaded = RwSignal::new(false);
+
+  let src = Signal::derive(move || match loaded.get() {
+    true => url.get(),
+    false => fallback_data.get(),
+  });
+
+  let onload_handler = move |_| {
+    leptos::logging::log!("hit onload handler");
+    loaded.set(true);
+  };
+
+  view! {
+    <SmallImage url=src style=style extra_class=extra_class />
+    <img class="hidden" src=url on:load=onload_handler />
   }
 }

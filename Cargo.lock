@@ -359,6 +359,7 @@ dependencies = [
  "const_format",
  "leptos",
  "models",
+ "serde",
  "web-sys",
 ]
 
@@ -3664,6 +3665,7 @@ dependencies = [
  "auth-domain",
  "axum",
  "base-components",
+ "base64",
  "belt",
  "either",
  "futures",

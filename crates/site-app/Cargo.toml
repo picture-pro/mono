@@ -20,6 +20,7 @@ models = { path = "../models" }
 prime-domain = { path = "../prime-domain", optional = true }
 
 axum = { workspace = true, optional = true }
+base64.workspace = true
 either = "1.13.0"
 futures.workspace = true
 serde.workspace = true
