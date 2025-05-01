@@ -12,9 +12,12 @@ pub struct ImageProcessor {}
 
 /// The metadata of an [`Image`](models::Image).
 pub struct ImageMetaData {
-  width:        u32,
-  height:       u32,
-  tiny_preview: ImageTinyPreview,
+  /// The width of the image.
+  pub width:        u32,
+  /// The height of the image.
+  pub height:       u32,
+  /// A tiny preview of the image.
+  pub tiny_preview: ImageTinyPreview,
 }
 
 /// Errors for creating [`ImageMetadata`].
