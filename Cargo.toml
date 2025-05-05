@@ -16,19 +16,17 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # errors
 # miette = { version = "7", default-features = false, features = [ "derive" ] }
-miette = { git = "https://github.com/zkat/miette", rev = "93d3bd118a072c35aa761f0ec74317166ec08113", default-features = false, features = [
-  "derive",
-] }
+miette = { git = "https://github.com/zkat/miette", default-features = false, features = ["derive"] }
 thiserror = "2"
 
-# inherited from rambit
-belt = { git = "https://github.com/rambit-systems/rambit" }
-db = { git = "https://github.com/rambit-systems/rambit" }
-dvf = { git = "https://github.com/rambit-systems/rambit" }
-hex = { git = "https://github.com/rambit-systems/rambit" }
-kv = { git = "https://github.com/rambit-systems/rambit", features = ["redb"] }
-model = { git = "https://github.com/rambit-systems/rambit" }
-storage = { git = "https://github.com/rambit-systems/rambit" }
+# inherited from app-core
+belt = { git = "https://github.com/johnbchron/app-core" }
+db = { git = "https://github.com/johnbchron/app-core" }
+dvf = { git = "https://github.com/johnbchron/app-core" }
+hex = { git = "https://github.com/johnbchron/app-core" }
+kv = { git = "https://github.com/johnbchron/app-core", features = ["redb"] }
+model = { git = "https://github.com/johnbchron/app-core" }
+storage = { git = "https://github.com/johnbchron/app-core" }
 
 # async
 async-trait = "0.1"
