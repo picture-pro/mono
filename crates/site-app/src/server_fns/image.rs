@@ -3,7 +3,7 @@ use models::{
   Image, ImageRecordId, PhotoGroup, PhotoGroupRecordId, PhotoRecordId,
 };
 
-/// Fetches the thumbnail [`Image`] of a given [`Photo`].
+/// Fetches the thumbnail [`Image`] of a given [`Photo`](models::Photo).
 #[server]
 pub async fn fetch_thumbnail_image_for_photo(
   /// The ID of the [`Photo`](models::Photo) to fetch.

@@ -49,7 +49,7 @@ impl health::HealthReporter for PrimeDomainService {
 }
 
 /// The possible errors of
-/// [`PrimeDomainService::create_photo_group_from_artifacts`].
+/// [`PrimeDomainService::create_photo_group_from_images()`].
 #[derive(Debug, thiserror::Error)]
 pub enum CreatePhotoGroupFromImagesError {
   /// Failed to fetch an image.
@@ -66,7 +66,7 @@ pub enum CreatePhotoGroupFromImagesError {
   InternalError,
 }
 
-/// The possible errors of [`PrimeDomainService::create_image_from_artifact`].
+/// The possible errors of [`PrimeDomainService::create_image_from_artifact()`].
 #[derive(Debug, thiserror::Error)]
 pub enum CreateImageFromArtifactError {
   /// The artifact didn't exist.
