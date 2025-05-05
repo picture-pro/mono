@@ -78,7 +78,7 @@ fn PhotoPreview(id: Ulid) -> impl IntoView {
       view! {
         <div class="flex flex-col justify-center items-center group">
           <div class="relative">
-            <SmallImage url=url style=ImageStyle::BorderHover />
+            <SmallImage style={ImageStyle::BorderHover} {..} src=url />
             { status_overlay_element }
             <DeleteButtonOverlay {..} on:click=delete_handler />
           </div>

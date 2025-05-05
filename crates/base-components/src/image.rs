@@ -23,9 +23,6 @@ const BORDER_HOVER_ADD_CLASS: &str =
 
 #[component]
 pub fn SmallImage(
-  /// The image's URL.
-  #[prop(into)]
-  url: Signal<String>,
   /// The image's style.
   #[prop(into, default = ImageStyle::Border.into())]
   style: Signal<ImageStyle>,
@@ -49,7 +46,7 @@ pub fn SmallImage(
   });
 
   view! {
-    <img src=url class=class />
+    <img class=class />
   }
 }
 
@@ -98,7 +95,7 @@ pub fn SmallImageWithFallback(
   );
 
   view! {
-    <SmallImage url=src style=style extra_class=extra_class />
-    <img class="hidden" src=url on:load=onload_handler node_ref=image_ref />
+    <SmallImage style=style extra_class={extra_class} {..} srcset=src />
+    <img class="hidden" srcset=url on:load=onload_handler node_ref=image_ref />
   }
 }

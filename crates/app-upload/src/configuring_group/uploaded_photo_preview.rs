@@ -47,7 +47,7 @@ fn UploadedPhotoPreview(id: Ulid) -> impl IntoView {
 
   let image_fn = move |url| {
     view! {
-      <SmallImage url=url />
+      <SmallImage {..} src=url />
     }
   };
 
