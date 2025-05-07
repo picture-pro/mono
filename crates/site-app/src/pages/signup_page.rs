@@ -140,12 +140,15 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
   let action_succeeded = move || matches!(action_value.get(), Some(Ok(_)));
   let action_value_view = move || {
     action_value.get().map(|v| match v {
-      Ok(id) => leptos::either::Either::Left(view! {
+      Ok(id) => view! {
         <p class="text-success-11 dark:text-successdark-11">"User created with id: " {id.to_string()}</p>
-      }),
-      Err(e) => leptos::either::Either::Right(view! {
+      }.into_any(),
+      Err(ServerFnError::ServerError(desc)) if desc == "Email is already in use" => view! {
+        <p class="text-danger-11 dark:text-dangerdark-11">"Email is already in use. Try logging in."</p>
+      }.into_any(),
+      Err(e) => view! {
         <p class="text-danger-11 dark:text-dangerdark-11">{ e.to_string() }</p>
-      }),
+      }.into_any(),
     })
   };
 
