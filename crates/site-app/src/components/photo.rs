@@ -23,7 +23,7 @@ pub fn PhotoPreview(id: PhotoRecordId) -> impl IntoView {
     }
   };
 
-  move || {
+  let suspended_fn = move || {
     Suspend::new(async move {
       match resource.await {
         Ok(Some(i)) => render_fn(i).into_any(),
@@ -34,5 +34,11 @@ pub fn PhotoPreview(id: PhotoRecordId) -> impl IntoView {
         }
       }
     })
+  };
+
+  view! {
+    <Suspense fallback=move || view! { "Loading..." }>
+      { suspended_fn }
+    </Suspense>
   }
 }
