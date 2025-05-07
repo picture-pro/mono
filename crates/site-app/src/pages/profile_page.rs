@@ -46,11 +46,7 @@ pub fn ProfilePhotoGroupPreview() -> impl IntoView {
       match photo_groups.await {
         Ok(pgs) => view! {
           <div class="flex flex-col gap-4">
-            <For
-              each=move || pgs.clone()
-              key=move |pg| pg.id
-              children=move |pg| view! { <PhotoGroupPreview pg=pg /> }
-            />
+            { pgs.into_iter().map(|pg| view! { <PhotoGroupPreview pg=pg /> }).collect_view() }
           </div>
         }
         .into_any(),

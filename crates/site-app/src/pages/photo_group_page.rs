@@ -72,13 +72,7 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
   view! {
     <div class="flex flex-col-reverse sm:flex-row gap-8 sm:items-start">
       <div class="flex-1 flex flex-row flex-wrap gap-4">
-        <For
-          each=move || pg.photos.clone()
-          key=move |p| *p
-          children=move |p| view! {
-            <PhotoPreview id=p />
-          }
-        />
+        { pg.photos.into_iter().map(|p| view! { <PhotoPreview id=p /> }).collect_view() }
       </div>
 
       // <div class="my-4 w-[1px] border-l-2 border-dashed border-base-8 dark:border-basedark-8" />
