@@ -24,13 +24,13 @@ pub fn PhotoGroupPreview(pg: PhotoGroup) -> impl IntoView {
         underline=LinkUnderline::Always attr:href=url
       >{ price }</Link>
       <div class="flex flex-row flex-wrap gap-4">
-      <For
-        each=move || pg.photos.clone()
-        key=move |p| *p
-        children=move |p| view! {
-          <PhotoPreview id=p />
-        }
-      />
+        <For
+          each=move || pg.photos.clone()
+          key=move |p| *p
+          children=move |p| view! {
+            <PhotoPreview id=p />
+          }
+        />
       </div>
     </div>
   }
