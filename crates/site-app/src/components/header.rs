@@ -1,4 +1,5 @@
 use leptos::{either::Either, prelude::*};
+use leptos_router::location::Url;
 use lsc::{button::*, link::*};
 use models::{AuthStatus, PublicUser};
 
@@ -44,16 +45,24 @@ fn HeaderUserArea() -> impl IntoView {
 
 #[component]
 fn LoggedOutUserAuthActions() -> impl IntoView {
+  let return_url = leptos_router::hooks::use_url();
+  let escaped_return_url =
+    Signal::derive(move || Url::escape(&url_to_full_path(&return_url())));
+  let signup_url =
+    Signal::derive(move || format!("/sign-up?next={}", escaped_return_url()));
+  let login_url =
+    Signal::derive(move || format!("/log-in?next={}", escaped_return_url()));
+
   view! {
     <Button
       element_type=ButtonElementType::Link color={ButtonColor::Primary}
-      {..} href="/sign-up"
+      {..} href=signup_url
     >
       "Sign Up"
     </Button>
     <Button
       element_type=ButtonElementType::Link color={ButtonColor::Base}
-      {..} href="/log-in"
+      {..} href=login_url
     >
       "Log In"
     </Button>
@@ -76,4 +85,20 @@ fn LoggedInUserAuthActions(user: PublicUser) -> impl IntoView {
       "Log Out"
     </Button>
   }
+}
+
+// taken from https://github.com/leptos-rs/leptos/blob/2ee4444bb44310e73e908b98ccd2b353f534da01/router/src/location/mod.rs#L87-L100
+fn url_to_full_path(url: &Url) -> String {
+  let mut path = url.path().to_string();
+  if !url.search().is_empty() {
+    path.push('?');
+    path.push_str(url.search());
+  }
+  if !url.hash().is_empty() {
+    if !url.hash().starts_with('#') {
+      path.push('#');
+    }
+    path.push_str(url.hash());
+  }
+  path
 }

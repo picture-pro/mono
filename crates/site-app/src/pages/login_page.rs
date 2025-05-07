@@ -1,5 +1,8 @@
 use base_components::{
-  utils::{inputs::touched_input_bindings, navigation::navigate_to},
+  utils::{
+    inputs::touched_input_bindings,
+    navigation::{navigate_to, sanitize_auth_next_url},
+  },
   FloatingBoxSection, Prose,
 };
 use leptos::prelude::*;
@@ -17,10 +20,7 @@ pub fn LoginPage() -> impl IntoView {
 
 #[island]
 pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
-  let next_url = match next_url {
-    Some(next_url) if next_url.starts_with("/") => next_url,
-    _ => "/profile".to_string(),
-  };
+  let next_url = sanitize_auth_next_url(next_url);
 
   let email = RwSignal::new(None::<String>);
 

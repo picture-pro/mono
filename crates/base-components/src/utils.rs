@@ -28,6 +28,16 @@ pub mod navigation {
       logging::error!("failed to reload: {:?}", e);
     }
   }
+
+  /// Sanitizes the `next_url` used for redirecting from the auth pages.
+  pub fn sanitize_auth_next_url(next_url: Option<String>) -> String {
+    match next_url {
+      Some(next_url) if next_url.starts_with("/") && next_url != "/" => {
+        next_url
+      }
+      _ => "/profile".to_string(),
+    }
+  }
 }
 
 pub mod inputs {

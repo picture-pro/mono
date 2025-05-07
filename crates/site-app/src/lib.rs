@@ -51,9 +51,9 @@ pub fn App() -> impl IntoView {
   view! {
     <Title text="PicturePro"/>
 
-    <Header/>
-    <PageContainer>
-      <Router>
+    <Router>
+      <Header/>
+      <PageContainer>
         <Routes fallback=NotFoundPage>
           <Route path=path!("/") view=HomePage />
           <Route path=path!("/sign-up") view=SignupPage />
@@ -66,8 +66,8 @@ pub fn App() -> impl IntoView {
           <Route path=path!("/component-testing/button") view=lsc::button::ButtonMatrixTestPage />
           <Route path=path!("/component-testing/field") view=lsc::field::FieldMatrixTestPage />
         </Routes>
-      </Router>
-    </PageContainer>
+      </PageContainer>
+    </Router>
   }
 }
 
