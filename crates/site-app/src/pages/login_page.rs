@@ -20,6 +20,15 @@ pub fn LoginPage() -> impl IntoView {
 
 #[island]
 pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
+  use lsc::link::*;
+
+  let signup_url = format!(
+    "/sign-up{}",
+    next_url
+      .clone()
+      .map(|nu| format!("?next={nu}"))
+      .unwrap_or_default()
+  );
   let next_url = sanitize_auth_next_url(next_url);
 
   let email = RwSignal::new(None::<String>);
@@ -57,7 +66,11 @@ pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
       </p>
 
       <Prose>
-        "This is some placeholder text. More placeholder text will hold the place of text whose place needs to be held."
+        "Don't have an account? "
+        <Link size=LinkSize::Medium underline={LinkUnderline::Always} {..} href=signup_url>
+          "Sign up"
+        </Link>
+        "."
       </Prose>
 
       <form class="mt-2 mb-4 flex flex-col gap-4">

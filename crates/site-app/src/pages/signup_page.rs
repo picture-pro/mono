@@ -98,6 +98,15 @@ pub fn SignupPage() -> impl IntoView {
 
 #[island]
 pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
+  use lsc::link::*;
+
+  let login_url = format!(
+    "/log-in{}",
+    next_url
+      .clone()
+      .map(|nu| format!("?next={nu}"))
+      .unwrap_or_default()
+  );
   let next_url = sanitize_auth_next_url(next_url);
 
   // the actual input values
@@ -240,8 +249,11 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
         "Create your account"
       </p>
       <Prose>
-        "Spend less time distributing your photos and more time capturing memories. Sign up for \
-        PicturePro today."
+        "Already have an accout? "
+        <Link size=LinkSize::Medium underline={LinkUnderline::Always} {..} href=login_url>
+          "Log in"
+        </Link>
+        "."
       </Prose>
 
       <form class="mt-2 mb-4 flex flex-col gap-4">
