@@ -5,8 +5,23 @@ use base_components::{
 use leptos::prelude::*;
 use lsc::{button::*, field::*};
 
-#[island]
+#[component]
 pub fn LoginPage() -> impl IntoView {
+  let query = leptos_router::hooks::use_query_map();
+  let next_url = Signal::derive(move || query().get("next"));
+
+  view! {
+    <LoginPageIsland next_url={next_url.get_untracked()} />
+  }
+}
+
+#[island]
+pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
+  let next_url = match next_url {
+    Some(next_url) if next_url.starts_with("/") => next_url,
+    _ => "/profile".to_string(),
+  };
+
   let email = RwSignal::new(None::<String>);
 
   let (read_email_callback, write_email_callback) =
@@ -31,7 +46,7 @@ pub fn LoginPage() -> impl IntoView {
 
   Effect::new(move |_| {
     if matches!(action_value.get(), Some(Ok(true))) {
-      navigate_to("/profile");
+      navigate_to(&next_url);
     }
   });
 

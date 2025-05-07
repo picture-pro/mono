@@ -83,8 +83,23 @@ fn FormField(
   }
 }
 
-#[island]
+#[component]
 pub fn SignupPage() -> impl IntoView {
+  let query = leptos_router::hooks::use_query_map();
+  let next_url = Signal::derive(move || query().get("next"));
+
+  view! {
+    <SignupPageIsland next_url={next_url.get_untracked()} />
+  }
+}
+
+#[island]
+pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
+  let next_url = match next_url {
+    Some(next_url) if next_url.starts_with("/") => next_url,
+    _ => "/profile".to_string(),
+  };
+
   // the actual input values
   // we store them as Option<String> so that we don't run validation on
   //   untouched inputs
@@ -127,7 +142,7 @@ pub fn SignupPage() -> impl IntoView {
 
   Effect::new(move |_| {
     if action_succeeded() {
-      navigate_to("/profile");
+      navigate_to(&next_url);
     }
   });
 
