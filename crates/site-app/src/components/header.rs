@@ -1,3 +1,4 @@
+use base_components::utils::navigation::url_to_full_path;
 use leptos::{either::Either, prelude::*};
 use leptos_router::location::Url;
 use lsc::{button::*, link::*};
@@ -45,13 +46,26 @@ fn HeaderUserArea() -> impl IntoView {
 
 #[component]
 fn LoggedOutUserAuthActions() -> impl IntoView {
+  let query = leptos_router::hooks::use_query_map();
+  // if we already have a `next` url
+  let existing_next_url = Signal::derive(move || query().get("next"));
+
+  // if we need a `next_url`
   let return_url = leptos_router::hooks::use_url();
   let escaped_return_url =
     Signal::derive(move || Url::escape(&url_to_full_path(&return_url())));
+
+  // use the existing `next` url if it exists, rather than setting it to the
+  // current page
+  let redirect_url = Signal::derive(move || match existing_next_url() {
+    Some(existing_next_url) => existing_next_url,
+    _ => escaped_return_url(),
+  });
+
   let signup_url =
-    Signal::derive(move || format!("/sign-up?next={}", escaped_return_url()));
+    Signal::derive(move || format!("/sign-up?next={}", redirect_url()));
   let login_url =
-    Signal::derive(move || format!("/log-in?next={}", escaped_return_url()));
+    Signal::derive(move || format!("/log-in?next={}", redirect_url()));
 
   view! {
     <Button
@@ -85,20 +99,4 @@ fn LoggedInUserAuthActions(user: PublicUser) -> impl IntoView {
       "Log Out"
     </Button>
   }
-}
-
-// taken from https://github.com/leptos-rs/leptos/blob/2ee4444bb44310e73e908b98ccd2b353f534da01/router/src/location/mod.rs#L87-L100
-fn url_to_full_path(url: &Url) -> String {
-  let mut path = url.path().to_string();
-  if !url.search().is_empty() {
-    path.push('?');
-    path.push_str(url.search());
-  }
-  if !url.hash().is_empty() {
-    if !url.hash().starts_with('#') {
-      path.push('#');
-    }
-    path.push_str(url.hash());
-  }
-  path
 }

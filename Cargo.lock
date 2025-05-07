@@ -358,6 +358,7 @@ version = "0.1.0"
 dependencies = [
  "const_format",
  "leptos",
+ "leptos_router",
  "models",
  "serde",
  "web-sys",

@@ -1,9 +1,30 @@
 //! Utils and functions.
 
 pub mod navigation {
+  #![allow(missing_docs)]
+
   //! Navigation utils.
 
-  use leptos::logging;
+  use leptos::{logging, prelude::*};
+  use leptos_router::location::Url;
+
+  // taken from https://github.com/leptos-rs/leptos/blob/2ee4444bb44310e73e908b98ccd2b353f534da01/router/src/location/mod.rs#L87-L100
+  /// Constructs the "full path" (relative to origin, starting from "/") from a
+  /// [`Url`].
+  pub fn url_to_full_path(url: &Url) -> String {
+    let mut path = url.path().to_string();
+    if !url.search().is_empty() {
+      path.push('?');
+      path.push_str(url.search());
+    }
+    if !url.hash().is_empty() {
+      if !url.hash().starts_with('#') {
+        path.push('#');
+      }
+      path.push_str(url.hash());
+    }
+    path
+  }
 
   /// Navigate to a new page.
   pub fn navigate_to(path: &str) {
@@ -37,6 +58,17 @@ pub mod navigation {
       }
       _ => "/profile".to_string(),
     }
+  }
+
+  #[island]
+  /// Redirects to a given path when client logic loads.
+  pub fn UnconditionalClientRedirect(
+    /// The path to redirect to.
+    path: String,
+  ) -> impl IntoView {
+    Effect::new(move || {
+      navigate_to(&path);
+    });
   }
 }
 
