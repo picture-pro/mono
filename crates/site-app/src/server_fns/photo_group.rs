@@ -17,11 +17,13 @@ pub async fn fetch_photo_groups_for_user(
 
   let pd: PrimeDomainService = expect_context();
 
-  let photo_groups =
+  let mut photo_groups =
     pd.fetch_photo_groups_by_user(user.id).await.map_err(|e| {
       tracing::error!("failed to fetch photo groups: {e}");
       ServerFnError::new("Internal Error")
     })?;
+  photo_groups.sort_unstable_by_key(|pg| pg.id);
+  photo_groups.reverse();
 
   Ok(photo_groups)
 }
