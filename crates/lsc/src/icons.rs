@@ -20,9 +20,14 @@ radix_icon!(
   ExclamationTriangleIcon,
   "crates/lsc/src/radix-icons/exclamation-triangle.svg"
 );
+radix_icon!(LayersIcon, "crates/lsc/src/radix-icons/layers.svg");
 radix_icon!(
   LightningBoltIcon,
   "crates/lsc/src/radix-icons/lightning-bolt.svg"
+);
+radix_icon!(
+  MagnifyingGlassIcon,
+  "crates/lsc/src/radix-icons/magnifying-glass.svg"
 );
 radix_icon!(TrashIcon, "crates/lsc/src/radix-icons/trash.svg");
 radix_icon!(UploadIcon, "crates/lsc/src/radix-icons/upload.svg");
