@@ -82,8 +82,20 @@ fn protect<
   move || view! { <ProtectedPage> { func() } </ProtectedPage> }
 }
 
-#[island]
+#[component]
 fn PageCover() -> impl IntoView {
+  let (hide, _) = use_cookie::<bool, FromToStringCodec>("hide_loader");
+
+  move || match hide() {
+    // if the hide cookie is already set, don't render the cover
+    Some(_) => None,
+    // otherwise render the cover and let the client set the cookie
+    None => Some(view! { <PageCoverInner /> }),
+  }
+}
+
+#[island]
+fn PageCoverInner() -> impl IntoView {
   let (hide, set_hide) = use_cookie::<bool, FromToStringCodec>("hide_loader");
   let hide = Signal::derive(move || hide.get().is_some_and(|v| v));
 
