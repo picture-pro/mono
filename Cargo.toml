@@ -43,6 +43,7 @@ tower-sessions = { version = "0.14", default-features = false, features = ["axum
 # leptos
 console_error_panic_hook = "0.1"
 leptos = { version = "0.8.0-rc2", features = ["nightly", "tracing", "islands"] }
+leptos-use = { version = "0.16.0-beta" }
 leptos_axum = { version = "0.8.0-rc2", features = ["tracing"] }
 leptos_meta = { version = "0.8.0-rc2", features = ["tracing"] }
 leptos_router = { version = "0.8.0-rc2", features = ["nightly", "tracing"] }
