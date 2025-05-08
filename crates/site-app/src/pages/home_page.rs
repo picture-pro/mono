@@ -17,55 +17,65 @@ pub fn HomePage() -> impl IntoView {
     </Section>
 
     <Section>
-      <div class="grid sm:grid-cols-2 w-full gap-4">
-        <a href="/upload-photo" class="bg-ruby-3 dark:bg-rubydark-3 border border-ruby-normal text-rubya-normal flex flex-col gap-2 p-4 rounded-xl shadow-xl transition">
-          <div class="flex flex-row items-center gap-2">
-            <CameraIcon {..} class="size-5" />
-            <p class="text-lg">
-              "Single Subject"
-            </p>
-          </div>
-          <p class="text-rubya-dim max-w-prose text-sm">
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut auctor magna in lacus egestas tincidunt. Maecenas erat tellus, dapibus feugiat purus eget, tincidunt semper risus."
-          </p>
-        </a>
+      <div class="grid grid-cols-2 w-full gap-4">
+        <ColoredBox
+          href="/upload-photo"
+          extra_outer_class="bg-ruby-3 dark:bg-rubydark-3 border border-ruby-normal text-rubya-normal"
+          extra_dim_text_class="text-rubya-dim"
+          title="Single Subject"
+          icon_view={ view! { <CameraIcon {..} class="size-5" /> }.into_any() }
+        />
 
-        <div class="bg-jade-3 dark:bg-jadedark-3 border border-jade-normal text-jadea-normal flex flex-col gap-2 p-4 rounded-xl shadow-xl transition">
-          <div class="flex flex-row items-center gap-2">
-            <UploadIcon {..} class="size-5" />
-            <p class="text-lg">
-              "Upload to Marketplace"
-            </p>
-          </div>
-          <p class="text-jadea-dim max-w-prose text-sm">
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut auctor magna in lacus egestas tincidunt. Maecenas erat tellus, dapibus feugiat purus eget, tincidunt semper risus."
-          </p>
-        </div>
+        <ColoredBox
+          extra_outer_class="bg-jade-3 dark:bg-jadedark-3 border border-jade-normal text-jadea-normal"
+          extra_dim_text_class="text-jadea-dim"
+          title="Upload to Marketplace"
+          icon_view={ view! { <UploadIcon {..} class="size-5" /> }.into_any() }
+        />
 
-        <div class="bg-cyan-3 dark:bg-cyandark-3 border border-cyan-normal text-cyana-normal flex flex-col gap-2 p-4 rounded-xl shadow-xl transition">
-          <div class="flex flex-row items-center gap-2">
-            <MagnifyingGlassIcon {..} class="size-5" />
-            <p class="text-lg">
-              "Explore Marketplace"
-            </p>
-          </div>
-          <p class="text-cyana-dim max-w-prose text-sm">
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut auctor magna in lacus egestas tincidunt. Maecenas erat tellus, dapibus feugiat purus eget, tincidunt semper risus."
-          </p>
-        </div>
+        <ColoredBox
+          extra_outer_class="bg-cyan-3 dark:bg-cyandark-3 border border-cyan-normal text-cyana-normal"
+          extra_dim_text_class="text-cyana-dim"
+          title="Explore Marketplace"
+          icon_view={ view! { <MagnifyingGlassIcon {..} class="size-5" /> }.into_any() }
+        />
 
-        <div class="bg-orange-3 dark:bg-orangedark-3 border border-orange-normal text-orangea-normal flex flex-col gap-2 p-4 rounded-xl shadow-xl transition">
-          <div class="flex flex-row items-center gap-2">
-            <LayersIcon {..} class="size-5" />
-            <p class="text-lg">
-              "Event"
-            </p>
-          </div>
-          <p class="text-orangea-dim max-w-prose text-sm">
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut auctor magna in lacus egestas tincidunt. Maecenas erat tellus, dapibus feugiat purus eget, tincidunt semper risus."
-          </p>
-        </div>
+        <ColoredBox
+          extra_outer_class="bg-orange-3 dark:bg-orangedark-3 border border-orange-normal text-orangea-normal"
+          extra_dim_text_class="text-orangea-dim"
+          title="Event"
+          icon_view={ view! { <LayersIcon {..} class="size-5" /> }.into_any() }
+        />
       </div>
     </Section>
+  }
+}
+
+#[component]
+fn ColoredBox(
+  #[prop(optional)] href: Option<&'static str>,
+  extra_outer_class: &'static str,
+  extra_dim_text_class: &'static str,
+  title: &'static str,
+  icon_view: AnyView,
+) -> impl IntoView {
+  let outer_class = format!(
+    "flex flex-col gap-2 p-4 rounded-xl shadow-xl transition \
+     {extra_outer_class}"
+  );
+  let dim_text_class = format!("max-w-prose text-sm {extra_dim_text_class}");
+
+  view! {
+    <a href=href class=outer_class>
+      <div class="flex flex-row items-center gap-2">
+        { icon_view }
+        <p class="sm:text-lg">
+          { title }
+        </p>
+      </div>
+      <p class=dim_text_class>
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut auctor magna in lacus egestas tincidunt. Maecenas erat tellus, dapibus feugiat purus eget, tincidunt semper risus."
+      </p>
+    </a>
   }
 }
