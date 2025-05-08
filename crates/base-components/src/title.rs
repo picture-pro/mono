@@ -7,7 +7,8 @@ pub fn Title(
   #[prop(into, optional)]
   class: MaybeProp<String>,
 ) -> impl IntoView {
-  const BASE_CLASS: &str = "text-6xl font-serif font-light tracking-tight mb-4";
+  const BASE_CLASS: &str =
+    "text-5xl sm:text-6xl font-serif font-light tracking-tight mb-4";
   let final_class = Signal::derive(move || {
     format!("{BASE_CLASS} {}", class().unwrap_or_default())
   });
