@@ -32,16 +32,16 @@ fn PageCoverInner() -> impl IntoView {
   );
 
   let class = Signal::derive(move || {
-    let mut class = "absolute inset-0 bg-base-app flex flex-col items-center \
-                     justify-center gap-4 pointer-events-none"
-      .to_string();
-    if hide() {
-      class.push_str(
+    format!(
+      "absolute inset-0 bg-base-app flex flex-col items-center justify-center \
+       gap-4 pointer-events-none {}",
+      if hide() {
         " delay-[500ms] duration-[500ms] ease-in-out opacity-0 \
-         transition-opacity",
-      );
-    }
-    class
+         transition-opacity"
+      } else {
+        ""
+      }
+    )
   });
 
   view! {
