@@ -1,3 +1,4 @@
+use base_components::Title;
 use leptos::{prelude::*, server::codee::string::FromToStringCodec};
 
 fn use_hide_loader_cookie() -> (Signal<Option<bool>>, WriteSignal<Option<bool>>)
@@ -33,8 +34,8 @@ fn PageCoverInner() -> impl IntoView {
 
   let class = Signal::derive(move || {
     format!(
-      "absolute inset-0 bg-base-app flex flex-col items-center justify-center \
-       gap-4 pointer-events-none {}",
+      "absolute inset-0 bg-primary-app flex flex-col items-center \
+       justify-center gap-8 pointer-events-none {}",
       if hide() {
         " delay-[500ms] duration-[500ms] ease-in-out opacity-0 \
          transition-opacity"
@@ -46,7 +47,12 @@ fn PageCoverInner() -> impl IntoView {
 
   view! {
     <div class=class>
-      <base_components::Title>"PicturePro"</base_components::Title>
+      <Title class="font-semibold">"PicturePro"</Title>
+      <div class="flex flex-row justify-between gap-8 text-xl text-base-dim">
+        <p class="flex-1">"Capture"</p>
+        <p class="flex-1">"Share"</p>
+        <p class="flex-1">"Profit"</p>
+      </div>
     </div>
   }
 }
