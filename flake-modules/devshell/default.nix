@@ -24,13 +24,13 @@ localFlake: { ... }: {
     };
     tikv-docker-commands = [
       ( ephemeralDockerCommand {
-        imagePath = inputs'.rambit.images.tikv;
+        imagePath = inputs'.tikv.packages.tikv-image;
         imageName = "tikv-server";
         imageVersion = "8.1.1";
         commandName = "run-tikv";
       } )
       ( ephemeralDockerCommand {
-        imagePath = inputs'.rambit.images.pd;
+        imagePath = inputs'.tikv.packages.pd-image;
         imageName = "pd-server";
         imageVersion = "8.1.1";
         commandName = "run-pd";
