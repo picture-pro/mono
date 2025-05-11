@@ -1,9 +1,13 @@
 use leptos::{prelude::*, server::codee::string::FromToStringCodec};
-use leptos_use::use_cookie;
+
+fn use_hide_loader_cookie() -> (Signal<Option<bool>>, WriteSignal<Option<bool>>)
+{
+  leptos_use::use_cookie::<bool, FromToStringCodec>("hide_loader")
+}
 
 #[component]
 pub fn PageCover() -> impl IntoView {
-  let (hide, _) = use_cookie::<bool, FromToStringCodec>("hide_loader");
+  let (hide, _) = use_hide_loader_cookie();
 
   move || match hide() {
     // if the hide cookie is already set, don't render the cover
@@ -15,7 +19,7 @@ pub fn PageCover() -> impl IntoView {
 
 #[island]
 fn PageCoverInner() -> impl IntoView {
-  let (hide, set_hide) = use_cookie::<bool, FromToStringCodec>("hide_loader");
+  let (hide, set_hide) = use_hide_loader_cookie();
   let hide = Signal::derive(move || hide.get().is_some_and(|v| v));
 
   // set hide right after render
