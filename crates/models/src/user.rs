@@ -76,6 +76,24 @@ impl From<UserCreateRequest> for User {
   }
 }
 
+/// A public view of a [`User`], able to be shown to other users.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PublicUser {
+  /// The user's ID.
+  pub id:   UserRecordId,
+  /// The user's name.
+  pub name: HumanName,
+}
+
+impl From<User> for PublicUser {
+  fn from(user: User) -> Self {
+    Self {
+      id:   user.id,
+      name: user.name,
+    }
+  }
+}
+
 /// An auth-centric view of a [`User`], able to be sent to the client.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AuthUser {
