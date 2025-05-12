@@ -80,7 +80,7 @@ localFlake: { ... }: {
           name = "container";
           command = ''
             docker load -i $(nix build .#site-server-container --print-out-paths --no-link) && \
-            docker run --rm --network host -e TIKV_URLS=$TIKV_URLS site-server:latest
+            docker run --rm --network host -e BASE_URL='http://localhost:3000' site-server:latest
           '';
           help = "Runs the ${bin-hl "site-server"} in a container.";
         }
