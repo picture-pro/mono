@@ -102,9 +102,9 @@ impl FieldStyleProps {
 
   fn size_class(&self) -> &'static str {
     match self.size {
-      Small => "text-xs indent-1.5 h-6",
-      Medium => "text-sm indent-2 h-8",
-      Large => "text-base indent-3 h-10",
+      Small => "text-xs indent-1.5 h-6 min-w-48",
+      Medium => "text-sm indent-2 h-8 min-w-48",
+      Large => "text-base indent-3 h-10 min-w-64",
     }
   }
 
