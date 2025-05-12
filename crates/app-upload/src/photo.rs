@@ -42,7 +42,7 @@ impl Photo {
     match self.action_state {
       PhotoActionState::Started(action) => {
         let value = action.value();
-        Signal::derive(move || value.get().and_then(|r| r.ok()))
+        Signal::derive(move || value.get().and_then(Result::ok))
       }
       PhotoActionState::Oversized(_) => Signal::stored(None),
     }
@@ -80,7 +80,7 @@ impl PhotoActionState {
     let blob_size = blob.size();
     if blob_size > MAX_UPLOAD_SIZE {
       return PhotoActionState::Oversized(FileSize::new(blob_size));
-    };
+    }
     let action =
       Action::new_local(move |blob| upload_action_fn(SendWrapper::clone(blob)));
     action.dispatch_local(blob.clone());

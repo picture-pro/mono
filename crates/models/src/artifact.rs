@@ -32,15 +32,19 @@ pub struct ArtifactPath(Ulid);
 
 impl ArtifactPath {
   /// Creates a new [`ArtifactPath`] from a [`Ulid`].
+  #[must_use]
   pub fn new(ulid: Ulid) -> Self { Self(ulid) }
 
   /// Creates a new random [`ArtifactPath`].
+  #[must_use]
   pub fn new_random() -> Self { Self(Ulid::new()) }
 
   /// Converts the [`ArtifactPath`] into a [`Ulid`].
+  #[must_use]
   pub fn into_inner(self) -> Ulid { self.0 }
 
   /// Converts the [`ArtifactPath`] into a [`PathBuf`].
+  #[must_use]
   pub fn to_path_buf(&self) -> PathBuf { self.0.to_string().into() }
 }
 
@@ -56,9 +60,11 @@ pub struct ArtifactMimeType(String);
 
 impl ArtifactMimeType {
   /// Creates a new [`ArtifactMimeType`].
+  #[must_use]
   pub fn new(mime_type: &str) -> Self { Self(mime_type.to_owned()) }
 
   /// Converts the [`ArtifactMimeType`] into a [`String`].
+  #[must_use]
   pub fn into_inner(self) -> String { self.0 }
 }
 

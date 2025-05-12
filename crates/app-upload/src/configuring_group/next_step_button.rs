@@ -11,6 +11,8 @@ use crate::{
 
 #[component]
 pub(super) fn NextStepButton() -> impl IntoView {
+  use lsc::{button::*, icons::*};
+
   let context: Store<UploadState> = expect_context();
   let state = context
     .configuring_group_0()
@@ -23,11 +25,11 @@ pub(super) fn NextStepButton() -> impl IntoView {
 
   let disabled_signal = Signal::derive(move || !ready_to_advance());
 
-  let action = Action::new(move |_: &()| {
+  let action = Action::new(move |(): &()| {
     let artifact_ids = photos
       .read()
       .values()
-      .map(|up| up.image_id())
+      .map(super::uploaded_photo::UploadedPhoto::image_id)
       .collect::<Vec<_>>();
     let usage_rights_price = state
       .usage_rights_price()
@@ -53,8 +55,6 @@ pub(super) fn NextStepButton() -> impl IntoView {
     },
     false,
   );
-
-  use lsc::{button::*, icons::*};
 
   view! {
     <Button size=ButtonSize::Large disabled={disabled_signal} {..} on:click=handler>

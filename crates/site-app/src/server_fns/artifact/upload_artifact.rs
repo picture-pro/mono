@@ -1,3 +1,11 @@
+#![cfg_attr(
+  debug_assertions,
+  expect(
+    clippy::items_after_statements,
+    reason = "axum::debug_handler triggers this"
+  )
+)]
+
 use std::io;
 
 use auth_domain::AuthSession;

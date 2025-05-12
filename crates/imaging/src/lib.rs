@@ -26,10 +26,15 @@ pub enum ImageCreateError {
 
 impl ImageProcessor {
   /// Creates a new [`ImageProcessor`].
+  #[must_use]
   #[expect(clippy::new_without_default)]
   pub fn new() -> Self { ImageProcessor {} }
 
   /// Creates [`ImageMetadata`] from input bytes.
+  #[allow(
+    clippy::missing_panics_doc,
+    reason = "only panic is never happens, but cannot be statically proved"
+  )]
   pub fn image_from_bytes(
     &self,
     data: &[u8],
@@ -37,7 +42,7 @@ impl ImageProcessor {
     // open an image reader
     let mut reader = image::ImageReader::new(Cursor::new(data))
       .with_guessed_format()
-      .expect("bytes io never fails");
+      .expect("cursor io never fails, see https://docs.rs/image/latest/image/struct.ImageReader.html");
 
     // determine format
     let format = reader.format().ok_or(ImageCreateError::UnknownFormat)?;

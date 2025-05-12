@@ -12,6 +12,8 @@ use crate::{
 
 #[component]
 pub(super) fn NextStepButton() -> impl IntoView {
+  use lsc::{button::*, icons::*};
+
   let context: Store<super::super::UploadState> = expect_context();
 
   let ready_to_advance = Memo::new(move |_| {
@@ -57,8 +59,6 @@ pub(super) fn NextStepButton() -> impl IntoView {
     };
     *context.write() = UploadState::ConfiguringGroup(new_state);
   };
-
-  use lsc::{button::*, icons::*};
 
   view! {
     <Button size=ButtonSize::Large disabled={disabled_signal} {..} on:click=handler>

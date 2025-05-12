@@ -65,9 +65,8 @@ struct FieldStyleProps {
   hint:    Option<FieldHint>,
 }
 
-use FieldHint::*;
-use FieldSize::*;
-use FieldVariant::*;
+#[allow(clippy::enum_glob_use)]
+use {FieldHint::*, FieldSize::*, FieldVariant::*};
 
 impl FieldStyleProps {
   fn outline_class(&self) -> &'static str {

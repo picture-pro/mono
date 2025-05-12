@@ -1,4 +1,4 @@
-//! Domain models for the PicturePro project.
+//! Domain models for the `PicturePro` project.
 
 mod artifact;
 mod image;

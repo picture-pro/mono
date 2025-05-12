@@ -1,4 +1,7 @@
-//! The photo upload flow for PicturePro.
+// not useful for component-oriented crates
+#![allow(clippy::must_use_candidate)]
+
+//! The photo upload flow for `PicturePro`.
 
 mod configuring_group;
 mod photo;
@@ -6,7 +9,7 @@ mod selecting_photos;
 mod server_fns;
 mod upload_finished;
 
-use std::{collections::HashMap, ops::Deref};
+use std::collections::HashMap;
 
 use leptos::{either::EitherOf3, prelude::*};
 use reactive_stores::Store;
@@ -40,7 +43,7 @@ fn UploadPhotoWizard() -> impl IntoView {
 
   Effect::new(move || {
     let context: Store<UploadState> = expect_context();
-    leptos::logging::log!("{:#?}", context.read().deref());
+    leptos::logging::log!("{:#?}", &*context.read());
   });
 
   let memoized_top_level_switch = Memo::new(move |_| {
@@ -56,9 +59,9 @@ fn UploadPhotoWizard() -> impl IntoView {
   });
 
   move || match memoized_top_level_switch() {
-    EitherOf3::A(_) => EitherOf3::A(view! { <SelectingPhotosStep /> }),
-    EitherOf3::B(_) => EitherOf3::B(view! { <ConfiguringGroupStep /> }),
-    EitherOf3::C(_) => EitherOf3::C(view! { <UploadFinishedStep /> }),
+    EitherOf3::A(()) => EitherOf3::A(view! { <SelectingPhotosStep /> }),
+    EitherOf3::B(()) => EitherOf3::B(view! { <ConfiguringGroupStep /> }),
+    EitherOf3::C(()) => EitherOf3::C(view! { <UploadFinishedStep /> }),
   }
 }
 

@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_lines)]
+
 use base_components::{
   utils::{
     inputs::touched_input_bindings,
@@ -20,6 +22,7 @@ enum SignupFormState {
 
 #[component]
 fn SubmitButton(#[prop(into)] state: Signal<SignupFormState>) -> impl IntoView {
+  #[allow(clippy::enum_glob_use)]
   use SignupFormState::*;
 
   let disabled = Signal::derive(move || {
@@ -128,7 +131,7 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
       .and_then(|c| email.read().as_ref().map(|e| !c.eq(e)))
   });
 
-  let action = Action::new(move |_: &()| {
+  let action = Action::new(move |(): &()| {
     signup(
       name.get().unwrap_or_default(),
       email.get().unwrap_or_default(),
@@ -167,23 +170,6 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
       })
     })
   });
-  // let email_error = Memo::new(move |_| {
-  //   validated_email().and_then(|r| {
-  //     match r.map(|e| models::validate_compliant_email_address(e.as_ref())) {
-  //       Ok(true) => None,
-  //       Ok(false) => Some(Either::Left(
-  //         "Though technically valid, this email address is probably not \
-  //          correct",
-  //       )),
-  //       Err(models::EmailAddressError::PredicateViolated) => {
-  //         Some(Either::Right("Invalid email address"))
-  //       }
-  //       Err(models::EmailAddressError::LenCharMaxViolated) => {
-  //         Some(Either::Right("Email is too long"))
-  //       }
-  //     }
-  //   })
-  // });
   let email_error = Memo::new(move |_| match validated_email() {
     Some(Err(models::EmailAddressError::PredicateViolated)) => {
       Some("Invalid email address")
@@ -220,13 +206,7 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
   let name_error_view =
     move || name_error().map(|t| view! { <FieldErrorText text=t /> });
   let email_error_view = move || {
-    email_error().map(|e| {
-      // e.either(
-      //   |t| view! { <FieldWarningText text=t /> }.into_any(),
-      //   |t| view! { <FieldErrorText text=t /> }.into_any(),
-      // )
-      view! { <FieldErrorText text=e /> }.into_any()
-    })
+    email_error().map(|e| view! { <FieldErrorText text=e /> }.into_any())
   };
   let confirm_email_error_view =
     move || confirm_email_error().map(|t| view! { <FieldErrorText text=t /> });
@@ -234,15 +214,8 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
   // hint values for the input fields
   let name_input_hint =
     Signal::derive(move || name_error().map(|_| FieldHint::Error));
-  let email_input_hint = Signal::derive(move || {
-    email_error().map(|_| {
-      // match e {
-      //   Either::Left(_) => FieldHint::Warning,
-      //   Either::Right(_) => FieldHint::Error,
-      // }
-      FieldHint::Error
-    })
-  });
+  let email_input_hint =
+    Signal::derive(move || email_error().map(|_| FieldHint::Error));
   let confirm_email_input_hint =
     Signal::derive(move || confirm_email_error().map(|_| FieldHint::Error));
 
@@ -285,10 +258,6 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
 
       <div class="flex flex-row">
         <div class="flex-1" />
-        // <Button size={ButtonSize::Large} {..} on:click={move |_| {action.dispatch(());}}>
-        //   "Sign up"
-        //   <lsc::icons::ArrowRightIcon {..} class="size-5" />
-        // </Button>
         <SubmitButton state={state} {..} on:click={move |_| {action.dispatch(());}} />
       </div>
 

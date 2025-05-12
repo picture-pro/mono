@@ -39,7 +39,7 @@ pub fn PhotoGroupPreview(pg: PhotoGroup) -> impl IntoView {
 #[component]
 pub fn ProfilePhotoGroupPreview() -> impl IntoView {
   let photo_groups =
-    Resource::new(move || (), move |_| fetch_photo_groups_for_user());
+    Resource::new(move || (), move |()| fetch_photo_groups_for_user());
 
   let suspended_fn = move || {
     Suspend::new(async move {

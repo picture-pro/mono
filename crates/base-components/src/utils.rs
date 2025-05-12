@@ -29,10 +29,11 @@ pub mod navigation {
   /// Navigate to a new page.
   pub fn navigate_to(path: &str) {
     logging::log!("navigating to: {}", path);
-    let result = web_sys::window()
-      .expect("Failed to get window")
-      .location()
-      .set_href(path);
+    let Some(window) = web_sys::window() else {
+      logging::error!("failed to get window");
+      return;
+    };
+    let result = window.location().set_href(path);
     if let Err(e) = result {
       logging::error!("failed to navigate: {:?}", e);
     }
@@ -41,10 +42,11 @@ pub mod navigation {
   /// Reload the current page.
   #[allow(dead_code)]
   pub fn reload() {
-    let result = web_sys::window()
-      .expect("Failed to get window")
-      .location()
-      .reload();
+    let Some(window) = web_sys::window() else {
+      logging::error!("failed to get window");
+      return;
+    };
+    let result = window.location().reload();
     if let Err(e) = result {
       logging::error!("failed to reload: {:?}", e);
     }
@@ -53,7 +55,7 @@ pub mod navigation {
   /// Sanitizes the `next_url` used for redirecting from the auth pages.
   pub fn sanitize_auth_next_url(next_url: Option<String>) -> String {
     match next_url {
-      Some(next_url) if next_url.starts_with("/") && next_url != "/" => {
+      Some(next_url) if next_url.starts_with('/') && next_url != "/" => {
         next_url
       }
       _ => "/profile".to_string(),

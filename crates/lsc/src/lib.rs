@@ -1,3 +1,6 @@
+// not useful for component-oriented crates
+#![allow(clippy::must_use_candidate)]
+
 //! Leptos Styled Components
 
 pub mod button;

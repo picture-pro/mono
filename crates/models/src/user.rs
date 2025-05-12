@@ -27,6 +27,7 @@ pub struct User {
 
 impl User {
   /// Returns the hash of the user's authentication secrets.
+  #[must_use]
   pub fn auth_hash(&self) -> u64 {
     let mut hasher = hash::DefaultHasher::new();
     self.auth.hash(&mut hasher);

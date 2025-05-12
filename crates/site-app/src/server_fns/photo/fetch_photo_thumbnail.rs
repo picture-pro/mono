@@ -1,3 +1,11 @@
+#![cfg_attr(
+  debug_assertions,
+  expect(
+    clippy::items_after_statements,
+    reason = "axum::debug_handler triggers this"
+  )
+)]
+
 use std::str::FromStr;
 
 use axum::{
@@ -12,6 +20,9 @@ use axum::{
 use belt::Belt;
 use models::{PhotoRecordId, Ulid};
 use prime_domain::PrimeDomainService;
+
+const APPLICATION_OCTET_STREAM: HeaderValue =
+  HeaderValue::from_static("application/octet-stream");
 
 /// Fetches the bytes of a [`Photo`](models::Photo) thumbnail.
 #[axum::debug_handler]
@@ -66,8 +77,6 @@ pub async fn fetch_photo_thumbnail(
       (StatusCode::INTERNAL_SERVER_ERROR, "Internal Error").into_response()
     })?;
 
-  const APPLICATION_OCTET_STREAM: HeaderValue =
-    HeaderValue::from_static("application/octet-stream");
   let content_type = artifact_mime_type
     .and_then(|mt| HeaderValue::from_str(mt.as_ref()).ok())
     .unwrap_or(APPLICATION_OCTET_STREAM);
@@ -101,7 +110,7 @@ fn efficiently_compressed_belt_http_response(
       v.to_str()
         .unwrap()
         .split(',')
-        .map(|s| s.trim())
+        .map(str::trim)
         .collect::<Vec<_>>()
     })
     .unwrap_or_default();

@@ -54,7 +54,7 @@ pub(super) fn GroupConfigurator() -> impl IntoView {
         .expect("`UploadContext` not in state `ConfiguringGroup`");
       state
         .usage_rights_price()
-        .set(vp.as_ref().cloned().and_then(Result::ok));
+        .set(vp.clone().and_then(Result::ok));
     },
     false,
   );

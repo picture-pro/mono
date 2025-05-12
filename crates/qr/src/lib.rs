@@ -9,6 +9,7 @@ pub struct QrCodeGenerator(());
 
 impl QrCodeGenerator {
   /// Create a new [`QrCodeGenerator`].
+  #[must_use]
   #[expect(clippy::new_without_default)]
   pub fn new() -> Self { QrCodeGenerator(()) }
 

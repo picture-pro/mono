@@ -45,6 +45,7 @@ impl health::HealthReporter for UserRepository {
 
 impl UserRepository {
   /// Create a new [`UserRepository`].
+  #[must_use]
   pub fn new(model_repo: Database<User>) -> Self { Self { model_repo } }
 
   /// Create a [`User`] model.

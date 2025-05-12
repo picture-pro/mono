@@ -213,10 +213,10 @@ pub fn LinkMatrixTestPage() -> impl IntoView {
                     key=move |u| *u
                     children=move |underline| view! {
                       <Link color=color size=size underline=underline high_contrast=false {..} href="#">
-                        { format!("{:?} {:?} {:?}", color, size, underline) }
+                        { format!("{color:?} {size:?} {underline:?}") }
                       </Link>
                       <Link color=color size=size underline=underline high_contrast=true {..} href="#">
-                        { format!("{:?} {:?} {:?} (high contrast)", color, size, underline) }
+                        { format!("{color:?} {size:?} {underline:?} (high contrast)") }
                       </Link>
                     }
                   />

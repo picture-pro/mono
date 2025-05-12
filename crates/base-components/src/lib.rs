@@ -1,4 +1,7 @@
-//! Base components for use within PicturePro pages.
+// not useful for component-oriented crates
+#![allow(clippy::must_use_candidate)]
+
+//! Base components for use within `PicturePro` pages.
 
 mod image;
 mod page_container;

@@ -59,6 +59,7 @@ impl health::HealthReporter for ArtifactRepository {
 
 impl ArtifactRepository {
   /// Create a new [`ArtifactRepository`].
+  #[must_use]
   pub fn new(
     storage_repo: StorageClient,
     model_repo: Database<Artifact>,

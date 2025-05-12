@@ -1,6 +1,8 @@
 #![feature(impl_trait_in_fn_trait_return)]
+// not useful for component-oriented crates
+#![allow(clippy::must_use_candidate)]
 
-//! Leptos application for PicturePro.
+//! Leptos application for `PicturePro`.
 
 mod components;
 mod pages;

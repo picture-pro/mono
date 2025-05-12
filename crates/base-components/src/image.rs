@@ -71,9 +71,12 @@ pub fn SmallImageWithFallback(
   let loaded = RwSignal::new(false);
 
   // what actually goes into the image
-  let src = Signal::derive(move || match loaded.get() {
-    true => url.get(),
-    false => fallback_data.get(),
+  let src = Signal::derive(move || {
+    if loaded.get() {
+      url.get()
+    } else {
+      fallback_data.get()
+    }
   });
 
   // fires when image fully loads, or never if cached
@@ -87,7 +90,7 @@ pub fn SmallImageWithFallback(
   // sets `loaded` immediately after render if image is cached
   Effect::watch(
     move || (),
-    move |_, _, _| {
+    move |(), _, _| {
       let image = image_ref.get().unwrap();
       loaded.set(image.complete());
     },

@@ -29,7 +29,7 @@ pub fn LogoutPage() -> impl IntoView {
 
 #[island]
 fn LogoutButton() -> impl IntoView {
-  let action = Action::new(move |_: &()| logout());
+  let action = Action::new(move |(): &()| logout());
   let action_value = action.value();
 
   Effect::new(move |_| {

@@ -37,7 +37,7 @@ pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
     touched_input_bindings(email);
 
   let action =
-    Action::new(move |_: &()| login(email.get().unwrap_or_default()));
+    Action::new(move |(): &()| login(email.get().unwrap_or_default()));
   let action_value = action.value();
   let action_value_view = move || {
     action_value.get().map(|v| match v {

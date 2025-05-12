@@ -11,9 +11,10 @@ pub fn Header() -> impl IntoView {
                border border-t-0 border-base-7 dark:border-basedark-7";
 
   let auth_status = use_context::<AuthStatus>().and_then(|as_| as_.0);
-  let logo_link_dest = match auth_status.is_some() {
-    true => "/profile",
-    false => "/",
+  let logo_link_dest = if auth_status.is_some() {
+    "/profile"
+  } else {
+    "/"
   };
 
   view! {

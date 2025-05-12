@@ -22,6 +22,7 @@ impl health::HealthReporter for PhotoGroupRepository {
 
 impl PhotoGroupRepository {
   /// Create a new [`PhotoGroupRepository`].
+  #[must_use]
   pub fn new(model_repo: Database<PhotoGroup>) -> Self {
     Self { db: model_repo }
   }

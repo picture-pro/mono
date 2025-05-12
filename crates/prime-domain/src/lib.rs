@@ -85,6 +85,7 @@ pub enum CreateImageFromArtifactError {
 
 impl PrimeDomainService {
   /// Create a new [`PrimeDomainService`].
+  #[must_use]
   pub fn new(
     artifact_repo: ArtifactRepository,
     image_processor: ImageProcessor,

@@ -105,9 +105,8 @@ pub enum ButtonElementType {
 const BUTTON_SOLID_ACTIVE_FILTER: &str =
   "active:brightness-[.92] active:saturate-[1.1]";
 
-use ButtonColor::*;
-use ButtonSize::*;
-use ButtonVariant::*;
+#[allow(clippy::enum_glob_use)]
+use {ButtonColor::*, ButtonSize::*, ButtonVariant::*};
 
 impl ButtonStyleProps {
   fn text_color_class(&self) -> String {
@@ -135,7 +134,7 @@ impl ButtonStyleProps {
     if self.disabled {
       return match self.variant {
         Solid | Soft => "bg-graya-3 dark:bg-graydarka-3".into(),
-        _ => "".into(),
+        Outline => String::new(),
       };
     }
 
@@ -207,13 +206,12 @@ impl ButtonStyleProps {
       },
     };
 
-    format!("{} {} {}", normal, hover, active)
+    format!("{normal} {hover} {active}")
   }
 
   fn border_color_class(&self) -> String {
     match self.variant {
-      Solid => "border-transparent".into(),
-      Soft => "border-transparent".into(),
+      Soft | Solid => "border-transparent".into(),
       Outline => {
         if self.disabled {
           return "border-graya-7 dark:border-graydarka-7".into();
@@ -249,9 +247,10 @@ impl ButtonStyleProps {
   }
 
   fn extra_disabled_class(&self) -> &'static str {
-    match self.disabled {
-      true => "cursor-not-allowed",
-      false => "",
+    if self.disabled {
+      "cursor-not-allowed"
+    } else {
+      ""
     }
   }
 
@@ -337,7 +336,7 @@ pub fn ButtonMatrixTestPage() -> impl IntoView {
                           key={move |v| *v}
                           children=move |variant| view!{
                             <Button color=color variant=variant size=size disabled=disabled>
-                              { format!("{:?} {:?} disabled={disabled}", color, variant) }
+                              { format!("{color:?} {variant:?} disabled={disabled}") }
                             </Button>
                           }
                         />

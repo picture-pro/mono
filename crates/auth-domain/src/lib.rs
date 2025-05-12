@@ -20,6 +20,7 @@ pub struct AuthDomainService {
 
 impl AuthDomainService {
   /// Creates a new [`AuthDomainService`].
+  #[must_use]
   pub fn new(user_repo: UserRepository) -> Self { Self { user_repo } }
 }
 

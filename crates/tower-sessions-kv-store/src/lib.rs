@@ -17,6 +17,7 @@ pub struct TowerSessionsKvStore {
 
 impl TowerSessionsKvStore {
   /// Create a new key-value store backend.
+  #[must_use]
   pub fn new(kv: KeyValueStore) -> Self { Self { kv } }
 }
 

@@ -26,7 +26,7 @@ fn PageCoverInner() -> impl IntoView {
   // set hide right after render
   Effect::watch(
     move || (),
-    move |_, _, _| {
+    move |(), _, _| {
       set_hide.set(Some(true));
     },
     true,
