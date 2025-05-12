@@ -3,7 +3,7 @@ use std::str::FromStr;
 use base_components::{PhotoGroupQrCode, Section, Title};
 use leptos::{either::Either, prelude::*};
 use leptos_router::hooks::use_params_map;
-use models::{PhotoGroup, PhotoGroupRecordId};
+use models::{PhotoGroupFullQuery, PhotoGroupRecordId};
 
 use crate::{
   components::PhotoPreview, pages::NotFoundPage, server_fns::fetch_photo_group,
@@ -36,7 +36,7 @@ pub fn PhotoGroupFetcher(id: PhotoGroupRecordId) -> impl IntoView {
   let suspended_fn = move || {
     Suspend::new(async move {
       match pg_resource.await {
-        Ok(Some(pg)) => view! { <PhotoGroupPageInner pg=pg />}.into_any(),
+        Ok(Some(pg)) => view! { <PhotoGroupPageInner pgq=pg />}.into_any(),
         Ok(None) => view! { <NotFoundPage /> }.into_any(),
         Err(e) => {
           let e = e.to_string();
@@ -54,25 +54,36 @@ pub fn PhotoGroupFetcher(id: PhotoGroupRecordId) -> impl IntoView {
 }
 
 #[component]
-pub fn PhotoGroupPageInner(pg: PhotoGroup) -> impl IntoView {
+pub fn PhotoGroupPageInner(pgq: PhotoGroupFullQuery) -> impl IntoView {
+  let name = pgq.vendor_data.name.as_ref().to_owned();
+
   view! {
     <Section>
-      <Title>"Photo Group"</Title>
+      <Title>
+        "Photos by " { name }
+      </Title>
     </Section>
     <Section>
-      <PhotoGroupDetails pg=pg />
+      <PhotoGroupDetails pgq=pgq />
     </Section>
   }
 }
 
 #[component]
-pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
+pub fn PhotoGroupDetails(pgq: PhotoGroupFullQuery) -> impl IntoView {
   use lsc::{button::*, icons::*};
+
+  let photo_previews = pgq
+    .photo_group
+    .photos
+    .into_iter()
+    .map(|p| view! { <PhotoPreview id=p /> })
+    .collect_view();
 
   view! {
     <div class="flex flex-col-reverse sm:flex-row gap-8 sm:items-start">
       <div class="flex-1 flex flex-row flex-wrap gap-4">
-        { pg.photos.into_iter().map(|p| view! { <PhotoPreview id=p /> }).collect_view() }
+        { photo_previews }
       </div>
 
       // <div class="my-4 w-[1px] border-l-2 border-dashed border-base-8 dark:border-basedark-8" />
@@ -81,7 +92,7 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
         <p class="text-3xl">
           "Price: "
           <span class="font-bold">
-            { pg.config.usage_rights_price.to_string() }
+            { pgq.photo_group.config.usage_rights_price.to_string() }
           </span>
         </p>
 
@@ -103,7 +114,7 @@ pub fn PhotoGroupDetails(pg: PhotoGroup) -> impl IntoView {
         <div class="flex flex-col gap-1">
           <p class="text-3xl">"Share:"</p>
           <PhotoGroupQrCode
-            id=pg.id {..}
+            id=pgq.photo_group.id {..}
             class="aspect-square w-full max-w-96 rounded-lg"
           />
         </div>

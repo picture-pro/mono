@@ -79,6 +79,7 @@ impl AppState {
       image_repo,
       photo_repo,
       photo_group_repo,
+      user_repo.clone(),
     );
     let auth_domain_service = AuthDomainService::new(user_repo);
 

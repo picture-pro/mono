@@ -7,20 +7,20 @@ pub use hex;
 use hex::health::{self, HealthAware};
 pub use imaging;
 use imaging::{ImageCreateError, ImageProcessor};
-use miette::{Context, IntoDiagnostic, Result};
+use miette::{miette, Context, IntoDiagnostic, Result};
 pub use models;
 use models::{
   Artifact, ArtifactMimeType, ArtifactRecordId, BaseUrl, Image,
   ImageCreateRequest, ImageRecordId, Photo, PhotoCreateRequest, PhotoGroup,
-  PhotoGroupConfig, PhotoGroupCreateRequest, PhotoGroupRecordId, PhotoImages,
-  PhotoRecordId, UserRecordId,
+  PhotoGroupConfig, PhotoGroupCreateRequest, PhotoGroupFullQuery,
+  PhotoGroupRecordId, PhotoImages, PhotoRecordId, UserRecordId,
 };
 use qr::QrCodeGenerator;
 pub use repos;
 use repos::{
   belt::Belt, ArtifactRepository, CreateArtifactError, CreateModelError,
   FetchModelByIndexError, FetchModelError, ImageRepository,
-  PhotoGroupRepository, PhotoRepository, ReadArtifactError,
+  PhotoGroupRepository, PhotoRepository, ReadArtifactError, UserRepository,
 };
 use tracing::instrument;
 
@@ -33,6 +33,7 @@ pub struct PrimeDomainService {
   photo_group_repo: PhotoGroupRepository,
   photo_repo:       PhotoRepository,
   qr_generator:     QrCodeGenerator,
+  user_repo:        UserRepository,
 }
 
 #[async_trait::async_trait]
@@ -92,6 +93,7 @@ impl PrimeDomainService {
     image_repo: ImageRepository,
     photo_repo: PhotoRepository,
     photo_group_repo: PhotoGroupRepository,
+    user_repo: UserRepository,
   ) -> Self {
     Self {
       artifact_repo,
@@ -99,6 +101,7 @@ impl PrimeDomainService {
       image_repo,
       photo_repo,
       photo_group_repo,
+      user_repo,
       qr_generator: QrCodeGenerator::new(),
     }
   }
@@ -283,8 +286,27 @@ impl PrimeDomainService {
   pub async fn fetch_photo_group(
     &self,
     id: PhotoGroupRecordId,
-  ) -> Result<Option<PhotoGroup>, FetchModelError> {
-    self.photo_group_repo.fetch_photo_group_by_id(id).await
+  ) -> Result<Option<PhotoGroupFullQuery>, FetchModelError> {
+    let Some(photo_group) =
+      self.photo_group_repo.fetch_photo_group_by_id(id).await?
+    else {
+      return Ok(None);
+    };
+    let vendor_data = self
+      .user_repo
+      .fetch_user_by_id(photo_group.vendor)
+      .await?
+      .ok_or(FetchModelError::Db(miette!(
+        "user (vendor) {vendor} not found: listed in photo_group {photo_group}",
+        vendor = photo_group.vendor,
+        photo_group = photo_group.id
+      )))?
+      .into();
+
+    Ok(Some(PhotoGroupFullQuery {
+      photo_group,
+      vendor_data,
+    }))
   }
 
   /// Fetch [`PhotoGroup`]s by user.

@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use models::{PhotoGroup, PhotoGroupRecordId};
+use models::{PhotoGroup, PhotoGroupFullQuery, PhotoGroupRecordId};
 #[cfg(feature = "ssr")]
 pub use ssr::*;
 
@@ -33,7 +33,7 @@ pub async fn fetch_photo_groups_for_user(
 pub async fn fetch_photo_group(
   /// The ID of the [`PhotoGroup`] to fetch.
   id: PhotoGroupRecordId,
-) -> Result<Option<PhotoGroup>, ServerFnError> {
+) -> Result<Option<PhotoGroupFullQuery>, ServerFnError> {
   use prime_domain::PrimeDomainService;
 
   let pd: PrimeDomainService = expect_context();
