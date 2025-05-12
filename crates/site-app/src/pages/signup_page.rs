@@ -333,7 +333,7 @@ async fn signup(
         }
       })?;
 
-  let public_user = models::PublicUser::from(user.clone());
+  let public_user = models::AuthUser::from(user.clone());
   auth_session.login(&public_user).await.map_err(|e| {
     tracing::error!("failed to log in user: {e}");
     ServerFnError::new("Internal error")

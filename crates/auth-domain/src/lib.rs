@@ -1,11 +1,11 @@
 //! Provides the [`AuthDomainService`], the entry point for users,
 //! authentication, and authorization logic.
 
-use axum_login::AuthUser;
+use axum_login::AuthUser as AxumLoginAuthUser;
 pub use axum_login::AuthnBackend;
 use hex::health::{self, HealthAware};
 use miette::IntoDiagnostic;
-use models::{PublicUser, User, UserAuthCredentials, UserCreateRequest};
+use models::{AuthUser, User, UserAuthCredentials, UserCreateRequest};
 use repos::{FetchModelByIndexError, FetchModelError, UserRepository};
 use tracing::instrument;
 
@@ -116,7 +116,7 @@ impl health::HealthReporter for AuthDomainService {
 
 #[async_trait::async_trait]
 impl AuthnBackend for AuthDomainService {
-  type User = PublicUser;
+  type User = AuthUser;
   type Credentials = UserAuthCredentials;
   type Error = AuthenticationError;
 
@@ -131,7 +131,7 @@ impl AuthnBackend for AuthDomainService {
   }
   async fn get_user(
     &self,
-    id: &<Self::User as AuthUser>::Id,
+    id: &<Self::User as AxumLoginAuthUser>::Id,
   ) -> Result<Option<Self::User>, Self::Error> {
     self
       .fetch_user_by_id(*id)

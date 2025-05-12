@@ -102,7 +102,7 @@ pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
 #[tracing::instrument]
 async fn login(email: String) -> Result<bool, ServerFnError> {
   use auth_domain::{AuthDomainService, AuthSession};
-  use models::{EmailAddress, PublicUser, UserAuthCredentials};
+  use models::{EmailAddress, AuthUser, UserAuthCredentials};
 
   let auth_service = use_context::<AuthDomainService>().ok_or_else(|| {
     tracing::error!("auth service not found");
@@ -127,7 +127,7 @@ async fn login(email: String) -> Result<bool, ServerFnError> {
   let Some(user) = user else {
     return Ok(false);
   };
-  let public_user = PublicUser::from(user);
+  let public_user = AuthUser::from(user);
 
   auth_session.login(&public_user).await.map_err(|e| {
     tracing::error!("failed to fetch user: {e}");

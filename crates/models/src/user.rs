@@ -76,9 +76,9 @@ impl From<UserCreateRequest> for User {
   }
 }
 
-/// A public view of a [`User`].
+/// An auth-centric view of a [`User`], able to be sent to the client.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct PublicUser {
+pub struct AuthUser {
   /// The user's ID.
   pub id:              UserRecordId,
   /// The user's name.
@@ -87,7 +87,7 @@ pub struct PublicUser {
   pub auth_hash_bytes: Box<[u8]>,
 }
 
-impl From<User> for PublicUser {
+impl From<User> for AuthUser {
   fn from(user: User) -> Self {
     let auth_hash_bytes =
       user.auth_hash().to_be_bytes().to_vec().into_boxed_slice();
@@ -104,16 +104,16 @@ impl From<User> for PublicUser {
 mod bridge {
   /// The status of user authentication.
   #[derive(Debug, Clone)]
-  pub struct AuthStatus(pub Option<super::PublicUser>);
+  pub struct AuthStatus(pub Option<super::AuthUser>);
 }
 
 #[cfg(feature = "auth")]
 mod auth {
-  use axum_login::AuthUser;
+  use axum_login::AuthUser as AxumLoginAuthUser;
 
-  use super::PublicUser;
+  use super::AuthUser;
 
-  impl AuthUser for PublicUser {
+  impl AxumLoginAuthUser for AuthUser {
     type Id = super::UserRecordId;
     fn id(&self) -> Self::Id { self.id }
     fn session_auth_hash(&self) -> &[u8] { &self.auth_hash_bytes }

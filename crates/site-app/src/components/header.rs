@@ -2,7 +2,7 @@ use base_components::utils::navigation::url_to_full_path;
 use leptos::{either::Either, prelude::*};
 use leptos_router::location::Url;
 use lsc::{button::*, link::*};
-use models::{AuthStatus, PublicUser};
+use models::{AuthStatus, AuthUser};
 
 #[component]
 pub fn Header() -> impl IntoView {
@@ -85,7 +85,7 @@ fn LoggedOutUserAuthActions() -> impl IntoView {
 }
 
 #[component]
-fn LoggedInUserAuthActions(user: PublicUser) -> impl IntoView {
+fn LoggedInUserAuthActions(user: AuthUser) -> impl IntoView {
   view! {
     <span class="text-sm text-base-dim leading-none text-right">
       "Welcome, "
