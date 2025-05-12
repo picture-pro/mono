@@ -26,13 +26,13 @@ pub(super) fn SelectingPhotosStep() -> impl IntoView {
     </Section>
 
     <Section>
-      <PhotoPreviewer />
-    </Section>
-
-    <Section>
       <div class="w-full flex flex-row justify-end">
         <NextStepButton />
       </div>
+    </Section>
+
+    <Section>
+      <PhotoPreviewer />
     </Section>
   }
 }
