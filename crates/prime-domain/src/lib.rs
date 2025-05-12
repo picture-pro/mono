@@ -227,7 +227,7 @@ impl PrimeDomainService {
     }
 
     let photo_group_create_request = PhotoGroupCreateRequest {
-      owner: user,
+      vendor: user,
       photos,
       config,
     };

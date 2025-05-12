@@ -20,8 +20,8 @@ pub type PhotoGroupRecordId = RecordId<PhotoGroup>;
 pub struct PhotoGroup {
   /// The photo group's id.
   pub id:     PhotoGroupRecordId,
-  /// The photo group's owner.
-  pub owner:  UserRecordId,
+  /// The photo group's vendor.
+  pub vendor: UserRecordId,
   /// The photos included in the group.
   pub photos: Vec<PhotoRecordId>,
   /// The configuration for the group.
@@ -43,7 +43,7 @@ impl Model for PhotoGroup {
   )] = &[];
   const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] =
     &[("owner", |photo_group| {
-      EitherSlug::Strict(StrictSlug::new(photo_group.owner.to_string()))
+      EitherSlug::Strict(StrictSlug::new(photo_group.vendor.to_string()))
     })];
 
   fn id(&self) -> PhotoGroupRecordId { self.id }
@@ -52,8 +52,8 @@ impl Model for PhotoGroup {
 /// A request to create a new [`PhotoGroup`].
 #[derive(Debug)]
 pub struct PhotoGroupCreateRequest {
-  /// The photo group's owner.
-  pub owner:  UserRecordId,
+  /// The photo group's vendor.
+  pub vendor: UserRecordId,
   /// The photos included in the group.
   pub photos: Vec<PhotoRecordId>,
   /// The configuration for the group.
@@ -64,7 +64,7 @@ impl From<PhotoGroupCreateRequest> for PhotoGroup {
   fn from(input: PhotoGroupCreateRequest) -> Self {
     Self {
       id:     PhotoGroupRecordId::default(),
-      owner:  input.owner,
+      vendor: input.vendor,
       photos: input.photos,
       config: input.config,
     }
