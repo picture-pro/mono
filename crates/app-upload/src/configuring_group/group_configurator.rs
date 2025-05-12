@@ -61,7 +61,7 @@ pub(super) fn GroupConfigurator() -> impl IntoView {
 
   view! {
     <div class="flex flex-col gap-1">
-      <label class="" for="price">"Price"</label>
+      <label class="text-base-dim" for="price">"Price"</label>
       <Field size={FieldSize::Large} {..}
         placeholder="1.00" id="price" type="text"
         on:input=write_price prop:value=read_price

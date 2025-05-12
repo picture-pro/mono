@@ -27,7 +27,7 @@ pub(super) fn ConfiguringGroupStep() -> impl IntoView {
     <Section>
       <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
         <GroupConfigurator />
-        <div class="flex-1" />
+        <div class="hidden sm:block flex-1" />
         <NextStepButton />
       </div>
     </Section>

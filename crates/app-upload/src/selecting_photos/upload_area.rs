@@ -10,9 +10,9 @@ use crate::UploadStateStoreFields;
 pub(super) fn UploadArea() -> impl IntoView {
   use lsc::icons::*;
 
-  let class = "w-full bg-base-2 dark:bg-basedark-2 border-2 border-dashed \
-               border-base-8 dark:border-basedark-8 rounded-xl flex flex-row \
-               items-stretch";
+  let class = "w-full bg-base-2 dark:bg-basedark-2 text-base-dim border-2 \
+               border-dashed border-base-8 dark:border-basedark-8 rounded-xl \
+               flex flex-row items-stretch";
 
   let icon_class = "size-24 text-basea-11 dark:text-basedarka-11";
 
