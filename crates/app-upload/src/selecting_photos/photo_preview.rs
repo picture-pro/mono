@@ -8,7 +8,7 @@ use crate::{
   selecting_photos::SelectingPhotosStateStoreFields,
 };
 
-#[component]
+#[island]
 pub(super) fn PhotoPreviewer() -> impl IntoView {
   let context: Store<super::super::UploadState> = expect_context();
 
