@@ -102,7 +102,7 @@ pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
 #[tracing::instrument]
 async fn login(email: String) -> Result<bool, ServerFnError> {
   use auth_domain::{AuthDomainService, AuthSession};
-  use models::{EmailAddress, AuthUser, UserAuthCredentials};
+  use models::{AuthUser, EmailAddress, UserAuthCredentials};
 
   let auth_service = use_context::<AuthDomainService>().ok_or_else(|| {
     tracing::error!("auth service not found");
