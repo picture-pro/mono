@@ -32,12 +32,19 @@ pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
   let next_url = sanitize_auth_next_url(next_url);
 
   let email = RwSignal::new(None::<String>);
+  let password = RwSignal::new(None::<String>);
 
   let (read_email_callback, write_email_callback) =
     touched_input_bindings(email);
+  let (read_password_callback, write_password_callback) =
+    touched_input_bindings(password);
 
-  let action =
-    Action::new(move |(): &()| login(email.get().unwrap_or_default()));
+  let action = Action::new(move |(): &()| {
+    login(
+      email.get().unwrap_or_default(),
+      password.get().unwrap_or_default(),
+    )
+  });
   let action_value = action.value();
   let action_value_view = move || {
     action_value.get().map(|v| match v {
@@ -81,6 +88,14 @@ pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
             on:input=write_email_callback prop:value=read_email_callback
           />
         </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="" for="password">"Password"</label>
+          <Field size={FieldSize::Large} {..}
+            placeholder="Enter your password" type="password" id="password"
+            on:input=write_password_callback prop:value=read_password_callback
+          />
+        </div>
       </form>
 
       <div class="flex flex-row">
@@ -100,9 +115,9 @@ pub fn LoginPageIsland(next_url: Option<String>) -> impl IntoView {
 
 #[server(name = LoginActionParams)]
 #[tracing::instrument]
-async fn login(email: String) -> Result<bool, ServerFnError> {
+async fn login(email: String, password: String) -> Result<bool, ServerFnError> {
   use auth_domain::{AuthDomainService, AuthSession};
-  use models::{AuthUser, EmailAddress, UserAuthCredentials};
+  use models::{AuthUser, EmailAddress, UserSubmittedAuthCredentials};
 
   let auth_service = use_context::<AuthDomainService>().ok_or_else(|| {
     tracing::error!("auth service not found");
@@ -117,7 +132,8 @@ async fn login(email: String) -> Result<bool, ServerFnError> {
   let email = EmailAddress::try_new(email)
     .map_err(|_| ServerFnError::new("Email address is invalid"))?;
 
-  let creds = UserAuthCredentials::EmailEntryOnly(email.clone());
+  let creds =
+    UserSubmittedAuthCredentials::EmailAndPassword { email, password };
 
   let user = auth_service.user_authenticate(creds).await.map_err(|e| {
     tracing::error!("failed to fetch user: {e}");

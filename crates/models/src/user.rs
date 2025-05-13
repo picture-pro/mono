@@ -35,12 +35,32 @@ impl User {
   }
 }
 
+/// A password hash.
+#[derive(Clone, Debug, Hash, PartialEq, Serialize, Deserialize)]
+pub struct PasswordHash(pub String);
+
+/// The user-submitted version of [`UserAuthCredentials`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub enum UserSubmittedAuthCredentials {
+  /// Standard email and password.
+  EmailAndPassword {
+    /// The email used.
+    email:    EmailAddress,
+    /// The password used.
+    password: String,
+  },
+}
+
 /// The authentication method for a [`User`].
 #[derive(Clone, Debug, Hash, PartialEq, Serialize, Deserialize)]
 pub enum UserAuthCredentials {
-  /// Indicates that the user is authenticated through just an email entry, and
-  /// no other verification. VERY DANGEROUS.
-  EmailEntryOnly(EmailAddress),
+  /// Standard email and password (hash).
+  EmailAndPassword {
+    /// The email used.
+    email:         EmailAddress,
+    /// The hash of the password used.
+    password_hash: PasswordHash,
+  },
 }
 
 impl Model for User {

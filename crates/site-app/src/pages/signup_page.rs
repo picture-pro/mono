@@ -117,25 +117,33 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
   //   untouched inputs
   let name = RwSignal::new(None::<String>);
   let email = RwSignal::new(None::<String>);
-  let confirm_email = RwSignal::new(None::<String>);
+  let password = RwSignal::new(None::<String>);
+  let confirm_password = RwSignal::new(None::<String>);
 
   // validated versions of the input values
   let validated_name =
     Memo::new(move |_| name.read().as_ref().map(HumanName::try_new));
   let validated_email =
     Memo::new(move |_| email.read().as_ref().map(EmailAddress::try_new));
-  let validated_confirm_email = Memo::new(move |_| {
-    confirm_email
+  let validated_password = Memo::new(move |_| {
+    password
       .read()
       .as_ref()
-      .and_then(|c| email.read().as_ref().map(|e| !c.eq(e)))
+      .map(|p| Ok::<String, &'static str>(p.clone()))
+  });
+  let validated_confirm_password = Memo::new(move |_| {
+    confirm_password
+      .read()
+      .as_ref()
+      .and_then(|c| password.read().as_ref().map(|e| !c.eq(e)))
   });
 
   let action = Action::new(move |(): &()| {
     signup(
       name.get().unwrap_or_default(),
       email.get().unwrap_or_default(),
-      confirm_email.get().unwrap_or_default(),
+      password.get().unwrap_or_default(),
+      confirm_password.get().unwrap_or_default(),
     )
   });
   let action_value = action.value();
@@ -179,17 +187,25 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
     }
     Some(Ok(_)) | None => None,
   });
-  let confirm_email_error = Memo::new(move |_| {
-    validated_confirm_email().and_then(|r| r.then_some("Emails do not match"))
+  let password_error =
+    Memo::new(move |_| validated_password().and_then(Result::err));
+  let confirm_password_error = Memo::new(move |_| {
+    validated_confirm_password()
+      .and_then(|r| r.then_some("Passwords do not match"))
   });
 
   let state = Memo::new(move |_| {
-    if name().is_none() && email().is_none() && confirm_email().is_none() {
+    if name().is_none()
+      && email().is_none()
+      && password().is_none()
+      && confirm_password().is_none()
+    {
       return SignupFormState::Untouched;
     }
     if name_error().is_some()
       || email_error().is_some()
-      || confirm_email_error().is_some()
+      || password_error().is_some()
+      || confirm_password_error().is_some()
     {
       return SignupFormState::ValidationFailed;
     }
@@ -208,16 +224,22 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
   let email_error_view = move || {
     email_error().map(|e| view! { <FieldErrorText text=e /> }.into_any())
   };
-  let confirm_email_error_view =
-    move || confirm_email_error().map(|t| view! { <FieldErrorText text=t /> });
+  let password_error_view = move || {
+    password_error().map(|e| view! { <FieldErrorText text=e /> }.into_any())
+  };
+  let confirm_password_error_view = move || {
+    confirm_password_error().map(|t| view! { <FieldErrorText text=t /> })
+  };
 
   // hint values for the input fields
   let name_input_hint =
     Signal::derive(move || name_error().map(|_| FieldHint::Error));
   let email_input_hint =
     Signal::derive(move || email_error().map(|_| FieldHint::Error));
-  let confirm_email_input_hint =
-    Signal::derive(move || confirm_email_error().map(|_| FieldHint::Error));
+  let password_input_hint =
+    Signal::derive(move || password_error().map(|_| FieldHint::Error));
+  let confirm_password_input_hint =
+    Signal::derive(move || confirm_password_error().map(|_| FieldHint::Error));
 
   view! {
     <FloatingBoxSection>
@@ -248,11 +270,18 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
         </FormField>
 
         <FormField
-          field_id="confirm_email" placeholder="Enter your email again"
-          hint=confirm_email_input_hint field_label="Confirm Email" signal=confirm_email
-          field_type="email"
+          field_id="password" placeholder="Enter your password" hint=password_input_hint
+          field_label="Password" signal=password field_type="password"
         >
-          { confirm_email_error_view }
+          { password_error_view }
+        </FormField>
+
+        <FormField
+          field_id="confirm_password" placeholder="Enter your password again"
+          hint=confirm_password_input_hint field_label="Confirm Password" signal=confirm_password
+          field_type="password"
+        >
+          { confirm_password_error_view }
         </FormField>
       </form>
 
@@ -273,10 +302,11 @@ pub fn SignupPageIsland(next_url: Option<String>) -> impl IntoView {
 async fn signup(
   name: String,
   email: String,
-  confirm_email: String,
+  password: String,
+  confirm_password: String,
 ) -> Result<UserRecordId, ServerFnError> {
   use auth_domain::{AuthDomainService, AuthSession};
-  use models::{UserAuthCredentials, UserCreateRequest};
+  use models::UserSubmittedAuthCredentials;
 
   let auth_service = use_context::<AuthDomainService>().ok_or_else(|| {
     tracing::error!("auth service not found");
@@ -299,22 +329,16 @@ async fn signup(
   // if !models::validate_reasonable_email_address(email.as_ref()) {
   //   return Err(ServerFnError::new("Email is unreasonable"));
   // }
-  let confirm_email = EmailAddress::try_new(confirm_email)
-    .map_err(|_| ServerFnError::new("Emails do not match"))?;
-  if email != confirm_email {
-    return Err(ServerFnError::new("Emails do not match"));
+  if password != confirm_password {
+    return Err(ServerFnError::new("Passwords do not match"));
   }
 
-  let creds = UserAuthCredentials::EmailEntryOnly(email.clone());
-  let create_request = UserCreateRequest {
-    name,
-    email,
-    auth: creds.clone(),
-  };
+  let creds =
+    UserSubmittedAuthCredentials::EmailAndPassword { email, password };
 
   let user =
     auth_service
-      .user_signup(create_request)
+      .user_signup(name, creds)
       .await
       .map_err(|e| match e {
         auth_domain::CreateUserError::EmailAlreadyUsed(email) => {
@@ -323,7 +347,8 @@ async fn signup(
           );
           ServerFnError::new("Email is already in use")
         }
-        auth_domain::CreateUserError::CreateError(error) => {
+        auth_domain::CreateUserError::CreateError(error)
+        | auth_domain::CreateUserError::PasswordHashing(error) => {
           tracing::error!("failed to create user: {error}");
           ServerFnError::new("Internal error")
         }

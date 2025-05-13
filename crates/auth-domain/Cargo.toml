@@ -16,6 +16,7 @@ thiserror.workspace = true
 
 async-trait.workspace = true
 axum-login.workspace = true
+argon2 = "0.5"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }

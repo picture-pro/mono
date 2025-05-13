@@ -4,8 +4,11 @@
 use axum_login::AuthUser as AxumLoginAuthUser;
 pub use axum_login::AuthnBackend;
 use hex::health::{self, HealthAware};
-use miette::IntoDiagnostic;
-use models::{AuthUser, User, UserAuthCredentials, UserCreateRequest};
+use miette::{miette, IntoDiagnostic};
+use models::{
+  AuthUser, EmailAddress, HumanName, User, UserAuthCredentials,
+  UserCreateRequest, UserSubmittedAuthCredentials,
+};
 use repos::{FetchModelByIndexError, FetchModelError, UserRepository};
 use tracing::instrument;
 
@@ -29,7 +32,10 @@ impl AuthDomainService {
 pub enum CreateUserError {
   /// Indicates that the user's email address is already in use.
   #[error("The email address is already in use: \"{0}\"")]
-  EmailAlreadyUsed(models::EmailAddress),
+  EmailAlreadyUsed(EmailAddress),
+  /// Indicates than an error occurred while hashing the password.
+  #[error("Failed to hash password")]
+  PasswordHashing(miette::Report),
   /// Indicates that an error occurred while creating the user.
   #[error("Failed to create the user")]
   CreateError(miette::Report),
@@ -47,6 +53,9 @@ pub enum AuthenticationError {
   /// Indicates that an error occurred while fetching users by index.
   #[error("Failed to fetch user by index")]
   FetchByIndexError(#[from] FetchModelByIndexError),
+  /// Indicates than an error occurred while hashing the password.
+  #[error("Failed to hash password")]
+  PasswordHashing(miette::Report),
 }
 
 impl AuthDomainService {
@@ -63,7 +72,7 @@ impl AuthDomainService {
   #[instrument(skip(self))]
   pub async fn fetch_user_by_email(
     &self,
-    email: models::EmailAddress,
+    email: EmailAddress,
   ) -> Result<Option<User>, FetchModelByIndexError> {
     self.user_repo.fetch_user_by_email(email).await
   }
@@ -72,12 +81,44 @@ impl AuthDomainService {
   #[instrument(skip(self))]
   pub async fn user_signup(
     &self,
-    req: UserCreateRequest,
+    name: HumanName,
+    auth: UserSubmittedAuthCredentials,
   ) -> Result<User, CreateUserError> {
-    let email = req.email.clone();
+    use argon2::PasswordHasher;
+
+    let email = match auth.clone() {
+      UserSubmittedAuthCredentials::EmailAndPassword { email, .. } => email,
+    };
+
     if self.fetch_user_by_email(email.clone()).await?.is_some() {
       return Err(CreateUserError::EmailAlreadyUsed(email));
     }
+
+    let auth: UserAuthCredentials = match auth {
+      UserSubmittedAuthCredentials::EmailAndPassword { email, password } => {
+        let salt = argon2::password_hash::SaltString::generate(
+          &mut argon2::password_hash::rand_core::OsRng,
+        );
+        let argon = argon2::Argon2::default();
+        let password_hash = models::PasswordHash(
+          argon
+            .hash_password(password.as_bytes(), &salt)
+            .map_err(|e| {
+              CreateUserError::PasswordHashing(miette!(
+                "failed to hash password: {e}"
+              ))
+            })?
+            .to_string(),
+        );
+
+        UserAuthCredentials::EmailAndPassword {
+          email,
+          password_hash,
+        }
+      }
+    };
+
+    let req = UserCreateRequest { name, email, auth };
 
     self
       .user_repo
@@ -91,14 +132,46 @@ impl AuthDomainService {
   #[instrument(skip(self))]
   pub async fn user_authenticate(
     &self,
-    creds: UserAuthCredentials,
+    creds: UserSubmittedAuthCredentials,
   ) -> Result<Option<User>, AuthenticationError> {
-    let user = match creds {
-      UserAuthCredentials::EmailEntryOnly(email) => {
-        self.fetch_user_by_email(email).await?
+    use argon2::PasswordVerifier;
+
+    let Some(user) = (match creds.clone() {
+      UserSubmittedAuthCredentials::EmailAndPassword { email, .. } => {
+        self.user_repo.fetch_user_by_email(email.clone()).await?
       }
+    }) else {
+      return Ok(None);
     };
-    Ok(user)
+
+    match (creds, user.auth.clone()) {
+      (
+        UserSubmittedAuthCredentials::EmailAndPassword { password, .. },
+        UserAuthCredentials::EmailAndPassword { password_hash, .. },
+      ) => {
+        let password_hash = argon2::PasswordHash::new(&password_hash.0)
+          .map_err(|e| {
+            AuthenticationError::PasswordHashing(miette!(
+              "failed to parse password hash: {e}"
+            ))
+          })?;
+
+        let argon = argon2::Argon2::default();
+        let correct =
+          (match argon.verify_password(password.as_bytes(), &password_hash) {
+            Ok(()) => Ok(true),
+            Err(argon2::password_hash::Error::Password) => Ok(false),
+            Err(e) => Err(e),
+          })
+          .map_err(|e| {
+            AuthenticationError::PasswordHashing(miette!(
+              "failed to verify password against hash: {e}"
+            ))
+          })?;
+
+        Ok(correct.then_some(user))
+      }
+    }
   }
 }
 
@@ -117,7 +190,7 @@ impl health::HealthReporter for AuthDomainService {
 #[async_trait::async_trait]
 impl AuthnBackend for AuthDomainService {
   type User = AuthUser;
-  type Credentials = UserAuthCredentials;
+  type Credentials = UserSubmittedAuthCredentials;
   type Error = AuthenticationError;
 
   async fn authenticate(
@@ -153,24 +226,19 @@ mod tests {
     let user_repo = UserRepository::new(Database::new_mock());
     let service = AuthDomainService::new(user_repo);
 
+    let name = HumanName::try_new("Test User 1").unwrap();
     let email = EmailAddress::try_new("test@example.com").unwrap();
-    let user_1_req = UserCreateRequest {
-      email: email.clone(),
-      name:  HumanName::try_new("Test User 1").unwrap(),
-      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
+    let creds = UserSubmittedAuthCredentials::EmailAndPassword {
+      email:    email.clone(),
+      password: "hunter42".to_string(),
     };
-    let user = service.user_signup(user_1_req).await.unwrap();
+    let user = service.user_signup(name, creds.clone()).await.unwrap();
     assert_eq!(user.email, email);
 
     dbg!(&service);
 
-    let user_2_req = UserCreateRequest {
-      email: email.clone(),
-      name:  HumanName::try_new("Test User 2").unwrap(),
-      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
-    };
-
-    let user2 = service.user_signup(user_2_req).await;
+    let name = HumanName::try_new("Test User 2").unwrap();
+    let user2 = service.user_signup(name, creds.clone()).await;
     assert!(matches!(user2, Err(CreateUserError::EmailAlreadyUsed(_))));
   }
 
@@ -179,22 +247,22 @@ mod tests {
     let user_repo = UserRepository::new(Database::new_mock());
     let service = AuthDomainService::new(user_repo);
 
+    let name = HumanName::try_new("Test User 1").unwrap();
     let email = EmailAddress::try_new("test@example.com").unwrap();
-    let user_1_req = UserCreateRequest {
-      email: email.clone(),
-      name:  HumanName::try_new("Test User 1").unwrap(),
-      auth:  UserAuthCredentials::EmailEntryOnly(email.clone()),
+    let creds = UserSubmittedAuthCredentials::EmailAndPassword {
+      email:    email.clone(),
+      password: "hunter42".to_string(),
     };
-    let user = service.user_signup(user_1_req).await.unwrap();
+    let user = service.user_signup(name, creds.clone()).await.unwrap();
     assert_eq!(user.email, email);
 
-    let creds = UserAuthCredentials::EmailEntryOnly(email.clone());
     let auth_user = service.user_authenticate(creds).await.unwrap();
     assert_eq!(auth_user, Some(user));
 
-    let creds = UserAuthCredentials::EmailEntryOnly(
-      EmailAddress::try_new("untest@example.com").unwrap(),
-    );
+    let creds = UserSubmittedAuthCredentials::EmailAndPassword {
+      email:    EmailAddress::try_new("untest@example.com").unwrap(),
+      password: "hunter42".to_string(),
+    };
     let auth_user = service.user_authenticate(creds).await.unwrap();
     assert_eq!(auth_user, None);
   }
