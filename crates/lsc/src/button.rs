@@ -120,11 +120,11 @@ impl ButtonStyleProps {
         _ => "text-white".into(),
       },
       Soft | Outline => match self.color {
-        Base => "text-basea-11 dark:text-basedarka-11".into(),
-        Primary => "text-primarya-11 dark:text-primarydarka-11".into(),
-        Danger => "text-dangera-11 dark:text-dangerdarka-11".into(),
-        Success => "text-successa-11 dark:text-successdarka-11".into(),
-        Warning => "text-warninga-11 dark:text-warningdarka-11".into(),
+        Base => "text-basea-dim".into(),
+        Primary => "text-primarya-dim".into(),
+        Danger => "text-dangera-dim".into(),
+        Success => "text-successa-dim".into(),
+        Warning => "text-warninga-dim".into(),
         Named(col) => col.text_class_a(11),
       },
     }
