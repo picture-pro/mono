@@ -32,12 +32,17 @@ impl Photo {
       action_state,
     }
   }
+
   pub(super) fn id(&self) -> Ulid { self.id }
+
   pub(super) fn blob(&self) -> Blob { self.blob.clone().take() }
+
   pub(super) fn url(&self) -> ObjectUrl { self.url.clone().take() }
+
   pub(super) fn upload_status(&self) -> Signal<PhotoUploadStatus> {
     self.action_state.status()
   }
+
   pub(super) fn image_id(&self) -> Signal<Option<ImageRecordId>> {
     match self.action_state {
       PhotoActionState::Started(action) => {

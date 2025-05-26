@@ -73,6 +73,10 @@ impl AsRef<str> for ArtifactMimeType {
 }
 
 impl Model for Artifact {
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] =
+    &[("originator", |artifact| {
+      EitherSlug::Strict(StrictSlug::new(artifact.originator.to_string()))
+    })];
   const TABLE_NAME: &'static str = ARTIFACT_TABLE_NAME;
   const UNIQUE_INDICES: &'static [(
     &'static str,
@@ -80,10 +84,6 @@ impl Model for Artifact {
   )] = &[("path", |artifact| {
     EitherSlug::Strict(StrictSlug::new(artifact.path.to_string()))
   })];
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] =
-    &[("originator", |artifact| {
-      EitherSlug::Strict(StrictSlug::new(artifact.originator.to_string()))
-    })];
 
   fn id(&self) -> ArtifactRecordId { self.id }
 }

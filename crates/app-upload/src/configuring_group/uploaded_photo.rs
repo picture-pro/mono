@@ -40,7 +40,9 @@ impl UploadedPhoto {
   }
 
   pub fn id(&self) -> Ulid { self.id }
+
   pub fn url(&self) -> ObjectUrl { self.url.clone().take() }
+
   pub fn image_id(&self) -> ImageRecordId { self.image_id }
 
   pub fn from_photo(photo: &Photo) -> Option<Self> {

@@ -39,6 +39,7 @@ pub struct PrimeDomainService {
 #[async_trait::async_trait]
 impl health::HealthReporter for PrimeDomainService {
   fn name(&self) -> &'static str { stringify!(PrimeDomainService) }
+
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(vec![
       self.photo_repo.health_report(),

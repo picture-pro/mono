@@ -34,6 +34,7 @@ impl fmt::Debug for UserRepository {
 #[async_trait::async_trait]
 impl health::HealthReporter for UserRepository {
   fn name(&self) -> &'static str { stringify!(UserRepository) }
+
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(vec![self
       .model_repo

@@ -13,6 +13,7 @@ pub struct PhotoRepository {
 #[async_trait::async_trait]
 impl health::HealthReporter for PhotoRepository {
   fn name(&self) -> &'static str { stringify!(PhotoRepository) }
+
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(vec![self.db.health_report()])
       .await

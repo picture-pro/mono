@@ -178,6 +178,7 @@ impl AuthDomainService {
 #[async_trait::async_trait]
 impl health::HealthReporter for AuthDomainService {
   fn name(&self) -> &'static str { stringify!(AuthDomainService) }
+
   async fn health_check(&self) -> health::ComponentHealth {
     health::AdditiveComponentHealth::from_futures(vec![self
       .user_repo
@@ -189,9 +190,9 @@ impl health::HealthReporter for AuthDomainService {
 
 #[async_trait::async_trait]
 impl AuthnBackend for AuthDomainService {
-  type User = AuthUser;
   type Credentials = UserSubmittedAuthCredentials;
   type Error = AuthenticationError;
+  type User = AuthUser;
 
   async fn authenticate(
     &self,
@@ -202,6 +203,7 @@ impl AuthnBackend for AuthDomainService {
       .await
       .map(|u| u.map(Into::into))
   }
+
   async fn get_user(
     &self,
     id: &<Self::User as AxumLoginAuthUser>::Id,

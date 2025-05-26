@@ -46,6 +46,7 @@ pub struct ImageTinyPreview {
 }
 
 impl Model for Image {
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = IMAGE_TABLE_NAME;
   const UNIQUE_INDICES: &'static [(
     &'static str,
@@ -53,7 +54,7 @@ impl Model for Image {
   )] = &[("artifact", |i| {
     EitherSlug::Lax(LaxSlug::new(i.artifact.to_string()))
   })];
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
+
   fn id(&self) -> ImageRecordId { self.id }
 }
 

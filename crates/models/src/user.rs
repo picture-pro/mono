@@ -64,12 +64,12 @@ pub enum UserAuthCredentials {
 }
 
 impl Model for User {
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = USER_TABLE_NAME;
   const UNIQUE_INDICES: &'static [(
     &'static str,
     model::SlugFieldGetter<Self>,
   )] = &[("email", |u| EitherSlug::Lax(LaxSlug::new(u.email.as_ref())))];
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> UserRecordId { self.id }
 }
@@ -153,7 +153,9 @@ mod auth {
 
   impl AxumLoginAuthUser for AuthUser {
     type Id = super::UserRecordId;
+
     fn id(&self) -> Self::Id { self.id }
+
     fn session_auth_hash(&self) -> &[u8] { &self.auth_hash_bytes }
   }
 }

@@ -39,15 +39,15 @@ pub struct PhotoGroupConfig {
 }
 
 impl Model for PhotoGroup {
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] =
+    &[("owner", |photo_group| {
+      EitherSlug::Strict(StrictSlug::new(photo_group.vendor.to_string()))
+    })];
   const TABLE_NAME: &'static str = PHOTO_GROUP_TABLE_NAME;
   const UNIQUE_INDICES: &'static [(
     &'static str,
     model::SlugFieldGetter<Self>,
   )] = &[];
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] =
-    &[("owner", |photo_group| {
-      EitherSlug::Strict(StrictSlug::new(photo_group.vendor.to_string()))
-    })];
 
   fn id(&self) -> PhotoGroupRecordId { self.id }
 }

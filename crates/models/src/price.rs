@@ -19,6 +19,7 @@ impl UsdPriceNaive {
       cents: ((value.max(0.0) * 100.0) as i64).unsigned_abs(),
     }
   }
+
   /// Represents a price as dollars.
   #[must_use]
   #[allow(clippy::cast_precision_loss)]

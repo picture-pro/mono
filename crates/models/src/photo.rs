@@ -28,12 +28,12 @@ pub struct PhotoImages {
 }
 
 impl Model for Photo {
+  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
   const TABLE_NAME: &'static str = PHOTO_TABLE_NAME;
   const UNIQUE_INDICES: &'static [(
     &'static str,
     model::SlugFieldGetter<Self>,
   )] = &[];
-  const INDICES: &'static [(&'static str, model::SlugFieldGetter<Self>)] = &[];
 
   fn id(&self) -> PhotoRecordId { self.id }
 }
