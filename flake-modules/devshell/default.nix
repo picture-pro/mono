@@ -49,6 +49,7 @@ localFlake: { ... }: {
       packages = with pkgs; [
         # rust dev toolchain (with RA), built from current nixpkgs
         (rust-toolchain.dev-toolchain pkgs)
+        cargo-machete
 
         # tools
         mprocs # runs commands in parallel

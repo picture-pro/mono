@@ -16,7 +16,7 @@ miette.workspace = true
 thiserror.workspace = true
 
 async-trait.workspace = true
-tokio = { workspace = true, features = ["sync"] }
+# tokio = { workspace = true, features = ["sync"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }

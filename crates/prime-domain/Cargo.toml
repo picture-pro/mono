@@ -11,7 +11,7 @@ repos = { path = "../repos" }
 
 hex.workspace = true
 
-serde.workspace = true
+# serde.workspace = true
 tracing.workspace = true
 
 miette.workspace = true
