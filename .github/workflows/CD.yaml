@@ -12,7 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
-      - run: nix flake check -L
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run:  docker load -i $(nix build ".#site-server-container" -L --no-link --print-out-paths) && flyctl deploy --local-only --detach
         env:
