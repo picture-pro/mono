@@ -22,9 +22,11 @@ prime-domain = { path = "../prime-domain", optional = true }
 workspace = true
 
 [features]
-default = []
+default = ["single-photo-upload"]
 hydrate = ["leptos/hydrate", "base-components/hydrate", "lsc/hydrate"]
 ssr = ["leptos/ssr", "base-components/ssr", "lsc/ssr", "dep:prime-domain"]
+
+single-photo-upload = []
 
 [package.metadata.cargo-machete]
 # leptos islands need serde as a root dep
